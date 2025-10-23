@@ -6,6 +6,7 @@ import Details from './Details';
 import Assemblies from './Assemblies';
 import Invoice from './Invoice';
 
+
 export default function StopCard({ stopID }) {
   const [expanded, setExpanded] = useState(false);
   const [activeTab, setActiveTab] = useState('Details');

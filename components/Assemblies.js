@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { Dialog } from '@headlessui/react';
 import { CheckCircle2, Wrench, FileText } from 'lucide-react';
+import Results from "./Results"
 
 export default function Assemblies({ list = [] }) {
   const [openReasonDialog, setOpenReasonDialog] = useState(false);
@@ -126,8 +127,8 @@ export default function Assemblies({ list = [] }) {
               Assembly Results
             </Dialog.Title>
 
-            <div className="mt-4 text-center text-gray-700 font-medium">
-              Display
+            <div className="mt-4 text-center text-gray-700 font-medium h-150">
+              <Results />
             </div>
 
             <div className="flex justify-end mt-6">
