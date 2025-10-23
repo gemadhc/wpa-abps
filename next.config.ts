@@ -4,7 +4,7 @@ const nextConfig: NextConfig = {
   env:{
     SERVER: "https://abps-erp.com/field",
     QUICKBOOKS: "https://abps-erp/quickbooks"
-  }
+  },
   eslint: {
         ignoreDuringBuilds: true,
     },
