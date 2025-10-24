@@ -73,8 +73,8 @@ export const requestInvoice = async (obj, id) => {
 	    if (!response.ok) {
 	      throw new Error(data.message || "Failed to update stop");
 	    }
-	    if(data.length){
-	    	return data[0];
+	    if(data.invoice.length){
+	    	return data.invoice[0];
 	    }else{
 	    	return data
 	    }

@@ -4,7 +4,7 @@ export default function Bins({list}){
 			{
 				list.map((item, ind) =>{
 					return(
-						<div className = "p-1 bg-slate-100 text-black">
+						<div className = "p-1 bg-slate-100 text-black rounded-xl text-nowrap">
 							{item.bin_num}
 						</div>
 					)

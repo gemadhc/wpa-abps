@@ -5,7 +5,7 @@ import { Dialog } from '@headlessui/react';
 import { X, DollarSign, Ban, RotateCcw } from 'lucide-react';
 import LineItems from './LineItems';
 
-export default function Invoice({ items = [], billing}) {
+export default function Invoice({ items = [], billing, invoice}) {
   const [isVoided, setIsVoided] = useState(false);
   const [openPaymentDialog, setOpenPaymentDialog] = useState(false);
 
@@ -14,7 +14,7 @@ export default function Invoice({ items = [], billing}) {
   const handleOpenPayment = () => setOpenPaymentDialog(true);
   const handleClosePayment = () => setOpenPaymentDialog(false);
 
-  const statusText = isVoided ? 'Voided' : 'Active';
+  const statusText = invoice.status;
   const statusColor = isVoided
     ? 'bg-red-100 text-red-700'
     : 'bg-green-100 text-green-700';

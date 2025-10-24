@@ -19,12 +19,12 @@ export default function StopCard({ stopID, item }) {
   const [myBilling, setMyBilling] = useState(null)
   const [myInvoice, setMyInvoice] = useState(null)
   const [myLines, setMyLines] = useState([])
-
+  const [services, setServices] = useState([])
   // Tabs array
   const tabs = [
     { name: 'Details', content: <Details item = {item}/> },
-    { name: 'Assemblies', content: <Assemblies list={[1, 2, 3, 4, 5]} /> },
-    { name: 'Invoice', content: <Invoice items = {myLines}  billing = {myBilling} /> },
+    { name: 'Assemblies', content: <Assemblies list={services} /> },
+    { name: 'Invoice', content: <Invoice items = {myLines}  billing = {myBilling} invoice = {myInvoice}/> },
   ];
 
   const handleCompleteStop = () => {
@@ -43,6 +43,7 @@ export default function StopCard({ stopID, item }) {
 
   useEffect(()=>{
     if(expanded){
+      console.log("Item: ", item)
       requestBilling(item.invoiceID).then((data, err) =>{
         setMyBilling(data)
       })
@@ -51,6 +52,9 @@ export default function StopCard({ stopID, item }) {
       })
       requestItems(item.invoiceID).then((data, err) =>{
         setMyLines(data)
+      })
+      requestServices(item.stopID).then((data, err) =>{
+        setServices(data)
       })
     }
   }, [expanded] )

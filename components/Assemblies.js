@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Dialog } from '@headlessui/react';
 import { CheckCircle2, Wrench, FileText } from 'lucide-react';
 import Results from "./Results"
@@ -20,6 +20,10 @@ export default function Assemblies({ list = [] }) {
       assembly.ready = true;
     }
   };
+
+  useEffect(()=>{
+    console.log("This is the  list of services: ", list)
+  }, [list])
 
   const handleRowClick = (assembly) => {
     setSelectedAssembly(assembly);
@@ -50,10 +54,12 @@ export default function Assemblies({ list = [] }) {
               className="border-b last:border-none hover:bg-gray-50 cursor-pointer transition"
             >
               <td className="py-2 px-2 flex items-center gap-2">
-                <Wrench className="w-4 h-4 text-blue-500" />
-                {assembly.name || `Assembly ${ind + 1}`}
+                {assembly.serial_number  || `Assembly ${ind + 1}`} <br/>
+                {assembly.location}
               </td>
-              <td className="py-2 px-2">{assembly.service || '—'}</td>
+              <td className="py-2 px-2">
+                {assembly.serviceType || '—'} <br/>
+              </td>
               <td
                 className="py-2 px-2 text-center"
                 onClick={(e) => e.stopPropagation()} // prevent opening dialog

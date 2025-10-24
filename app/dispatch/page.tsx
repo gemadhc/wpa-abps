@@ -53,6 +53,7 @@ export default function Home() {
           <StopCard 
             key={ind} 
             item = {item}
+            
             />
         ))}
       </div>
