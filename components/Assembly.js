@@ -5,7 +5,7 @@ export default function Assembly(){
 		<div>
 
 			<AssemblyForm />
-			<div> history </div>
+			<div></div>
 		</div>
 	)
 }

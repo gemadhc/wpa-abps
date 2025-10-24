@@ -4,6 +4,7 @@ import {useState, useEffect } from "react"
 
 export default function InitialDC(){
 	const fields_1 = [ 
+		{ name: 'RPA_typeII', label: 'Type II', type:"checkbox", full: true},
 		{ name: 'RPA1_tight', label: 'Tight', type:"checkbox" },
 		{ name: 'RPA1_leaked', label: 'Leaked', type:"checkbox" },
 		{ name: 'RPA1_psid', label: 'PSID', type:"text" }
@@ -18,17 +19,6 @@ export default function InitialDC(){
 
 	return(
 		<div>
-			<label
-                key="RPA_typeII"
-              >
-                <input
-                  type="checkbox"
-                  checked={typeII}
-                  onClick={(event)=> setTypeII(event.target.checked)}
-                  className="w-4 h-4 mr-5 accent-blue-600"
-                />
-                Type II
-             </label>
 			<FormLayout 
 				fields = {fields_1}
 				title = "Check #1"

@@ -12,6 +12,8 @@ export default function System(){
 	return(
 		<FormLayout 
 			fields = {fields}
+			title = "System"
+			hasTitle = {true}
 		/>
 	)
 }

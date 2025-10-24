@@ -51,13 +51,13 @@ export default function NumberPad({ targetElement }: NumberPadProps) {
   };
 
   return (
-    <div className="grid grid-cols-3 gap-0 w-full p-1">
+    <div className="grid grid-cols-3 gap-1 w-full p-0">
       {buttons.map((btn) => (
         <button
           key={btn}
           id={btn}
           onClick={grabValue}
-          className={`p-1 text-lg font-semibold rounded-lg border bg-gray-100 hover:bg-gray-200 transition`}
+          className={`p-3 text-lg font-semibold rounded-lg border bg-gray-100 hover:bg-gray-200 transition`}
         >
           {btn}
         </button>

@@ -5,7 +5,7 @@ import { Dialog } from '@headlessui/react';
 import { X, DollarSign, Ban, RotateCcw } from 'lucide-react';
 import LineItems from './LineItems';
 
-export default function Invoice() {
+export default function Invoice({ items = [], billing}) {
   const [isVoided, setIsVoided] = useState(false);
   const [openPaymentDialog, setOpenPaymentDialog] = useState(false);
 
@@ -72,17 +72,32 @@ export default function Invoice() {
       {/* Billing Address */}
       <div className="bg-gray-50 border rounded-xl p-4 text-sm">
         <h3 className="font-medium text-gray-700 mb-1">Billing Address</h3>
-        <p className="text-gray-600 leading-relaxed">
-          John Doe <br />
-          123 Main Street <br />
-          Springfield, CA 98765 <br />
-          (555) 123-4567
-        </p>
+        {
+          billing ?
+            <p className="text-gray-600 leading-relaxed">
+              {billing.name}<br />
+              {billing.street} <br />
+              {billing.city}, {billing.state} {billing.zipcode} <br />
+              {billing.phone} <br/>
+              {billing.email}
+            </p>
+          : 
+            <> No billing info available</>
+        }
+
+        
       </div>
 
       {/* Line Items */}
-      <LineItems />
-
+      {
+        items.length ?
+          <LineItems 
+            items = {items}
+          />
+        : 
+          <></>
+      }
+      
       {/* Payment Dialog */}
       <Dialog open={openPaymentDialog} onClose={handleClosePayment} className="relative z-50">
         <div className="fixed inset-0 bg-black/30" aria-hidden="true" />

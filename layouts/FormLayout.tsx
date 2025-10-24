@@ -15,9 +15,15 @@ type FormProps = {
   fields: Field[];
   title?: string;
   hasTitle?: boolean;
+  totalRows?: number; // NEW: determines grid columns
 };
 
-export default function Form({ fields, title, hasTitle = false }: FormProps) {
+export default function Form({
+  fields,
+  title,
+  hasTitle = false,
+  totalRows = 2, // Default 2 columns
+}: FormProps) {
   const initialState = fields.reduce((acc, field) => {
     if (field.type === 'checkbox') acc[field.name] = false;
     else if (field.type === 'radio') acc[field.name] = null;
@@ -40,16 +46,16 @@ export default function Form({ fields, title, hasTitle = false }: FormProps) {
   };
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col gap-2 w-full">
       {hasTitle && title && (
         <h2 className="text-lg text-left font-semibold text-gray-800">{title}</h2>
       )}
 
       {/* Fields Grid */}
-      <div className="grid grid-cols-2 gap-1">
+      <div className={`grid grid-cols-${totalRows} gap-1 w-full`}>
         {fields.map((field) => {
           const isFull = field.full ?? false;
-          const gridClass = isFull ? 'col-span-2' : '';
+          const gridClass = isFull ? `col-span-${totalRows}` : '';
 
           const isTextField =
             field.type === 'text' ||
@@ -79,10 +85,7 @@ export default function Form({ fields, title, hasTitle = false }: FormProps) {
           // Radio
           if (field.type === 'radio') {
             return (
-              <div
-                key={field.name}
-                className={`${gridClass} flex items-center gap-0`}
-              >
+              <div key={field.name} className={`${gridClass} flex items-center gap-1`}>
                 <span className="text-gray-700 text-sm">{field.label}:</span>
                 <label className="flex items-center gap-1">
                   <input
@@ -118,7 +121,7 @@ export default function Form({ fields, title, hasTitle = false }: FormProps) {
             >
               <span
                 className={`${
-                  isTextField ? 'bg-gray-200 px-2 py-1  w-14 mr-0' : ''
+                  isTextField ? 'bg-gray-200 px-2 py-1 w-14 mr-0' : ''
                 } text-gray-700 text-sm w-14`}
               >
                 {field.label}:
@@ -152,7 +155,7 @@ export default function Form({ fields, title, hasTitle = false }: FormProps) {
                   value={formData[field.name]}
                   onChange={(e) => handleChange(field.name, e.target.value)}
                   onBlur={() => handleSave(formData)}
-                  className="flex-1 border border-gray-300 rounded p-1 text-sm max-w-15"
+                  className="flex-1 border border-gray-300 rounded p-1 text-sm"
                 />
               )}
             </div>

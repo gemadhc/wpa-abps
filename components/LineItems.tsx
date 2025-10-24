@@ -3,11 +3,11 @@
 import { useState } from 'react';
 import { Pencil, Trash2, Save } from 'lucide-react';
 
-export default function LineItems() {
-  const [items, setItems] = useState([
+export default function LineItems({items}) {
+ /* const [items, setItems] = useState([
     { id: 1, item: 'Backflow Test', description: 'Testing service', qty: 1, unitPrice: 85, taxable: true },
     { id: 2, item: 'Replacement Part', description: 'Valve replacement', qty: 2, unitPrice: 15, taxable: false },
-  ]);
+  ]);*/
 
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editedItem, setEditedItem] = useState<any>({});
@@ -32,7 +32,7 @@ export default function LineItems() {
     setEditedItem((prev: any) => ({ ...prev, [field]: value }));
   };
 
-  const total = items.reduce((sum, itm) => sum + itm.qty * itm.unitPrice, 0);
+  const total = items?.reduce((sum, itm) => sum + itm.quantity * itm.unitPriceDefined, 0);
 
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
@@ -51,9 +51,9 @@ export default function LineItems() {
             </tr>
           </thead>
           <tbody>
-            {items.map((itm) => {
+            {items?.map((itm) => {
               const isEditing = itm.id === editingId;
-              const amount = (itm.qty * itm.unitPrice).toFixed(2);
+              const amount = (itm.quantity * itm.unitPriceDefined).toFixed(2);
               return (
                 <tr key={itm.id} className="border-b last:border-none hover:bg-gray-50">
                   <td className="py-2 px-3">
@@ -82,24 +82,24 @@ export default function LineItems() {
                     {isEditing ? (
                       <input
                         type="number"
-                        value={editedItem.qty}
-                        onChange={(e) => handleChange('qty', +e.target.value)}
+                        value={editedItem.quantity}
+                        onChange={(e) => handleChange('quantity', +e.target.value)}
                         className="w-16 border border-gray-300 rounded-md px-2 py-1 text-sm text-right"
                       />
                     ) : (
-                      itm.qty
+                      itm.quantity
                     )}
                   </td>
                   <td className="py-2 px-3 text-right">
                     {isEditing ? (
                       <input
                         type="number"
-                        value={editedItem.unitPrice}
-                        onChange={(e) => handleChange('unitPrice', +e.target.value)}
+                        value={editedItem.unitPriceDefined}
+                        onChange={(e) => handleChange('unitPriceDefined', +e.target.value)}
                         className="w-20 border border-gray-300 rounded-md px-2 py-1 text-sm text-right"
                       />
                     ) : (
-                      `$${itm.unitPrice.toFixed(2)}`
+                      `$${itm.unitPriceDefined.toFixed(2)}`
                     )}
                   </td>
                   <td className="py-2 px-3 text-center">
@@ -139,9 +139,9 @@ export default function LineItems() {
 
       {/* Mobile Cards */}
       <div className="md:hidden divide-y divide-gray-100">
-        {items.map((itm) => {
+        {items?.map((itm) => {
           const isEditing = itm.id === editingId;
-          const amount = (itm.qty * itm.unitPrice).toFixed(2);
+          const amount = (itm.quantity * itm.unitPriceDefined ).toFixed(2);
 
           return (
             <div key={itm.id} className="p-4 flex flex-col gap-2 bg-white">
@@ -184,12 +184,12 @@ export default function LineItems() {
                   {isEditing ? (
                     <input
                       type="number"
-                      value={editedItem.qty}
-                      onChange={(e) => handleChange('qty', +e.target.value)}
+                      value={editedItem.quantity}
+                      onChange={(e) => handleChange('quantity', +e.target.value)}
                       className="w-16 border border-gray-300 rounded-md px-1 py-1 text-sm ml-1"
                     />
                   ) : (
-                    itm.qty
+                    itm.quantity
                   )}
                 </div>
                 <div className="text-right">
@@ -197,12 +197,12 @@ export default function LineItems() {
                   {isEditing ? (
                     <input
                       type="number"
-                      value={editedItem.unitPrice}
-                      onChange={(e) => handleChange('unitPrice', +e.target.value)}
+                      value={editedItem.unitPriceDefined}
+                      onChange={(e) => handleChange('unitPriceDefined', +e.target.value)}
                       className="w-20 border border-gray-300 rounded-md px-1 py-1 text-sm text-right ml-1"
                     />
                   ) : (
-                    `$${itm.unitPrice.toFixed(2)}`
+                    `$${itm.unitPriceDefined.toFixed(2)}`
                   )}
                 </div>
                 <div>
@@ -232,7 +232,7 @@ export default function LineItems() {
       {/* Footer */}
       <div className="flex justify-between md:justify-end items-center px-4 py-3 bg-gray-50 border-t rounded-b-2xl">
         <div className="text-sm font-semibold text-gray-700">
-          Total: ${total.toFixed(2)}
+          Total: ${total?.toFixed(2)}
         </div>
       </div>
     </div>

@@ -30,6 +30,7 @@ export default function Assembly(){
 			fields = {fields}
 			title = "Assembly"
 			hasTitle = {true}
+			totalRows = {1}
 		/>
 	)
 }

@@ -44,7 +44,12 @@ const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
   ) => {
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
       const val = e.target.value;
-      onSelected(e)
+      if(val){
+        onSelected(val)
+      }else{
+
+      }
+      
     };
 
     return (

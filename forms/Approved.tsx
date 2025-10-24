@@ -13,7 +13,7 @@ export default function Approved(){
 		<FormLayout 
 			fields = {fields}
 			title = "Approved"
-      	hasTitle = {true}
+      		hasTitle = {true}
 		/>
 	)
 }

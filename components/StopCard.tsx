@@ -1,24 +1,30 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect} from 'react';
 import { ChevronDown, ChevronUp, CheckCircle2, X } from 'lucide-react';
 import { Dialog } from '@headlessui/react';
 import Details from './Details';
 import Assemblies from './Assemblies';
 import Invoice from './Invoice';
+import {requestServices} from "../actions/stop"
+import {requestBilling,  requestInvoice, requestItems} from "../actions/invoice"
 
-
-export default function StopCard({ stopID }) {
+export default function StopCard({ stopID, item }) {
   const [expanded, setExpanded] = useState(false);
   const [activeTab, setActiveTab] = useState('Details');
   const [completed, setCompleted] = useState(false);
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
 
+
+  const [myBilling, setMyBilling] = useState(null)
+  const [myInvoice, setMyInvoice] = useState(null)
+  const [myLines, setMyLines] = useState([])
+
   // Tabs array
   const tabs = [
-    { name: 'Details', content: <Details /> },
+    { name: 'Details', content: <Details item = {item}/> },
     { name: 'Assemblies', content: <Assemblies list={[1, 2, 3, 4, 5]} /> },
-    { name: 'Invoice', content: <Invoice /> },
+    { name: 'Invoice', content: <Invoice items = {myLines}  billing = {myBilling} /> },
   ];
 
   const handleCompleteStop = () => {
@@ -35,22 +41,36 @@ export default function StopCard({ stopID }) {
     alert('Stop marked as completed!');
   };
 
+  useEffect(()=>{
+    if(expanded){
+      requestBilling(item.invoiceID).then((data, err) =>{
+        setMyBilling(data)
+      })
+      requestInvoice(item.invoiceID).then((data, err) =>{
+        setMyInvoice(data)
+      })
+      requestItems(item.invoiceID).then((data, err) =>{
+        setMyLines(data)
+      })
+    }
+  }, [expanded] )
+
   return (
     <div className="bg-white rounded-2xl shadow-md border border-gray-200 overflow-hidden transition-all hover:shadow-lg max-w-xl mx-auto">
       {/* Header */}
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 bg-gray-50 border-b border-gray-200 gap-2">
         <div className="flex-1">
           <div className="text-sm text-gray-600 font-medium mb-1">
-            TIMED • STATUS • ROUTED
+            {item.startTime} - {item.endTime} • {item.status} • ROUTED
           </div>
           <div className="text-base font-semibold text-gray-800">
-            LOCATION NAME
+            {item.location_name}
           </div>
-          <div className="text-sm text-gray-500">Street, City, State ZIP</div>
-          <div className="text-sm text-gray-600 mt-2 italic">Schedule note...</div>
+          <div className="text-sm text-gray-500">{item.street}, {item.city}, {item.state}  {item.zipcode}</div>
+          <div className="text-sm text-gray-600 mt-2 italic">{item.comment}</div>
           <div className="text-xs text-gray-400 mt-1">
             Scheduled by:{' '}
-            <span className="font-medium text-gray-700">Name</span>
+            <span className="font-medium text-gray-700">{item.tester_name}</span>
           </div>
         </div>
 

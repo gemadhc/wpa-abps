@@ -22,6 +22,8 @@ export default function Parts(){
 	return(
 		<FormLayout 
 			fields = {fields}
+			title = "Parts & Services"
+			hasTitle = {true}
 		/>
 	)
 }

@@ -1,9 +1,13 @@
+import Parts from "../forms/Parts"
+import FinalSystem from "../forms/FinalSystem"
+import FinalDC from "../forms/FinalDC"
+
 export default function Final(){
 	return(
 		<div>
-			<div> Parts and Service</div>
-			<div> Final Results </div>
-			<div> Final System </div>
+			<Parts />
+			<FinalDC />
+			<FinalSystem />
 		</div>
 	)
 }

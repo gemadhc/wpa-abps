@@ -1,16 +1,15 @@
 'use client';
 import { MapPin, Phone, Lock, FileText, Map, MapPinned } from 'lucide-react';
 
-export default function Details({ stopDetails }) {
+export default function Details({ stopDetails, item }) {
   const {
-    name = 'Customer Name',
-    phone = '(555) 555-5555',
-    gate_number = '1234',
-    site_note = 'Leave key under mat.',
-    street = '123 Main St',
-    city = 'Los Angeles',
-    state = 'CA',
-    zipcode = '90001',
+    name = item.requestor|| '',
+    phone = item.phone || '',
+    gate_number = item.gate_number || '',
+    street = item.street,
+    city = item.city,
+    state = item.state,
+    zipcode = item.zipcode,
   } = stopDetails || {};
 
   const address = `${street}, ${city}, ${state} ${zipcode}`;
@@ -42,11 +41,7 @@ export default function Details({ stopDetails }) {
         <span>{gate_number}</span>
       </div>
 
-      {/* Site Note */}
-      <div className="flex items-center gap-2">
-        <FileText className="w-4 h-4 text-orange-500" />
-        <span className="truncate">{site_note}</span>
-      </div>
+    
 
       {/* Apple Maps */}
       <div className="flex items-center gap-2">
