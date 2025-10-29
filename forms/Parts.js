@@ -1,9 +1,7 @@
 import FormLayout from "../layouts/FormLayout"
 
-export default function Parts(){
+export default function Parts( {report}){
 	const fields = [ 
-		{ name: 'repaired', label: 'Repaired',  type:"checkbox" }, 
-		{ name: 'cleaned', label: 'Cleaned',  type:"checkbox" },
 		{ name: 'disc', label: 'Disc',  type:"checkbox" },
 		{ name: 'o_ring', label: 'O-Ring',  type:"checkbox" },
 		{ name: 'check_disc', label: 'Check Disc',  type:"checkbox" },
@@ -18,12 +16,27 @@ export default function Parts(){
 		{ name: 'module', label: 'Module',  type:"checkbox" },
 		{ name: 'air_disc', label: 'Air Disc',  type:"checkbox" },
 	]
+	const fields_1 = [ 
+		{ name: 'repaired', label: 'Repaired',  type:"checkbox" }, 
+		{ name: 'cleaned', label: 'Cleaned',  type:"checkbox" }
+	]
+
 
 	return(
-		<FormLayout 
-			fields = {fields}
-			title = "Parts & Services"
-			hasTitle = {true}
-		/>
+		<div>
+			<FormLayout 
+				fields = {fields_1}
+				title = "Services"
+				hasTitle = {true}
+				initialValues = {report}
+			/>
+			<br/>
+			<FormLayout 
+				fields = {fields}
+				title = "Parts"
+				hasTitle = {true}
+				initialValues = {report}
+			/>
+		</div>
 	)
 }

@@ -7,6 +7,7 @@ import { toZonedTime } from 'date-fns-tz'
 import DatePicker from "../../components/DatePicker"
 import Bins from "../../components/Bins"
 import StopCard from "../../components/StopCard"
+import ListSorted from "./ListSorted"
 
 import { requestDispatch, requestBins } from "../../actions/dispatch"
 
@@ -49,13 +50,7 @@ export default function Home() {
 
       {/* LIST SECTION */}
       <div className="flex-1 max-h-150 overflow-y-scroll p-3 space-y-0 bg-gray-50">
-        {list.map((item, ind) => (
-          <StopCard 
-            key={ind} 
-            item = {item}
-            
-            />
-        ))}
+         <ListSorted  stops= {list}/>
       </div>
     </div>
   )

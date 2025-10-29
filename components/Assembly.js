@@ -1,10 +1,12 @@
 import AssemblyForm  from "../forms/Assembly"
 
-export default function Assembly(){
+export default function Assembly({device}){
 	return(
 		<div>
 
-			<AssemblyForm />
+			<AssemblyForm 	
+				device = {device}
+			/>
 			<div></div>
 		</div>
 	)

@@ -3,17 +3,17 @@ import Assembly from "./Assembly"
 import Initial from "./Initial"
 import Final from "./Final"
 
-export default function Results(){
+export default function Results({report, device}){
 	const [activeTab, setActiveTab] = useState('Assembly');
 	const tabs = [
-	    { name: 'Assembly', content: <Assembly /> },
-	    { name: 'Initial', content: <Initial /> },
-	    { name: 'Final', content: <Final /> },
+	    { name: 'Assembly', content: <Assembly  device = {device}/> },
+	    { name: 'Initial', content: <Initial report = {report} device = {device}/> },
+	    { name: 'Final', content: <Final report = {report} device= {device}/>   },
 	  ];
 
 	return(
 		<div>
-			<div className="flex flex-wrap gap-2 mb-3 pb-2 ">
+			<div className="flex flex-wrap gap-2 mb-3 pb-2  ">
 	            {tabs.map((tab) => (
 	              <button
 	                key={tab.name}
@@ -30,7 +30,7 @@ export default function Results(){
 	          </div>
 
 	          {/* Active Tab Content */}
-	          <div className="text-gray-700 text-sm  max-h-150 overflow-y-scroll">
+	          <div className="text-gray-700 text-sm  max-h-150 overflow-y-scroll p-0">
 	            {tabs.find((tab) => tab.name === activeTab)?.content}
 	          </div>
 		</div>

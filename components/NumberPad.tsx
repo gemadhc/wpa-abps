@@ -1,53 +1,49 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useRef } from 'react';
 
 type NumberPadProps = {
-  targetElement: string; // selector for the input element this pad controls
+  targetName: string; // the name attribute of the input
+  onInputChange: (name: string, value: string) => void; // update form state
+  fieldValue: string; // current value of the field
 };
 
-export default function NumberPad({ targetElement }: NumberPadProps) {
+export default function NumberPad({ targetName, onInputChange, fieldValue }: NumberPadProps) {
+  const inputRef = useRef<HTMLInputElement | null>(null);
+
+  useEffect(() => {
+    // Keep ref updated
+    inputRef.current = document.querySelector<HTMLInputElement>(`[name="${targetName}"]`);
+  }, [targetName]);
+
   const buttons = [
-    '1', '2', '3',
-    '4', '5', '6',
-    '7', '8', '9',
-    '.', '0', 'CL',
+    '1','2','3',
+    '4','5','6',
+    '7','8','9',
+    '.', '0', 'CL'
   ];
 
-  const grabValue = (event: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    const target = event.currentTarget;
-    if ('vibrate' in navigator) navigator.vibrate(100);
+  const handleClick = (btn: string) => {
+    if (!targetName || !onInputChange) return;
+    let newValue = fieldValue || '';
 
-    if (!targetElement) return;
-    const myElement = document.querySelector<HTMLInputElement>(targetElement);
-    if (!myElement) return;
-
-    const val = target.id;
-
-    if (val === 'CL') {
-      myElement.value = '';
-      return;
-    }
-
-    if (val === '.') {
-      if (!myElement.value.includes('.')) {
-        myElement.value = targetElement !== '#dmr'
-          ? (myElement.value + '.').replace(/^0+/, '')
-          : myElement.value + '.';
-      }
-      return;
-    }
-
-    // numbers 0-9
-    if (myElement.value.includes('.')) {
-      const periodIndex = myElement.value.indexOf('.');
-      if (myElement.value.length - periodIndex <= 2) {
-        myElement.value += val;
-      }
+    if (btn === 'CL') newValue = '';
+    else if (btn === '.') {
+      if (!newValue.includes('.')) newValue += '.';
     } else {
-      myElement.value = targetElement !== '#dmr'
-        ? (myElement.value + val).replace(/^0+/, '')
-        : myElement.value + val;
+      if (newValue.includes('.')) {
+        const periodIndex = newValue.indexOf('.');
+        if (newValue.length - periodIndex <= 2) newValue += btn;
+      } else {
+        newValue += btn;
+      }
     }
+
+    onInputChange(targetName, newValue);
+
+    // Maintain focus
+    setTimeout(() => {
+      inputRef.current?.focus();
+    }, 0);
   };
 
   return (
@@ -55,9 +51,9 @@ export default function NumberPad({ targetElement }: NumberPadProps) {
       {buttons.map((btn) => (
         <button
           key={btn}
-          id={btn}
-          onClick={grabValue}
-          className={`p-3 text-lg font-semibold rounded-lg border bg-gray-100 hover:bg-gray-200 transition`}
+          type="button"
+          onClick={() => handleClick(btn)}
+          className="p-3 text-lg font-semibold rounded border border-sky-700 bg-slate-100 hover:bg-slate-200 transition"
         >
           {btn}
         </button>

@@ -1,12 +1,12 @@
 'use client';
-import { useState, useEffect} from 'react';
+import { useState, useEffect } from 'react';
 import { ChevronDown, ChevronUp, CheckCircle2, X } from 'lucide-react';
 import { Dialog } from '@headlessui/react';
 import Details from './Details';
 import Assemblies from './Assemblies';
 import Invoice from './Invoice';
-import {requestServices} from "../actions/stop"
-import {requestBilling,  requestInvoice, requestItems} from "../actions/invoice"
+import { requestServices } from "../actions/stop";
+import { requestBilling, requestInvoice, requestItems } from "../actions/invoice";
 
 export default function StopCard({ stopID, item }) {
   const [expanded, setExpanded] = useState(false);
@@ -14,22 +14,39 @@ export default function StopCard({ stopID, item }) {
   const [completed, setCompleted] = useState(false);
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
+  const [isTimed, setIsTimed] = useState(false);
+  const [isSpecificTime, setIsSpecificTime] = useState(false);
+  const [myBilling, setMyBilling] = useState(null);
+  const [myInvoice, setMyInvoice] = useState(null);
+  const [myLines, setMyLines] = useState([]);
+  const [services, setServices] = useState([]);
 
+  const formatTime = (time) => {
+    if (!time) return "";
+    const [hour, minute] = time.split(':').map(Number);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    const displayHour = hour % 12 || 12;
+    return `${displayHour}:${minute.toString().padStart(2, '0')} ${ampm}`;
+  };
 
-  const [myBilling, setMyBilling] = useState(null)
-  const [myInvoice, setMyInvoice] = useState(null)
-  const [myLines, setMyLines] = useState([])
-  const [services, setServices] = useState([])
-  // Tabs array
+  useEffect(() => {
+    if (item) {
+      if (item.startTime === "08:00" && item.endTime === "16:00") {
+        setIsTimed(false);
+      } else {
+        setIsTimed(true);
+        setIsSpecificTime(item.startTime === item.endTime);
+      }
+    }
+  }, [item]);
+
   const tabs = [
-    { name: 'Details', content: <Details item = {item}/> },
+    { name: 'Details', content: <Details item={item} /> },
     { name: 'Assemblies', content: <Assemblies list={services} /> },
-    { name: 'Invoice', content: <Invoice items = {myLines}  billing = {myBilling} invoice = {myInvoice}/> },
+    { name: 'Invoice', content: <Invoice items={myLines} billing={myBilling} invoice={myInvoice} /> },
   ];
 
-  const handleCompleteStop = () => {
-    setOpenConfirmDialog(true);
-  };
+  const handleCompleteStop = () => setOpenConfirmDialog(true);
 
   const handleConfirmCompletion = () => {
     if (!confirmed) {
@@ -41,36 +58,45 @@ export default function StopCard({ stopID, item }) {
     alert('Stop marked as completed!');
   };
 
-  useEffect(()=>{
-    if(expanded){
-      console.log("Item: ", item)
-      requestBilling(item.invoiceID).then((data, err) =>{
-        setMyBilling(data)
-      })
-      requestInvoice(item.invoiceID).then((data, err) =>{
-        setMyInvoice(data)
-      })
-      requestItems(item.invoiceID).then((data, err) =>{
-        setMyLines(data)
-      })
-      requestServices(item.stopID).then((data, err) =>{
-        setServices(data)
-      })
+  useEffect(() => {
+    if (expanded) {
+      requestBilling(item.invoiceID).then(setMyBilling);
+      requestInvoice(item.invoiceID).then(setMyInvoice);
+      requestItems(item.invoiceID).then(setMyLines);
+      requestServices(item.stopID).then(setServices);
     }
-  }, [expanded] )
+  }, [expanded]);
+
+  const headerBg =
+    item.status === 'COMPLETED'
+      ? 'bg-green-100 border-green-300'
+      : 'bg-gray-50 border-gray-200';
 
   return (
     <div className="bg-white rounded-2xl shadow-md border border-gray-200 overflow-hidden transition-all hover:shadow-lg max-w-xl mx-auto">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 bg-gray-50 border-b border-gray-200 gap-2">
+      <div className={`flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 ${headerBg} border-b gap-2`}>
         <div className="flex-1">
           <div className="text-sm text-gray-600 font-medium mb-1">
-            {item.startTime} - {item.endTime} • {item.status} • ROUTED
+            {isTimed ? (
+              <span className="text-red-500 font-bold">
+                {isSpecificTime ? (
+                  <>{formatTime(item.startTime)} • </>
+                ) : (
+                  <>
+                    {formatTime(item.startTime)} - {formatTime(item.endTime)} •{' '}
+                  </>
+                )}
+              </span>
+            ) : null}
+            {item.status} • ROUTED
           </div>
           <div className="text-base font-semibold text-gray-800">
             {item.location_name}
           </div>
-          <div className="text-sm text-gray-500">{item.street}, {item.city}, {item.state}  {item.zipcode}</div>
+          <div className="text-sm text-gray-500">
+            {item.street}, {item.city}, {item.state} {item.zipcode}
+          </div>
           <div className="text-sm text-gray-600 mt-2 italic">{item.comment}</div>
           <div className="text-xs text-gray-400 mt-1">
             Scheduled by:{' '}

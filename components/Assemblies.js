@@ -1,5 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { requestReport } from "../actions/report"
+import { requestAssembly } from "../actions/assembly" 
 import { Dialog } from '@headlessui/react';
 import { CheckCircle2, Wrench, FileText } from 'lucide-react';
 import Results from "./Results"
@@ -9,6 +11,8 @@ export default function Assemblies({ list = [] }) {
   const [openResultsDialog, setOpenResultsDialog] = useState(false);
   const [selectedAssembly, setSelectedAssembly] = useState(null);
   const [reason, setReason] = useState('');
+  const [report, setReport] = useState(null)
+  const [device, setDevice] = useState(null)
 
   const handleToggleReady = (assembly, e) => {
     e.stopPropagation(); // prevent triggering row click
@@ -27,7 +31,13 @@ export default function Assemblies({ list = [] }) {
 
   const handleRowClick = (assembly) => {
     setSelectedAssembly(assembly);
-    setOpenResultsDialog(true);
+    requestReport(assembly.testReportID).then((data1, err) =>{
+      requestAssembly(assembly.assemblyID).then((data2, err) =>{
+        setReport(data1)
+        setDevice(data2)
+        setOpenResultsDialog(true);
+      })
+    })
   };
 
   const handleSubmitReason = () => {
@@ -48,30 +58,41 @@ export default function Assemblies({ list = [] }) {
         </thead>
         <tbody>
           {list.map((assembly, ind) => (
-            <tr
-              key={ind}
-              onClick={() => handleRowClick(assembly)}
-              className="border-b last:border-none hover:bg-gray-50 cursor-pointer transition"
-            >
-              <td className="py-2 px-2 flex items-center gap-2">
-                {assembly.serial_number  || `Assembly ${ind + 1}`} <br/>
-                {assembly.location}
-              </td>
-              <td className="py-2 px-2">
-                {assembly.serviceType || '—'} <br/>
-              </td>
-              <td
-                className="py-2 px-2 text-center"
-                onClick={(e) => e.stopPropagation()} // prevent opening dialog
+            <>
+              <tr
+                key={ind}
+                onClick={() => handleRowClick(assembly)}
+                className="border-b last:border-none hover:bg-gray-50 cursor-pointer transition"
               >
-                <input
-                  type="checkbox"
-                  checked={assembly.ready ?? true}
-                  onChange={(e) => handleToggleReady(assembly, e)}
-                  className="w-5 h-5 accent-blue-600 cursor-pointer"
-                />
-              </td>
-            </tr>
+                <td className="py-2 px-2 flex items-center gap-2">
+                  {assembly.serial_number  || `Assembly ${ind + 1}`} <br/>
+                  {assembly.location}
+                </td>
+                <td className="py-2 px-2">
+                  {assembly.serviceType || '—'} <br/>
+                  {assembly.state}
+                </td>
+                <td
+                  className="py-2 px-2 text-center"
+                  onClick={(e) => e.stopPropagation()} // prevent opening dialog
+                >
+                  <input
+                    type="checkbox"
+                    checked={assembly.ready ?? true}
+                    onChange={(e) => handleToggleReady(assembly, e)}
+                    className="w-5 h-5 accent-blue-600 cursor-pointer"
+                  />
+                </td>
+              </tr>
+              <tr>
+                {  assembly.reason ?
+                    <td> {assembly.reason}</td>
+                  : 
+                    <> </>
+                } 
+               
+              </tr>
+            </>
           ))}
         </tbody>
       </table>
@@ -133,10 +154,17 @@ export default function Assemblies({ list = [] }) {
               Assembly Results
             </Dialog.Title>
 
-            <div className="mt-4 text-center text-gray-700 font-medium h-150">
-              <Results />
+            <div className="mt-4 text-center text-gray-700 font-medium min-h-screen/2 ">
+              {
+                report && device ?
+                  <Results 
+                    report = {report}
+                    device = {device}
+                  />
+                : 
+                  <> Loading Values ... </>
+              }
             </div>
-
             <div className="flex justify-end mt-6">
               <button
                 onClick={() => setOpenResultsDialog(false)}

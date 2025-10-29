@@ -1,4 +1,13 @@
 const server = process.env.SERVER;
+const office = process.env.OFFICE;
+
+const readReport = (id) => 
+	fetch(`${office}/report?` + new URLSearchParams({id}), {
+    	method: "GET",
+    	credentials: "include"
+    
+ 	});
+
 
 const approved = (obj, id)=> 
 	fetch(`${server}/report/approved`, {
@@ -106,7 +115,26 @@ const status = (id, newStatus) =>
     
  	});
 
-export const updateApproved = (obj, id) => {
+export const requestReport = async ( id ) => {
+	try {
+	    const response = await readReport(id);
+	    const data = await response.json();
+	    if (!response.ok) {
+	      throw new Error(data.message || "Failed to read report");
+	    }
+	    if(data.Report.length ){
+	    	return data.Report[0];
+	    }else{
+	    	return {}
+	    }
+	  } catch (err) {
+	    // Always throw error so createAsyncThunk or calling code can catch it
+	    throw err;
+	  } 
+
+}
+
+export const updateApproved =  async (obj, id) => {
 	try {
 	    const response = await approved(obj, id);
 	    const data = await response.json();
@@ -119,7 +147,7 @@ export const updateApproved = (obj, id) => {
 	    throw err;
 	  } 
 }
-export const updateAssembly = (obj, id) => {
+export const updateAssembly =  async (obj, id) => {
 	try {
 	    const response = await assembly(obj, id);
 	    const data = await response.json();
@@ -132,7 +160,7 @@ export const updateAssembly = (obj, id) => {
 	    throw err;
 	  } 
 }
-export const updateFinalDC = (obj, id) => {
+export const updateFinalDC = async (obj, id) => {
 	try {
 	    const response = await finalDC(obj, id);
 	    const data = await response.json();
@@ -145,7 +173,7 @@ export const updateFinalDC = (obj, id) => {
 	    throw err;
 	  } 
 }
-export const updateFinalRP = (obj, id) => {
+export const updateFinalRP = async (obj, id) => {
 	try {
 	    const response = await finalRP(obj, id);
 	    const data = await response.json();
@@ -158,7 +186,7 @@ export const updateFinalRP = (obj, id) => {
 	    throw err;
 	  } 
 }
-export const updateFinalSystem = (obj, id) => {
+export const updateFinalSystem = async (obj, id) => {
 	try {
 	    const response = await finalSystem(obj, id);
 	    const data = await response.json();
@@ -171,7 +199,7 @@ export const updateFinalSystem = (obj, id) => {
 	    throw err;
 	  } 
 }
-export const updateFinalXVB = (obj, id) => {
+export const updateFinalXVB = async (obj, id) => {
 	try {
 	    const response = await finalXVB(obj, id);
 	    const data = await response.json();
@@ -184,7 +212,7 @@ export const updateFinalXVB = (obj, id) => {
 	    throw err;
 	  } 
 }
-export const updateAG = (obj, id) => {
+export const updateAG = async (obj, id) => {
 	try {
 	    const response = await ag(obj, id);
 	    const data = await response.json();
@@ -197,7 +225,7 @@ export const updateAG = (obj, id) => {
 	    throw err;
 	  } 
 }
-export const updateInitialDC = (obj, id) => {
+export const updateInitialDC = async (obj, id) => {
 	try {
 	    const response = await initialDC(obj, id);
 	    const data = await response.json();
@@ -210,7 +238,7 @@ export const updateInitialDC = (obj, id) => {
 	    throw err;
 	  } 
 }
-export const updateInitialRP = (obj, id) =>{
+export const updateInitialRP = async (obj, id) =>{
 	try {
 	    const response = await initialRP(obj, id);
 	    const data = await response.json();
@@ -223,7 +251,7 @@ export const updateInitialRP = (obj, id) =>{
 	    throw err;
 	  } 
 }
-export const updateInitialXVB = (obj, id) => {
+export const updateInitialXVB = async (obj, id) => {
 	try {
 	    const response = await initiaXVB(obj, id);
 	    const data = await response.json();
@@ -236,7 +264,7 @@ export const updateInitialXVB = (obj, id) => {
 	    throw err;
 	  } 
 }
-export const updateParts = (obj, id)=>{
+export const updateParts = async (obj, id)=>{
 	try {
 	    const response = await parts(obj, id);
 	    const data = await response.json();
@@ -249,7 +277,7 @@ export const updateParts = (obj, id)=>{
 	    throw err;
 	  } 
 }
-export const updateRemarks = (obj, id) =>{
+export const updateRemarks = async (obj, id) =>{
 	try {
 	    const response = await remarks(obj, id);
 	    const data = await response.json();
@@ -262,7 +290,7 @@ export const updateRemarks = (obj, id) =>{
 	    throw err;
 	  } 
 }
-export const updateSystem = (obj, id) => {
+export const updateSystem = async (obj, id) => {
 	try {
 	    const response = await system(obj, id);
 	    const data = await response.json();
@@ -275,7 +303,7 @@ export const updateSystem = (obj, id) => {
 	    throw err;
 	  } 
 }
-export const updateRemoved = (obj, id) =>{
+export const updateRemoved = async (obj, id) =>{
 	try {
 	    const response = await removed(obj, id);
 	    const data = await response.json();
@@ -290,7 +318,7 @@ export const updateRemoved = (obj, id) =>{
 }
 
 
-export const updateStatus= (id, newstatus) =>{
+export const updateStatus= async (id, newstatus) =>{
 	try {
 	    const response = await status(id, newstatus);
 	    const data = await response.json();

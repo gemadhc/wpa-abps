@@ -1,6 +1,6 @@
 import FormLayout from "../layouts/FormLayout"
 
-export default function FinalSystem(){
+export default function FinalSystem({report}){
 	const fields = [ 
 		{ name: 'repair_pass', label: 'Pass', type:"checkbox", full: false}, 
 		{ name: 'repair_fail', label: 'Fail', type:"checkbox", full: false },	
@@ -10,6 +10,7 @@ export default function FinalSystem(){
 			fields = {fields}
 			title = "System"
 			hasTitle = {true} 
+			initialValues = {report}
 		/>
 	)
 }

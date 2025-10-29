@@ -1,6 +1,6 @@
 import FormLayout from "../layouts/FormLayout"
 
-export default function FinalAG(){
+export default function FinalAG({report}){
 	const fields = [ 
 		{ name: 'fullName', label: 'Full Name', placeholder: 'Enter your name', required: true }
 	]
