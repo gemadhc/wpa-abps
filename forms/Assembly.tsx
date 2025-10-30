@@ -1,6 +1,6 @@
 import FormLayout from "../layouts/FormLayout"
 
-export default function Assembly({device}){
+export default function Assembly({device, onAssemblyChange}){
 	const fields = [ 
 		{ name: 'serial_number', label: 'Serial Number', type: 'text' }, 
 		{ name: 'location', label: 'Location', type: 'text'},
@@ -55,6 +55,7 @@ export default function Assembly({device}){
 			hasTitle = {true}
 			totalRows = {1}
 			initialValues = {device}
+			onUpdate = { (updated)=> onAssemblyChange(updated)}
 		/>
 	)
 }

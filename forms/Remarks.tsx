@@ -1,6 +1,6 @@
 import FormLayout from "../layouts/FormLayout"
 
-export default function Remarks({report}){
+export default function Remarks({report,  onTargetChange, onReportChange}){
 	const fields = [ 
 		{ name: 'so1', label: 'SO1', type:"radio", full: false }, 
 		{ name: 'so1_rusted', label: 'Rusted', type:"checkbox", full: false},
@@ -17,6 +17,7 @@ export default function Remarks({report}){
 			title = "Remarks"
 			hasTitle = {true}
 			initialValues = { report }
+			onUpdate = {(updated)=>onReportChange(updated)}
 		/>
 	)
 }

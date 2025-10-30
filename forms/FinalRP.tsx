@@ -1,9 +1,13 @@
 import FormLayout from "../layouts/FormLayout"
 
-export default function FinalRP({report}){
+export default function FinalRP({report, onTargetChange, onReportChange}){
 	const fields = [ 
-		{ name: 'repair_rpa_pressdrop', label: 'Pressdrop', type: "text", full: true , noKeyboard: true}, 
-		{ name: 'repair_rpa_openedat', label: 'Opened At', type: "text",full: true , noKeyboard: true}, 
+		{ name: 'repair_rpa_pressdrop', label: 'Pressdrop', type: "text", full: true , noKeyboard: true, 
+			getTargetName: (name: string) => onTargetChange && onTargetChange(name)
+		}, 
+		{ name: 'repair_rpa_openedat', label: 'Opened At', type: "text",full: true , noKeyboard: true, 
+			getTargetName: (name: string) => onTargetChange && onTargetChange(name)
+		}, 
 		{ name: 'RPA_did_not_open', label: 'Did Not Open', type: "checkbox", full: true }, 
 	]
 	const fields_2 = [ 
@@ -18,6 +22,7 @@ export default function FinalRP({report}){
 				title="Relief Valve"
 				hasTitle = {true}
 				initialValues = {report}
+				onUpdate = {(updated)=>onReportChange(updated)}
 			/>
 			<br/>
 			<FormLayout 
@@ -25,6 +30,7 @@ export default function FinalRP({report}){
 				title="Check #2"
 				hasTitle = {true}
 				initialValues = {report}
+				onUpdate = {(updated)=>onReportChange(updated)}
 			/>
 		</div>
 	)

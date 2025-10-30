@@ -1,6 +1,6 @@
 import FormLayout from "../layouts/FormLayout"
 
-export default function Approved({report}){
+export default function Approved({report, onTargetChange, onReportChange}){
 	const fields = [ 
 		{ name: 'approved_assembly', label: 'Assembly', type: 'checkbox' },
 		{ name: 'approved_USC', label: 'USC', type: 'checkbox' },
@@ -15,6 +15,7 @@ export default function Approved({report}){
 			title = "Approved"
       		hasTitle = {true}
       		initialValues = { report }
+      		onUpdate = {(updated)=>onReportChange(updated)}
 		/>
 	)
 }

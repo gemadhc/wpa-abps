@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import InitialDC from "../forms/InitialDC";
 import InitialRP from "../forms/InitialRP";
 import InitialXVB from "../forms/InitialXVB";
@@ -9,15 +9,25 @@ import System from "../forms/System";
 import Remarks from "../forms/Remarks";
 import NumberPad from "./NumberPad";
 
-export default function Initial({ report, device }) {
+export default function Initial({ report, device, onReportChange }) {
   // Track the currently focused field
   const [targetField, setTargetField] = useState<string | null>(null);
-  // Track values of fields for the number pad
-  const [fieldValues, setFieldValues] = useState<Record<string, string>>({});
+  const [currentValue, setCurrentValue] = useState('')
+  const [fieldValues, setFieldValues] = useState(null)
 
-  const handleFieldChange = (name: string, value: string) => {
-    setFieldValues((prev) => ({ ...prev, [name]: value }));
-  };
+  const handleFieldChange = (name, newval)=>{
+    console.log("Event: ", name, newval)
+    report[name] = newval; 
+    let newFields = {...report}
+    setFieldValues(newFields)
+  }
+
+  useEffect(()=>{
+    if(report){
+      setFieldValues(report)
+    }
+  }, [report])
+
 
   const renderDeviceForm = () => {
     switch (device.type) {
@@ -26,22 +36,37 @@ export default function Initial({ report, device }) {
       case "DCDAII":
         return (
           <InitialDC
-            report={report}
+            report={fieldValues}
             onTargetChange={(name) => setTargetField(name)} // called on focus of a number pad field
-            onFieldChange={handleFieldChange} // called when NumberPad updates
-            fieldValues={fieldValues} // pass current values
+            onReportChange = { (updated) => onReportChange(updated) }
           />
         );
       case "RP":
       case "RPDA":
       case "RPDAII":
-        return <InitialRP report={report} />;
+        return (
+          <InitialRP 
+            report={fieldValues}
+            onTargetChange={(name) => setTargetField(name)} // called on focus of a number pad field
+            onReportChange = { (updated) => onReportChange(updated) }
+          />);
+
       case "PVB":
       case "SVB":
       case "AVB":
-        return <InitialXVB report={report} />;
+        return( 
+        <InitialXVB 
+          report={fieldValues}
+          onTargetChange={(name) => setTargetField(name)} // called on focus of a number pad field
+          onReportChange = { (updated) => onReportChange(updated) }
+         />);
       case "AG":
-        return <InitialAG report={report} />;
+        return( 
+        <InitialAG 
+          report={fieldValues}
+          onTargetChange={(name) => setTargetField(name)} // called on focus of a number pad field
+          onReportChange = { (updated) => onReportChange(updated) }
+        />);
       default:
         return <>No device type</>;
     }
@@ -50,29 +75,36 @@ export default function Initial({ report, device }) {
   return (
     <div className="grid grid-cols-10 gap-8 pb-50">
       <div className="col-span-10">
-        <Approved report={report} />
+        <Approved  
+          report={fieldValues}
+          onTargetChange={(name) => setTargetField(name)} // called on focus of a number pad field
+          onReportChange = { (updated) => onReportChange(updated) }
+        />
       </div>
-
       <div className="col-span-5">{renderDeviceForm()}</div>
-
       <div className="col-span-5">
-        {targetField ? (
           <NumberPad
             targetName={targetField}
-            value={fieldValues[targetField] || ""}
-            onChange={(val) => handleFieldChange(targetField, val)}
+            fieldValue={report[targetField] || ""}
+            onInputChange = { handleFieldChange }
           />
-        ) : (
-          <> </>
-        )}
+        
       </div>
 
       <div className="col-span-10">
-        <System report={report} />
+        <System  
+          report={fieldValues}
+          onTargetChange={(name) => setTargetField(name)} // called on focus of a number pad field
+          onReportChange = { (updated) => onReportChange(updated) }
+        />
       </div>
 
       <div className="col-span-10">
-        <Remarks report={report} />
+        <Remarks 
+          report={fieldValues}
+          onTargetChange={(name) => setTargetField(name)} // called on focus of a number pad field
+          onReportChange = { (updated) => onReportChange(updated) }
+        />
       </div>
     </div>
   );

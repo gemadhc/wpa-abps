@@ -8,6 +8,16 @@ const readReport = (id) =>
     
  	});
 
+const update = (obj) => 
+	fetch(`${server}/report`, {
+    	method: "PUT",
+    	body: JSON.stringify({obj}),
+    	credentials: "include", 
+    	headers: {
+    		'Content-Type': 'application/json'
+    	}
+    
+ 	});
 
 const approved = (obj, id)=> 
 	fetch(`${server}/report/approved`, {
@@ -132,6 +142,20 @@ export const requestReport = async ( id ) => {
 	    throw err;
 	  } 
 
+}
+
+export const updateReport = async(obj) =>{
+	try {
+	    const response = await update(obj);
+	    const data = await response.json();
+	    if (!response.ok) {
+	      throw new Error(data.message || "Failed to read report");
+	    }
+	   	return data
+	} catch (err) {
+	    // Always throw error so createAsyncThunk or calling code can catch it
+	    throw err;
+	} 
 }
 
 export const updateApproved =  async (obj, id) => {

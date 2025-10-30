@@ -19,6 +19,7 @@ type FormProps = {
   hasTitle?: boolean;
   totalRows?: number;
   initialValues?: Record<string, any>;
+  onUpdate?: (updated: Record<string, any>) => void;
 };
 
 export default function Form({
@@ -27,6 +28,7 @@ export default function Form({
   hasTitle = false,
   totalRows = 2,
   initialValues = {},
+  onUpdate = (updated) => console.log('Updated:', updated),
 }: FormProps) {
   const defaultState = fields.reduce((acc, field) => {
     if (field.type === 'checkbox') acc[field.name] = false;
@@ -45,10 +47,14 @@ export default function Form({
   const handleChange = (name: string, value: any) => {
     setFormData((prev) => {
       const updated = { ...prev, [name]: value };
-      console.log('Auto-saved Data:', updated);
       return updated;
     });
   };
+
+  useEffect(()=>{
+    onUpdate(formData)
+  }, [formData])
+
 
   // ✅ handleSave now does the same as handleChange
   const handleSave = (name: string, value: any) => {
@@ -118,6 +124,7 @@ export default function Form({
 
           const commonProps = {
             id: field.name,
+            name: field.name,
             value: formData[field.name] || '',
             onChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
               handleChange(field.name, e.target.value),

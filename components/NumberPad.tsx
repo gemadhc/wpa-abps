@@ -12,7 +12,7 @@ export default function NumberPad({ targetName, onInputChange, fieldValue }: Num
 
   useEffect(() => {
     // Keep ref updated
-    inputRef.current = document.querySelector<HTMLInputElement>(`[name="${targetName}"]`);
+    inputRef.current = document.querySelector(`[name="${targetName}"]`);
   }, [targetName]);
 
   const buttons = [
@@ -23,9 +23,10 @@ export default function NumberPad({ targetName, onInputChange, fieldValue }: Num
   ];
 
   const handleClick = (btn: string) => {
+    console.log("clicked: ", btn, targetName, fieldValue)
     if (!targetName || !onInputChange) return;
-    let newValue = fieldValue || '';
-
+    let newValue = String(fieldValue) || '';
+    console.log(newValue, typeof(newValue))
     if (btn === 'CL') newValue = '';
     else if (btn === '.') {
       if (!newValue.includes('.')) newValue += '.';
@@ -37,7 +38,7 @@ export default function NumberPad({ targetName, onInputChange, fieldValue }: Num
         newValue += btn;
       }
     }
-
+    console.log("would be new value: ", newValue)
     onInputChange(targetName, newValue);
 
     // Maintain focus
