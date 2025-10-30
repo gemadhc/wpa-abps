@@ -50,7 +50,14 @@ export default function Home() {
 
       {/* LIST SECTION */}
       <div className="flex-1 max-h-150 overflow-y-scroll p-3 space-y-0 bg-gray-50">
-         <ListSorted  stops= {list}/>
+         <ListSorted  
+          stops= {list}
+          reloadList = {  
+              ()=> requestDispatch(myDate).then((data, err) =>{
+                setList(data)
+              })
+        }
+        />
       </div>
     </div>
   )

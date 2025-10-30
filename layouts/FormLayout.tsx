@@ -30,6 +30,7 @@ export default function Form({
   initialValues = {},
   onUpdate = (updated) => console.log('Updated:', updated),
 }: FormProps) {
+  // Default form state
   const defaultState = fields.reduce((acc, field) => {
     if (field.type === 'checkbox') acc[field.name] = false;
     else if (field.type === 'radio') acc[field.name] = null;
@@ -51,12 +52,10 @@ export default function Form({
     });
   };
 
-  useEffect(()=>{
-    onUpdate(formData)
-  }, [formData])
+  useEffect(() => {
+    onUpdate(formData);
+  }, [formData]);
 
-
-  // ✅ handleSave now does the same as handleChange
   const handleSave = (name: string, value: any) => {
     handleChange(name, value);
   };
@@ -78,6 +77,7 @@ export default function Form({
           const isFull = Boolean(field.full);
           const gridClass = isFull ? `col-span-${totalRows}` : 'col-span-1';
 
+          // ✅ Checkbox field
           if (field.type === 'checkbox') {
             return (
               <div key={field.name} className={`${gridClass} flex items-center gap-2`}>
@@ -92,6 +92,7 @@ export default function Form({
             );
           }
 
+          // ✅ Radio field
           if (field.type === 'radio') {
             return (
               <div key={field.name} className={`${gridClass} flex items-center gap-2`}>
@@ -122,6 +123,7 @@ export default function Form({
             );
           }
 
+          // ✅ Shared input props
           const commonProps = {
             id: field.name,
             name: field.name,
@@ -138,14 +140,20 @@ export default function Form({
               'peer w-full border border-gray-300 rounded-md p-2 pt-5 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-400',
           };
 
+          // ✅ Render field types
           return (
             <div key={field.name} className={`${gridClass} relative`}>
               {field.type === 'textarea' ? (
                 <div className="relative">
-                  <textarea {...commonProps} />
+                  <textarea
+                    {...commonProps}
+                    className={`${commonProps.className} min-h-[150px] min-w-[300px] `}
+                  />
                   <label
                     htmlFor={field.name}
-                    className="absolute left-2 top-2.5 text-gray-500 text-xs transition-all peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-gray-400 peer-placeholder-shown:text-sm peer-focus:top-1 peer-focus:text-xs peer-focus:text-blue-600"
+                    className="absolute left-2 top-2.5 text-gray-500 text-xs transition-all 
+                      peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-gray-400 
+                      peer-placeholder-shown:text-sm peer-focus:top-1 peer-focus:text-xs peer-focus:text-blue-600"
                   >
                     {field.label}
                   </label>
@@ -162,7 +170,9 @@ export default function Form({
                   </select>
                   <label
                     htmlFor={field.name}
-                    className="absolute left-2 top-2.5 text-gray-500 text-xs transition-all peer-placeholder-shown:text-gray-400 peer-placeholder-shown:text-sm peer-focus:text-blue-600"
+                    className="absolute left-2 top-2.5 text-gray-500 text-xs transition-all 
+                      peer-placeholder-shown:text-gray-400 peer-placeholder-shown:text-sm 
+                      peer-focus:text-blue-600"
                   >
                     {field.label}
                   </label>
@@ -172,7 +182,9 @@ export default function Form({
                   <input {...commonProps} type={field.type || 'text'} />
                   <label
                     htmlFor={field.name}
-                    className="absolute left-2 top-2.5 text-gray-500 text-xs transition-all peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-gray-400 peer-placeholder-shown:text-sm peer-focus:top-1 peer-focus:text-xs peer-focus:text-blue-600"
+                    className="absolute left-2 top-2.5 text-gray-500 text-xs transition-all 
+                      peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-gray-400 
+                      peer-placeholder-shown:text-sm peer-focus:top-1 peer-focus:text-xs peer-focus:text-blue-600"
                   >
                     {field.label}
                   </label>

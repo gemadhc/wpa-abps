@@ -1,7 +1,7 @@
 'use client';
 import StopCard from "../../components/StopCard"
 
-export default function StopsList({ stops }) {
+export default function StopsList({ stops, reloadList }) {
   // Helper to determine if a stop is timed
   const isTimedStop = (stop) => {
     if (!stop.startTime || !stop.endTime) return false;
@@ -33,7 +33,12 @@ export default function StopsList({ stops }) {
   return (
     <div >
       {sortedStops.map((stop) => (
-        <StopCard key={stop.stopID} stopID={stop.stopID} item={stop} />
+        <StopCard 
+          key={stop.stopID} 
+          stopID={stop.stopID} 
+          item={stop} 
+          reloadList = { reloadList }
+        />
       ))}
     </div>
   );

@@ -1,12 +1,14 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { requestReport } from "../actions/report";
-import { requestAssembly } from "../actions/assembly";
+import { requestAssembly, createAssembly} from "../actions/assembly";
 import { Dialog } from '@headlessui/react';
-import { CheckCircle2, FileText, X } from 'lucide-react';
+import { CheckCircle2, FileText, X, PlusCircle } from 'lucide-react';
 import Results from "./Results";
+import { setAsReady, setAsNotReady } from "../actions/service";
+import React from 'react'
 
-export default function Assemblies({ list = [] }) {
+export default function Assemblies({ list = [], reloadServices, stopID, addressID}) {
   const [openReasonDialog, setOpenReasonDialog] = useState(false);
   const [openResultsDialog, setOpenResultsDialog] = useState(false);
   const [selectedAssembly, setSelectedAssembly] = useState(null);
@@ -20,13 +22,11 @@ export default function Assemblies({ list = [] }) {
       setSelectedAssembly(assembly);
       setOpenReasonDialog(true);
     } else {
-      assembly.ready = true;
+      setAsReady(assembly.serviceID).then(() => {
+        reloadServices();
+      });
     }
   };
-
-  useEffect(() => {
-    console.log("This is the list of services: ", list);
-  }, [list]);
 
   const handleRowClick = (assembly) => {
     setSelectedAssembly(assembly);
@@ -40,9 +40,19 @@ export default function Assemblies({ list = [] }) {
   };
 
   const handleSubmitReason = () => {
-    console.log('Reason for', selectedAssembly?.name, ':', reason);
-    setOpenReasonDialog(false);
-    setReason('');
+    setAsNotReady(selectedAssembly.serviceID, reason).then(() => {
+      reloadServices();
+      setOpenReasonDialog(false);
+      setReason('');
+    });
+  };
+
+  // 🧩 Placeholder for adding new assembly
+  const handleAddAssembly = (assembly) => {
+    console.log("Add Assembly button clicked", addressID, stopID);
+    createAssembly(addressID, stopID).then((data, err) =>{
+      reloadServices()
+    })
   };
 
   return (
@@ -57,9 +67,8 @@ export default function Assemblies({ list = [] }) {
         </thead>
         <tbody>
           {list.map((assembly, ind) => (
-            <>
+            <React.Fragment key={ind}>
               <tr
-                key={ind}
                 onClick={() => handleRowClick(assembly)}
                 className="border-b last:border-none hover:bg-gray-50 cursor-pointer transition"
               >
@@ -79,21 +88,33 @@ export default function Assemblies({ list = [] }) {
                     type="checkbox"
                     checked={assembly.ready ?? true}
                     onChange={(e) => handleToggleReady(assembly, e)}
-                    className="w-5 h-5 accent-blue-600 cursor-pointer"
+                    className="w-5 h-5 accent-blue-600 cursor-pointer text-black"
                   />
                 </td>
               </tr>
               {assembly.reason && (
                 <tr>
-                  <td colSpan={3} className="text-sm text-gray-600 px-4 py-1 italic">
+                  <td colSpan={3} className="text-sm text-black px-4 py-1 italic">
                     Reason: {assembly.reason}
                   </td>
                 </tr>
               )}
-            </>
+            </React.Fragment>
           ))}
         </tbody>
       </table>
+
+      {/* ➕ Add Assembly Button */}
+      <div className="flex justify-start mt-4">
+        <button
+          onClick={  handleAddAssembly}
+          className="flex items-center gap-2 px-4 py-2 text-sm  border  shadow
+            rounded-lg bg-gray-200 text-white hover:bg-gray-500 transition "
+        >
+          <PlusCircle className="w-4 h-4 text-slate-500" />
+          
+        </button>
+      </div>
 
       {/* Reason Dialog */}
       <Dialog
@@ -104,7 +125,6 @@ export default function Assemblies({ list = [] }) {
         <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
         <div className="fixed inset-0 flex items-center justify-center p-4">
           <Dialog.Panel className="relative bg-white rounded-2xl p-6 shadow-xl max-w-sm w-full">
-            {/* Close Icon */}
             <button
               onClick={() => setOpenReasonDialog(false)}
               className="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
@@ -124,7 +144,7 @@ export default function Assemblies({ list = [] }) {
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               placeholder="Enter reason..."
-              className="w-full border border-gray-300 rounded-lg mt-3 p-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              className="w-full border border-gray-300 rounded-lg mt-3 p-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none text-black"
               rows={3}
             />
 
@@ -149,7 +169,6 @@ export default function Assemblies({ list = [] }) {
         <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
         <div className="fixed inset-0 flex items-center justify-center p-4">
           <Dialog.Panel className="relative bg-white rounded-2xl p-6 shadow-xl max-w-2xl w-full">
-            {/* Close Icon */}
             <button
               onClick={() => setOpenResultsDialog(false)}
               className="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
@@ -164,7 +183,7 @@ export default function Assemblies({ list = [] }) {
 
             <div className="mt-4 text-center text-gray-700 font-medium">
               {report && device ? (
-                <Results report={report} device={device} closeMe = {()=> setOpenResultsDialog(false)} />
+                <Results report={report} device={device} closeMe={() => setOpenResultsDialog(false)} />
               ) : (
                 <>Loading Values ...</>
               )}

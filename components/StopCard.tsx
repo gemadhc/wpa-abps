@@ -5,10 +5,10 @@ import { Dialog } from '@headlessui/react';
 import Details from './Details';
 import Assemblies from './Assemblies';
 import Invoice from './Invoice';
-import { requestServices } from "../actions/stop";
+import { requestServices, completeStop} from "../actions/stop";
 import { requestBilling, requestInvoice, requestItems } from "../actions/invoice";
 
-export default function StopCard({ stopID, item }) {
+export default function StopCard({ stopID, item, reloadList }) {
   const [expanded, setExpanded] = useState(false);
   const [activeTab, setActiveTab] = useState('Details');
   const [completed, setCompleted] = useState(false);
@@ -42,7 +42,11 @@ export default function StopCard({ stopID, item }) {
 
   const tabs = [
     { name: 'Details', content: <Details item={item} /> },
-    { name: 'Assemblies', content: <Assemblies list={services} /> },
+    { name: 'Assemblies', content: <Assemblies list={services}  
+    reloadServices = { ()=> requestServices(item.stopID).then(setServices) } 
+    stopID = {stopID} 
+    addressID = {item.addressID}
+    /> },
     { name: 'Invoice', content: <Invoice items={myLines} billing={myBilling} invoice={myInvoice} /> },
   ];
 
@@ -50,12 +54,15 @@ export default function StopCard({ stopID, item }) {
 
   const handleConfirmCompletion = () => {
     if (!confirmed) {
-      alert('Please confirm the checkbox before completing.');
+     
       return;
     }
-    setCompleted(true);
-    setOpenConfirmDialog(false);
-    alert('Stop marked as completed!');
+    completeStop(item.stopID).then((data, err) =>{
+      reloadList()
+      setCompleted(true);
+      setOpenConfirmDialog(false);
+    })
+    
   };
 
   useEffect(() => {

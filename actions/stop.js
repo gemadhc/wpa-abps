@@ -19,6 +19,15 @@ const services = (id) =>
     	credentials: "include"
     
   	});
+const complete = (id) =>
+	fetch(`${server}/stop/complete`, {
+    	method: "PUT",
+    	body: JSON.stringify({stopID: id}), 
+    	credentials: "include", 
+    	headers: {
+    		"Content-Type": "application/json"
+    	} 
+  	});
 export const requestStop = async (id) =>{
 	try {
 	    const response = await request(id);
@@ -54,6 +63,20 @@ export const requestServices = async (id) =>{
 	      throw new Error(data.message || "Failed to fetch services");
 	    }
 	    return data.list;
+	  } catch (err) {
+	    // Always throw error so createAsyncThunk or calling code can catch it
+	    throw err;
+	  } 
+}
+
+export const completeStop = async( id) => {
+	try {
+	    const response = await complete(id);
+	    const data = await response.json();
+	    if (!response.ok) {
+	      throw new Error(data.message || "Failed to fetch services");
+	    }
+	    return data;
 	  } catch (err) {
 	    // Always throw error so createAsyncThunk or calling code can catch it
 	    throw err;

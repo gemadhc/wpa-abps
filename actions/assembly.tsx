@@ -16,6 +16,15 @@ const update = (obj) =>
     		'Content-Type': "application/json"
     	}
  	});
+const create = (id, addressID) => 
+	fetch(`${server}/assembly`, {
+    	method: "POST",
+    	body: JSON.stringify({stopID: id, addressID: addressID }),
+    	credentials: "include", 
+    	headers:{
+    		'Content-Type': "application/json"
+    	}
+ 	});
 
 export const requestAssembly = async ( id ) => {
 	try {
@@ -39,6 +48,21 @@ export const requestAssembly = async ( id ) => {
 export const updateAssembly = async ( obj ) => {
 	try {
 	    const response = await update( obj );
+	    const data = await response.json();
+	    if (!response.ok) {
+	      throw new Error(data.message || "Failed to read report");
+	    }
+	   	return data
+	  } catch (err) {
+	    // Always throw error so createAsyncThunk or calling code can catch it
+	    throw err;
+	  } 
+
+}
+
+export const createAssembly = async ( addressID ,stopID  ) => {
+	try {
+	    const response = await create( stopID, addressID );
 	    const data = await response.json();
 	    if (!response.ok) {
 	      throw new Error(data.message || "Failed to read report");

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Dialog } from '@headlessui/react';
 import { X, DollarSign, Ban, RotateCcw } from 'lucide-react';
 import LineItems from './LineItems';
+import PaymentApp from "./PaymentApp"
 
 export default function Invoice({ items = [], billing, invoice}) {
   const [isVoided, setIsVoided] = useState(false);
@@ -116,27 +117,9 @@ export default function Invoice({ items = [], billing, invoice}) {
             </div>
 
             <Dialog.Description className="text-gray-600 text-sm mb-4">
-              For now, just display placeholder text for payment collection.
+              <PaymentApp 
+              />
             </Dialog.Description>
-
-            <div className="border rounded-lg p-4 bg-gray-50 text-center text-gray-700 text-sm sm:text-base">
-              Payment form goes here...
-            </div>
-
-            <div className="flex flex-col sm:flex-row justify-end gap-3 mt-5">
-              <button
-                onClick={handleClosePayment}
-                className="px-4 py-2 text-sm bg-gray-100 hover:bg-gray-200 rounded-lg w-full sm:w-auto"
-              >
-                Close
-              </button>
-              <button
-                onClick={() => alert('Payment processed (placeholder)')}
-                className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 w-full sm:w-auto"
-              >
-                Process Payment
-              </button>
-            </div>
           </Dialog.Panel>
         </div>
       </Dialog>

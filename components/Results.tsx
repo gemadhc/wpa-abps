@@ -85,6 +85,7 @@ export default function Results({ report, device, closeMe }) {
                 ...castBooleans(updates),
                 ...castBooleans(updatedDevice),
               };
+              merged.id = report.id;
               updateReport(merged).then(() => {
                 updateAssembly(merged).then(() => {
                   closeMe();
