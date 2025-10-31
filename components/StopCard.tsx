@@ -8,7 +8,7 @@ import Invoice from './Invoice';
 import { requestServices, completeStop} from "../actions/stop";
 import { requestBilling, requestInvoice, requestItems } from "../actions/invoice";
 
-export default function StopCard({ stopID, item, reloadList }) {
+export default function StopCard({ stopID, item, reloadList}) {
   const [expanded, setExpanded] = useState(false);
   const [activeTab, setActiveTab] = useState('Details');
   const [completed, setCompleted] = useState(false);
@@ -20,6 +20,7 @@ export default function StopCard({ stopID, item, reloadList }) {
   const [myInvoice, setMyInvoice] = useState(null);
   const [myLines, setMyLines] = useState([]);
   const [services, setServices] = useState([]);
+  const [loading, setLoading] = useState(false)
 
   useEffect(()=>{
     console.log(myInvoice)
@@ -45,13 +46,25 @@ export default function StopCard({ stopID, item, reloadList }) {
   }, [item]);
 
   const tabs = [
-    { name: 'Details', content: <Details item={item} /> },
-    { name: 'Assemblies', content: <Assemblies list={services}  
-    reloadServices = { ()=> requestServices(item.stopID).then(setServices) } 
-    stopID = {stopID} 
-    addressID = {item.addressID}
-    /> },
-    { name: 'Invoice', content: <Invoice items={myLines} billing={myBilling} invoice={myInvoice} /> },
+    { name: 'Details', content: 
+      <Details item={item} /> },
+    { name: 'Assemblies', content: 
+      <Assemblies 
+        list={services}  
+        reloadServices = { ()=> requestServices(item.stopID).then(setServices) } 
+        stopID = {stopID} 
+        addressID = {item.addressID}
+      /> 
+    },
+    { name: 'Invoice', content: 
+      <Invoice 
+        items={myLines} 
+        billing={myBilling} 
+        invoice={myInvoice} 
+        reload = { () => requestItems(item.invoiceID).then(setMyLines) }
+        address = { item }
+      /> 
+    },
   ];
 
   const handleCompleteStop = () => setOpenConfirmDialog(true);
@@ -76,6 +89,7 @@ export default function StopCard({ stopID, item, reloadList }) {
       requestItems(item.invoiceID).then(setMyLines);
       requestServices(item.stopID).then(setServices);
     }
+
   }, [expanded]);
 
   const headerBg =
@@ -153,7 +167,7 @@ export default function StopCard({ stopID, item, reloadList }) {
 
           {/* Active Tab Content */}
           <div className="text-gray-700 text-sm">
-            {tabs.find((tab) => tab.name === activeTab)?.content}
+             {tabs.find((tab) => tab.name === activeTab)?.content}
           </div>
 
           {/* Complete Stop Button */}

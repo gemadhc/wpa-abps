@@ -14,35 +14,45 @@ const status = (id, newStatus) =>
     	credentials: "include"
     
  });
+
 const requestLineItems = (id) => 
 	fetch(`${server}/invoice/lineitems?` + new URLSearchParams({id: id}), {
     	method: "GET",
     	credentials: "include"
     
  });
+
+
 const updateLineItem = (id, obj) =>
-	fetch(`${server}/invoice/lineitems`, {
+	fetch(`${office}/lineitems`, {
     	method: "PUT",
     	body: JSON.stringify({ id: id, obj: obj }), 
-    	credentials: "include"
-    
+    	credentials: "include",
+    	headers:{
+    		"Content-Type": "application/json"
+    	}
  });
 const removeLineItem = (id)  =>
-	fetch(`${server}/invoice/lineitems`, {
+	fetch(`${office}/lineitems`, {
     	method: "DELETE",
     	body: JSON.stringify({ id: id}), 
-    	credentials: "include"
-    
+    	credentials: "include", 
+    	headers:{
+    		"Content-Type": "application/json"
+    	}
  });
 const createLineItem = (id) => 
-	fetch(`${server}/invoice/lineitems`, {
+	fetch(`${office}/lineitems`, {
     	method: "POST",
-    	body: JSON.stringify({ id: id}), 
-    	credentials: "include"
-    
+    	body: JSON.stringify({ invoiceID: id}), 
+    	credentials: "include", 
+    	headers:{
+    		"Content-Type": "application/json"
+    	}
  });
+
 const billing = (id) => 
-	fetch(`${office}/invoice/billing?` + new URLSearchParams({id}), {
+	fetch(`${server}/invoice/billing?` + new URLSearchParams({id}), {
     	method: "GET",
     	credentials: "include"
     
@@ -75,11 +85,10 @@ export const requestInvoice = async (id) => {
 	    }
 	    console.log("data: ", data, data.invoice)
 	    return data.invoice
-	    
-	  } catch (err) {
+	 } catch (err) {
 	    // Always throw error so createAsyncThunk or calling code can catch it
 	    throw err;
-	  } 
+	 } 
 }
 export const requestItems = async( id) => {
 	try {

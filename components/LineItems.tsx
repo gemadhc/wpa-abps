@@ -1,147 +1,84 @@
 'use client';
 
-import { useState } from 'react';
-import { Pencil, Trash2, Save } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Pencil, Trash2, Save, PlusCircle } from 'lucide-react';
+import { createItem, removeItem, updateItem } from "../actions/invoice"
+import { getQuickbooksItems } from "../actions/quickbooks.js"
 
-export default function LineItems({items}) {
- /* const [items, setItems] = useState([
-    { id: 1, item: 'Backflow Test', description: 'Testing service', qty: 1, unitPrice: 85, taxable: true },
-    { id: 2, item: 'Replacement Part', description: 'Valve replacement', qty: 2, unitPrice: 15, taxable: false },
-  ]);*/
-
+export default function LineItems({ items: initialItems = [], invoiceID, reloadItems }) {
+  const [items, setItems] = useState(initialItems);
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editedItem, setEditedItem] = useState<any>({});
+  const [itemOptions, setItemOptions] = useState([]);
+
+  useEffect(() => {
+    getQuickbooksItems().then((data) => {
+      setItemOptions(data || []);
+    });
+  }, []);
+
+  useEffect(() => {
+    setItems(initialItems);
+  }, [initialItems]);
 
   const handleEdit = (item: any) => {
     setEditingId(item.id);
-    setEditedItem({ ...item });
+    setEditedItem(item);
   };
 
   const handleSave = (id: number) => {
-    setItems((prev) =>
-      prev.map((itm) => (itm.id === id ? editedItem : itm))
-    );
-    setEditingId(null);
+    updateItem(editedItem.id, editedItem).then(() => {
+      reloadItems();
+      setEditingId(null);
+      setEditedItem({});
+    });
   };
 
   const handleRemove = (id: number) => {
-    setItems((prev) => prev.filter((itm) => itm.id !== id));
+    removeItem(id).then(() => {
+      reloadItems();
+    });
   };
 
   const handleChange = (field: string, value: any) => {
-    setEditedItem((prev: any) => ({ ...prev, [field]: value }));
+    setEditedItem((prev: any) => {
+      const updated = { ...prev, [field]: value };
+
+      // === Auto-update unit price & amount ===
+      if (field === 'qb_id') {
+        const selected = itemOptions.find(opt => opt.Id === value);
+        if (selected) {
+          updated.unitPriceDefined = selected.UnitPrice || 0;
+          updated.item = selected.Name;
+        }
+      }
+
+      if (field === 'quantity' || field === 'unitPriceDefined' || field === 'qb_id') {
+        updated.amount = (updated.quantity || 0) * (updated.unitPriceDefined || 0);
+      }
+
+      return updated;
+    });
   };
 
-  const total = items?.reduce((sum, itm) => sum + itm.quantity * itm.unitPriceDefined, 0);
+  const handleAddNewItem = () => {
+    createItem(invoiceID).then(() => {
+      reloadItems();
+    });
+  };
+
+  const total = items.reduce( (sum, itm) => sum + itm.quantity * itm.unitPriceDefined, 0 );
+
+
 
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-      {/* Desktop Table */}
-      <div className="hidden md:block overflow-x-auto">
-        <table className="min-w-full text-sm text-gray-700">
-          <thead>
-            <tr className="bg-gray-50 text-left text-gray-500 uppercase text-xs border-b">
-              <th className="py-2 px-3">Item</th>
-              <th className="py-2 px-3">Description</th>
-              <th className="py-2 px-3 text-right">Qty</th>
-              <th className="py-2 px-3 text-right">Unit Price</th>
-              <th className="py-2 px-3 text-center">Taxable</th>
-              <th className="py-2 px-3 text-right">Amount</th>
-              <th className="py-2 px-3 text-center">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {items?.map((itm) => {
-              const isEditing = itm.id === editingId;
-              const amount = (itm.quantity * itm.unitPriceDefined).toFixed(2);
-              return (
-                <tr key={itm.id} className="border-b last:border-none hover:bg-gray-50">
-                  <td className="py-2 px-3">
-                    {isEditing ? (
-                      <input
-                        value={editedItem.item}
-                        onChange={(e) => handleChange('item', e.target.value)}
-                        className="w-full border border-gray-300 rounded-md px-2 py-1 text-sm"
-                      />
-                    ) : (
-                      itm.item
-                    )}
-                  </td>
-                  <td className="py-2 px-3">
-                    {isEditing ? (
-                      <input
-                        value={editedItem.description}
-                        onChange={(e) => handleChange('description', e.target.value)}
-                        className="w-full border border-gray-300 rounded-md px-2 py-1 text-sm"
-                      />
-                    ) : (
-                      itm.description
-                    )}
-                  </td>
-                  <td className="py-2 px-3 text-right">
-                    {isEditing ? (
-                      <input
-                        type="number"
-                        value={editedItem.quantity}
-                        onChange={(e) => handleChange('quantity', +e.target.value)}
-                        className="w-16 border border-gray-300 rounded-md px-2 py-1 text-sm text-right"
-                      />
-                    ) : (
-                      itm.quantity
-                    )}
-                  </td>
-                  <td className="py-2 px-3 text-right">
-                    {isEditing ? (
-                      <input
-                        type="number"
-                        value={editedItem.unitPriceDefined}
-                        onChange={(e) => handleChange('unitPriceDefined', +e.target.value)}
-                        className="w-20 border border-gray-300 rounded-md px-2 py-1 text-sm text-right"
-                      />
-                    ) : (
-                      `$${itm.unitPriceDefined.toFixed(2)}`
-                    )}
-                  </td>
-                  <td className="py-2 px-3 text-center">
-                    {isEditing ? (
-                      <input
-                        type="checkbox"
-                        checked={editedItem.taxable}
-                        onChange={(e) => handleChange('taxable', e.target.checked)}
-                        className="w-4 h-4 accent-blue-600"
-                      />
-                    ) : itm.taxable ? 'Yes' : 'No'}
-                  </td>
-                  <td className="py-2 px-3 text-right font-medium">${amount}</td>
-                  <td className="py-2 px-3 text-center">
-                    {isEditing ? (
-                      <button onClick={() => handleSave(itm.id)} className="p-1 text-green-600 hover:bg-green-50 rounded-lg">
-                        <Save className="w-4 h-4" />
-                      </button>
-                    ) : (
-                      <button onClick={() => handleEdit(itm)} className="p-1 text-blue-600 hover:bg-blue-50 rounded-lg">
-                        <Pencil className="w-4 h-4" />
-                      </button>
-                    )}
-                    <button
-                      onClick={() => handleRemove(itm.id)}
-                      className="p-1 text-red-600 hover:bg-red-50 rounded-lg ml-1"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Mobile Cards */}
-      <div className="md:hidden divide-y divide-gray-100">
-        {items?.map((itm) => {
+      <div className="divide-y divide-gray-100">
+        {items.map((itm) => {
           const isEditing = itm.id === editingId;
-          const amount = (itm.quantity * itm.unitPriceDefined ).toFixed(2);
+          const currentAmount = isEditing
+            ? (editedItem.quantity || 0) * (editedItem.unitPriceDefined || 0)
+            : itm.quantity * itm.unitPriceDefined;
 
           return (
             <div key={itm.id} className="p-4 flex flex-col gap-2 bg-white">
@@ -149,11 +86,17 @@ export default function LineItems({items}) {
                 <span className="font-semibold text-gray-800">{itm.item}</span>
                 <div className="flex gap-2">
                   {isEditing ? (
-                    <button onClick={() => handleSave(itm.id)} className="p-1 text-green-600 hover:bg-green-50 rounded-lg">
+                    <button
+                      onClick={() => handleSave(itm.id)}
+                      className="p-1 text-green-600 hover:bg-green-50 rounded-lg"
+                    >
                       <Save className="w-4 h-4" />
                     </button>
                   ) : (
-                    <button onClick={() => handleEdit(itm)} className="p-1 text-blue-600 hover:bg-blue-50 rounded-lg">
+                    <button
+                      onClick={() => handleEdit(itm)}
+                      className="p-1 text-blue-600 hover:bg-blue-50 rounded-lg"
+                    >
                       <Pencil className="w-4 h-4" />
                     </button>
                   )}
@@ -166,12 +109,29 @@ export default function LineItems({items}) {
                 </div>
               </div>
 
+              {/* ITEM SELECT */}
+              {isEditing && (
+                <select
+                  value={editedItem.qb_id || ''}
+                  onChange={(e) => handleChange('qb_id', e.target.value)}
+                  className="border border-gray-300 rounded-md px-2 py-1 text-sm w-full mt-2"
+                >
+                  <option value="">Select an item</option>
+                  {itemOptions.map(opt => (
+                    <option key={opt.Id} value={opt.Id}>
+                      {opt.Name}
+                    </option>
+                  ))}
+                </select>
+              )}
+
               <div className="text-sm text-gray-600">
                 {isEditing ? (
                   <input
-                    value={editedItem.description}
+                    value={editedItem.description || ''}
                     onChange={(e) => handleChange('description', e.target.value)}
                     className="w-full border border-gray-300 rounded-md px-2 py-1 text-sm mt-1"
+                    placeholder="Description"
                   />
                 ) : (
                   itm.description
@@ -210,7 +170,7 @@ export default function LineItems({items}) {
                   {isEditing ? (
                     <input
                       type="checkbox"
-                      checked={editedItem.taxable}
+                      checked={!!editedItem.taxable}
                       onChange={(e) => handleChange('taxable', e.target.checked)}
                       className="w-4 h-4 accent-blue-600 ml-1"
                     />
@@ -221,7 +181,7 @@ export default function LineItems({items}) {
                   )}
                 </div>
                 <div className="text-right font-medium text-gray-800">
-                  <span className="text-gray-500">Amount:</span> ${amount}
+                  <span className="text-gray-500">Amount:</span> ${currentAmount.toFixed(2)}
                 </div>
               </div>
             </div>
@@ -229,10 +189,15 @@ export default function LineItems({items}) {
         })}
       </div>
 
-      {/* Footer */}
       <div className="flex justify-between md:justify-end items-center px-4 py-3 bg-gray-50 border-t rounded-b-2xl">
+        <button
+          onClick={handleAddNewItem}
+          className="flex items-center gap-1 text-blue-600 text-sm font-medium hover:underline"
+        >
+          <PlusCircle className="w-4 h-4" /> Add New Line Item
+        </button>
         <div className="text-sm font-semibold text-gray-700">
-          Total: ${total?.toFixed(2)}
+          Total: ${total.toFixed(2)}
         </div>
       </div>
     </div>
