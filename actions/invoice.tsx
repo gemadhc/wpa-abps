@@ -1,10 +1,10 @@
 const server = process.env.SERVER;
+const office = process.env.OFFICE;
 
 const request = (id) => 
 	fetch(`${server}/invoice?` + new URLSearchParams({ id }), {
     	method: "GET",
     	credentials: "include"
-    
  });
 
 const status = (id, newStatus) => 
@@ -42,7 +42,7 @@ const createLineItem = (id) =>
     
  });
 const billing = (id) => 
-	fetch(`${server}/invoice/billing?` + new URLSearchParams({id}), {
+	fetch(`${office}/invoice/billing?` + new URLSearchParams({id}), {
     	method: "GET",
     	credentials: "include"
     
@@ -66,18 +66,15 @@ export const requestBilling = async (id) => {
 	    throw err;
 	  } 
 }
-export const requestInvoice = async (obj, id) => {
+export const requestInvoice = async (id) => {
 	try {
-	    const response = await request(obj, id);
+	    const response = await request(id);
 	    const data = await response.json();
 	    if (!response.ok) {
 	      throw new Error(data.message || "Failed to update stop");
 	    }
-	    if(data.invoice.length){
-	    	return data.invoice[0];
-	    }else{
-	    	return data
-	    }
+	    console.log("data: ", data, data.invoice)
+	    return data.invoice
 	    
 	  } catch (err) {
 	    // Always throw error so createAsyncThunk or calling code can catch it

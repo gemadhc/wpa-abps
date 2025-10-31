@@ -21,6 +21,10 @@ export default function StopCard({ stopID, item, reloadList }) {
   const [myLines, setMyLines] = useState([]);
   const [services, setServices] = useState([]);
 
+  useEffect(()=>{
+    console.log(myInvoice)
+  }, [myInvoice])
+
   const formatTime = (time) => {
     if (!time) return "";
     const [hour, minute] = time.split(':').map(Number);

@@ -26,7 +26,7 @@ export default function Invoice({ items = [], billing, invoice}) {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b pb-3 gap-3">
         <div className="flex items-center gap-2 flex-wrap">
           <h2 className="text-base sm:text-lg font-semibold text-gray-800">
-            Invoice #12345
+            #{invoice.id}
           </h2>
           <span
             className={`text-xs font-medium px-2 py-1 rounded-full ${statusColor}`}
