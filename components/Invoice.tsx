@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect} from 'react';
 import { Dialog, Menu, Transition } from '@headlessui/react';
 import { Fragment } from 'react';
 import {
@@ -13,14 +13,36 @@ import {
 } from 'lucide-react';
 import LineItems from './LineItems';
 import PaymentApp from './PaymentApp';
+import {updateStatus} from "../actions/invoice"
 
 
 export default function Invoice({ items = [], billing, invoice, reload, address}) {
   const [isVoided, setIsVoided] = useState(false);
   const [openPaymentDialog, setOpenPaymentDialog] = useState(false);
   const total = items.reduce( (sum, itm) => sum + itm.quantity * itm.unitPriceDefined, 0 )
+
+  useEffect(()=>{
+    console.log("Invoice: ", invoice)
+    if(invoice){
+      setIsVoided( invoice.status == "VOID" || invoice.status == "VOIDED" )
+    }else{
+      setIsVoided(false)
+    }
+  }, [invoice])
+
   // Handlers
-  const handleToggleVoid = () => setIsVoided((prev) => !prev);
+  const handleToggleVoid = () => {
+    if(invoice.status == "VOID" || invoice.status == "VOIDED"){
+      updateStatus(invoice.id, "Scheduled").then((data, err) =>{
+        reload()
+      })
+    }else{
+      updateStatus(invoice.id, "VOID").then((data, err) =>{
+        reload()
+      })
+    }
+  };
+
   const handleOpenPayment = () => setOpenPaymentDialog(true);
   const handleClosePayment = () => setOpenPaymentDialog(false);
   const handleEditInvoice = () => {
@@ -162,16 +184,17 @@ export default function Invoice({ items = [], billing, invoice, reload, address}
               </button>
             </div>
 
-            <Dialog.Description className="text-gray-600 text-sm mb-4">
-              <PaymentApp 
-                amount = {total}
-                invoiceID = {invoice.id}
-                lineItems = {items}
-                billing = {billing} 
-                address = {address}
-                invoice = {invoice}
-              />
-            </Dialog.Description>
+          
+            <PaymentApp 
+              amount = {total}
+              invoiceID = {invoice.id}
+              lineItems = {items}
+              billing = {billing} 
+              address = {address}
+              invoice = {invoice}
+              closeMe = { ()=> handleClosePayment() }
+            />
+            
           </Dialog.Panel>
         </div>
       </Dialog>

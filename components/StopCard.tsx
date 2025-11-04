@@ -61,7 +61,11 @@ export default function StopCard({ stopID, item, reloadList}) {
         items={myLines} 
         billing={myBilling} 
         invoice={myInvoice} 
-        reload = { () => requestItems(item.invoiceID).then(setMyLines) }
+        reload = { 
+          () => {
+            requestInvoice(item.invoiceID).then(setMyInvoice);
+            requestItems(item.invoiceID).then(setMyLines)
+          }}
         address = { item }
       /> 
     },

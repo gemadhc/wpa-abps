@@ -28,6 +28,15 @@ const charge = (chargeBodyWithToken) =>
     },
   });
 
+const salesReceipt = (salesBody) =>
+  fetch(`${quickbooks}/salesreceipt/create`, {
+    method: "POST",
+    body: JSON.stringify(salesBody),
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+  
 const sendReceipt = (id, email) =>
   fetch(`${quickbooks}/salesreceipt/send`, {
     method: "POST",
@@ -66,11 +75,6 @@ export async function createToken(card) {
 	  }
 	};
   const res = await token(mycard);
-
-  if (!res.ok) {
-    const message = await extractError(await res.json(), "Card tokenization failed");
-    throw new Error(message);
-  }
   return await res.json();
 }
 
@@ -86,6 +90,7 @@ export async function createSalesReceipt(salesBody, invoiceID) {
   const res = await salesReceipt(salesBody);
   if (!res.ok) throw new Error("Failed to create sales receipt");
   const data = await res.json(); 
+  console.log("Sales created: ", data)
   if(JSON.parse(data).response.SalesReceipt){
     const myres = JSON.parse(data).response.SalesReceipt
     const res2 = await flagAsAdded(myres.DocNumber, myres.Id, invoiceID, "SALES RECEIPT")
@@ -95,6 +100,13 @@ export async function createSalesReceipt(salesBody, invoiceID) {
      return JSON.parse(data).response;
   }
 }
+
+export async function emailSalesReceipt(id, email) {
+  const res = await sendReceipt(id, email);
+  if (!res.ok) throw new Error("Failed to send sales receipt email");
+  return await res.json();
+}
+
 
 export const getQuickbooksItems = async () => {
 	try {

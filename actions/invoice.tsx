@@ -8,11 +8,13 @@ const request = (id) =>
  });
 
 const status = (id, newStatus) => 
-	fetch(`${server}/invoice`, {
+	fetch(`${office}/invoices/status`, {
     	method: "PUT",
     	body: JSON.stringify({id: id, newStatus: newStatus}), 
-    	credentials: "include"
-    
+    	credentials: "include", 
+    	headers:{
+    		"Content-Type": "application/json"
+    	}
  });
 
 const requestLineItems = (id) => 

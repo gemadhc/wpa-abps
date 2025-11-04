@@ -5,13 +5,12 @@ export  const getLine = (lineItems) => {
         const quantity = parseFloat(item.quantity || 0);
         const unitPrice = parseFloat(item.unitPriceDefined || 0);
         const amount = quantity * unitPrice;
-
         return {
           Amount: amount,
           DetailType: 'SalesItemLineDetail',
           Description: item.description || 'Item',
           SalesItemLineDetail: {
-            ItemRef: { value: item.qb_id.toString() },
+            /*ItemRef: { value: item.qb_id.toString() },*/
             Qty: quantity,
             UnitPrice: unitPrice,
             TaxCodeRef: item.taxable ? { value: 'TAX' } : { value: 'NON' },
@@ -22,7 +21,7 @@ export  const getLine = (lineItems) => {
 
 export const cutomerReference = ( customer) =>{
   return(
-    { value: "iddd" }
+    { value: 1165 }
   )
 }
 
@@ -37,7 +36,7 @@ export const cutomerReference = ( customer) =>{
     };
   };
 
-  export const getCustomFields = (invoice) => [
+  export const getCustomFields = (invoice, address, billing) => [
     {
       DefinitionId: '1',
       Name: 'P.O. Number',
