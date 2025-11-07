@@ -11,6 +11,7 @@ function getCurrentLocation(){
 	return pos; 
 	
 }
+
 function convertToWayPoint(address){
 	return {location: `${address.street} ${address.city} ${address.state} ${address.zipcode}`}
 }
