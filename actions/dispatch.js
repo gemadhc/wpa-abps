@@ -21,7 +21,6 @@ export const requestDispatch = async (date) => {
 	    if (!response.ok) {
 	      throw new Error(data.message || "Failed to update stop");
 	    }
-	    console.log(data, data.list)
 	    return data.list;
 	  } catch (err) {
 	    // Always throw error so createAsyncThunk or calling code can catch it

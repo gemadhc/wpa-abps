@@ -23,7 +23,6 @@ export default function StopCard({ stopID, item, reloadList}) {
   const [loading, setLoading] = useState(false)
 
   useEffect(()=>{
-    console.log(myInvoice)
   }, [myInvoice])
 
   const formatTime = (time) => {
@@ -118,7 +117,7 @@ export default function StopCard({ stopID, item, reloadList}) {
                 )}
               </span>
             ) : null}
-            {item.status} • ROUTED
+            {item.status} • {item.isRouted ? <> ROUTED </> : <> NOT ROUTED</>}
           </div>
           <div className="text-base font-semibold text-gray-800">
             {item.location_name}

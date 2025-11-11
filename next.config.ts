@@ -9,7 +9,8 @@ const nextConfig: NextConfig = {
     VISA_METHOD_REF: "3", /* 9 for production and 3 for sandbox*/
     CASH_METHOD_REF: "1", 
     CHECK_METHOD_REF: "2", 
-    GOOGLE_API_KEY: "AIzaSyDDN477JYDDS-g_c3hLBxR3HEnqaGKSfFo"
+    GOOGLE_API_KEY: "AIzaSyDDN477JYDDS-g_c3hLBxR3HEnqaGKSfFo",
+    MAX_WAYPOINTS: 23
   },
   eslint: {
         ignoreDuringBuilds: true,

@@ -3,6 +3,8 @@
 import { useRouter, usePathname } from 'next/navigation';
 import { Home, Layers, LogOut } from 'lucide-react';
 import './globals.css';
+import { SessionProvider } from "../helpers/session";
+import {logout} from "../actions/session"
 
 export default function RootLayout({
   children,
@@ -15,8 +17,11 @@ export default function RootLayout({
   const handleDispatch = () => router.push('/dispatch');
   const handleMore = () => router.push('/more');
   const handleLogout = () => {
-    console.log('Logging out...');
-    router.push('/login');
+    logout().then((data, err) =>{
+      console.log("Data logged out.. ", data)
+      router.push('/login');
+    })
+    
   };
 
   // Helper to check if button is active
@@ -32,7 +37,9 @@ export default function RootLayout({
 
         {/* MAIN CONTENT */}
         <main className="flex-1 mt-12 mb-20 overflow-y-auto bg-gray-50 p-0 ">
-          {children}
+          <SessionProvider>
+            {children}
+          </SessionProvider>
         </main>
 
         {/* FOOTER NAVIGATION */}

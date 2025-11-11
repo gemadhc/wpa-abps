@@ -30,8 +30,10 @@ export default function Assemblies({ list = [], reloadServices, stopID, addressI
 
   const handleRowClick = (assembly) => {
     setSelectedAssembly(assembly);
+    console.log("assembly details: ", assembly)
     requestReport(assembly.testReportID).then((data1) => {
       requestAssembly(assembly.assemblyID).then((data2) => {
+        console.log(`Data1 ${JSON.stringify(data1) } data2 ${ JSON.stringify(data2) }`)
         setReport(data1);
         setDevice(data2);
         setOpenResultsDialog(true);

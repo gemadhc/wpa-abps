@@ -1,12 +1,17 @@
 'use client';
 
-import { useState } from 'react';
+import { createContext, useContext, useState, useEffect } from "react";
+import { login } from "../../actions/session.js"
+import { useSession } from "../../helpers/session";
+import { useRouter } from "next/navigation";
 
 export default function Home() {
   const [formData, setFormData] = useState({
-    email: '',
+    username: '',
     password: '',
   });
+  const { setSession } = useSession();
+  const router = useRouter();
 
   // Empty handler functions
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -16,14 +21,19 @@ export default function Home() {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Login clicked:', formData);
-    // TODO: Add login API call
+    login(formData).then((data, err)=>{
+      setSession({
+        data
+      });
+      
+      localStorage.setItem(
+          "session",
+          JSON.stringify(data)
+      );
+      router.push("/dispatch");
+    })
   };
 
-  const handleForgotPassword = () => {
-    console.log('Forgot password clicked');
-    // TODO: Navigate to password reset
-  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
@@ -48,12 +58,12 @@ export default function Home() {
             </label>
             <input
               type="email"
-              name="email"
-              id="email"
-              value={formData.email}
+              name="username"
+              id="username"
+              value={formData.username}
               onChange={handleChange}
               placeholder="you@example.com"
-              className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none text-black"
               required
             />
           </div>
@@ -73,7 +83,7 @@ export default function Home() {
               value={formData.password}
               onChange={handleChange}
               placeholder="••••••••"
-              className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              className="w-full border border-gray-300 rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none text-black"
               required
             />
           </div>
