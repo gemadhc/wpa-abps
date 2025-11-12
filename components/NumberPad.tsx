@@ -2,16 +2,15 @@
 import { useEffect, useRef } from 'react';
 
 type NumberPadProps = {
-  targetName: string; // the name attribute of the input
-  onInputChange: (name: string, value: string) => void; // update form state
-  fieldValue: string; // current value of the field
+  targetName: string;
+  onInputChange: (name: string, value: string) => void;
+  fieldValue: string;
 };
 
 export default function NumberPad({ targetName, onInputChange, fieldValue }: NumberPadProps) {
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
-    // Keep ref updated
     inputRef.current = document.querySelector(`[name="${targetName}"]`);
   }, [targetName]);
 
@@ -23,10 +22,15 @@ export default function NumberPad({ targetName, onInputChange, fieldValue }: Num
   ];
 
   const handleClick = (btn: string) => {
-    console.log("clicked: ", btn, targetName, fieldValue)
+    // 🔹 Vibrate on tap (mobile only)
+    if (navigator.vibrate) {
+      navigator.vibrate(40); // 40ms vibration
+    }
+
     if (!targetName || !onInputChange) return;
+
     let newValue = String(fieldValue) || '';
-    console.log(newValue, typeof(newValue))
+
     if (btn === 'CL') newValue = '';
     else if (btn === '.') {
       if (!newValue.includes('.')) newValue += '.';
@@ -38,10 +42,9 @@ export default function NumberPad({ targetName, onInputChange, fieldValue }: Num
         newValue += btn;
       }
     }
-    console.log("would be new value: ", newValue)
+
     onInputChange(targetName, newValue);
 
-    // Maintain focus
     setTimeout(() => {
       inputRef.current?.focus();
     }, 0);
@@ -54,7 +57,7 @@ export default function NumberPad({ targetName, onInputChange, fieldValue }: Num
           key={btn}
           type="button"
           onClick={() => handleClick(btn)}
-          className="p-3 text-lg font-semibold rounded border border-sky-700 bg-slate-100 hover:bg-slate-200 transition"
+          className="p-3 text-lg font-semibold rounded border border-sky-700 bg-slate-100 hover:bg-slate-200 transition active:scale-95"
         >
           {btn}
         </button>

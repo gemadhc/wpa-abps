@@ -62,10 +62,19 @@ export default function Home() {
 
       {/* LIST SECTION */}
       <div className="flex-1 max-h-200 overflow-y-scroll p-3 space-y-0 bg-slate-50 pb-500">
-        <ListSorted  
-          stops={list}
-          reloadList={() => handleDateChange(myDate)}
-        />
+        {
+          list.length ?
+            <ListSorted  
+              stops={list}
+              reloadList={() => handleDateChange(myDate)}
+            />
+           
+          :
+            <div className = "p-10 rounded-xl shadow">
+              <h4>No Stops To Show </h4>
+            </div>
+        }
+        
       </div>
     </div>
   )
