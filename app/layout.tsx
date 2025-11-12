@@ -36,14 +36,14 @@ export default function RootLayout({
         </header>
 
         {/* MAIN CONTENT */}
-        <main className="flex-1 mt-12 mb-20 overflow-y-auto bg-gray-50 p-0 ">
+        <main className="flex-1 mt-12 mb-20 overflow-y-auto bg-gray-50 p-0">
           <SessionProvider>
             {children}
           </SessionProvider>
         </main>
 
         {/* FOOTER NAVIGATION */}
-        <footer className="fixed bottom-0 left-0 right-0 z-50 bg-slate-100 border-t border-gray-200 flex justify-around items-center h-16 shadow-md">
+        <footer className="myfooter fixed bottom-0 left-0 right-0 z-50 bg-slate-100 border-t border-gray-200 flex justify-around items-center h-16 shadow-md">
           <button
             onClick={handleDispatch}
             className={`flex flex-col items-center justify-center px-4 py-1 rounded-md transition ${
