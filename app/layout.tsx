@@ -5,6 +5,7 @@ import { Home, Layers, LogOut } from 'lucide-react';
 import './globals.css';
 import { SessionProvider, useSession } from '../helpers/session';
 import { logout } from '../actions/session';
+import OnlineChecker from "../components/OnlineChecker"
 
 function LayoutContent({ children }) {
   const router = useRouter();
@@ -35,8 +36,12 @@ function LayoutContent({ children }) {
   return (
     <>
       {/* HEADER */}
-      <header className="fixed top-0 left-0 right-0 z-50 h-12 bg-slate-100 border-b border-gray-200 flex items-center justify-center shadow-sm font-semibold text-sm sm:text-base text-slate-900">
-        American Backflow & Plumbing Services, Inc.
+      <header className="fixed top-0 left-0 right-0 z-50 h-12 p-1 bg-slate-800 font-bold text-slate-100 mb-15">
+        <div className = "flex flex-row gap-2 justify-evenly">
+          <p><small>American Backflow & Plumbing Services, Inc.</small></p> 
+          <OnlineChecker
+          />
+        </div>
       </header>
 
       {/* MAIN */}
