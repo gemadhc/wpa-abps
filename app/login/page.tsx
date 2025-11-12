@@ -1,39 +1,47 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect } from "react";
-import { login } from "../../actions/session.js"
+import { useState } from "react";
+import { login } from "../../actions/session.js";
 import { useSession } from "../../helpers/session";
 import { useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react"; // ⬅️ nice loading icon
 
 export default function Home() {
   const [formData, setFormData] = useState({
     username: '',
     password: '',
   });
+  const [loading, setLoading] = useState(false); // ✅ loading state
   const { setSession } = useSession();
   const router = useRouter();
 
-  // Empty handler functions
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    login(formData).then((data, err)=>{
-      setSession({
-        data
-      });
-      
-      localStorage.setItem(
-          "session",
-          JSON.stringify(data)
-      );
-      router.push("/dispatch");
-    })
-  };
+    setLoading(true); // show animation
 
+    try {
+      const data = await login(formData);
+      console.log("setting this session: ", data);
+
+      setSession(data);
+      localStorage.setItem("session", JSON.stringify(data));
+
+      // Small delay for smoother UX
+      setTimeout(() => {
+        router.push("/dispatch");
+      }, 500);
+    } catch (err) {
+      console.error("Login error:", err);
+      alert("Invalid login. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
@@ -87,13 +95,25 @@ export default function Home() {
               required
             />
           </div>
-        
+
           {/* Submit Button */}
           <button
             type="submit"
-            className="w-full bg-blue-600 text-white rounded-lg py-2 font-medium hover:bg-blue-700 transition"
+            disabled={loading}
+            className={`w-full flex justify-center items-center gap-2 bg-blue-600 text-white rounded-lg py-2 font-medium transition ${
+              loading
+                ? "opacity-75 cursor-not-allowed"
+                : "hover:bg-blue-700"
+            }`}
           >
-            Sign In
+            {loading ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                Signing in...
+              </>
+            ) : (
+              "Sign In"
+            )}
           </button>
         </form>
 
