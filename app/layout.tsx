@@ -36,7 +36,7 @@ function LayoutContent({ children }) {
   return (
     <>
       {/* HEADER */}
-      <header className="fixed top-0 left-0 right-0 z-50 h-12 p-1 bg-slate-800 font-bold text-slate-100 mb-15">
+      <header className="fixed top-0 left-0 right-0 z-50 h-15 p-1 bg-slate-800 font-bold text-slate-100 mb-15 shadow">
         <div className = "flex flex-row gap-2 justify-evenly">
           <p><small>American Backflow & Plumbing Services, Inc.</small></p> 
           <OnlineChecker
@@ -45,7 +45,7 @@ function LayoutContent({ children }) {
       </header>
 
       {/* MAIN */}
-      <main className="flex-1 mt-12 mb-20 overflow-y-auto bg-gray-50 p-0">
+      <main className="flex-1 mt-15 mb-20 overflow-y-auto bg-gray-50 p-0">
         {children}
       </main>
 
