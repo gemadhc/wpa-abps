@@ -36,14 +36,14 @@ export default function Results({ report, device, closeMe }) {
   return (
     <div>
       {/* Tab Buttons */}
-      <div className="flex flex-wrap gap-2 mb-3 pb-2">
+      <div className="flex flex-wrap gap-0 mb-3 pb-1 border-b border-gray-200 ">
         {["Assembly", "Initial", "Final"].map((tabName) => (
           <button
             key={tabName}
             onClick={() => setActiveTab(tabName)}
-            className={`px-3 py-2 rounded-xl text-sm font-medium transition ${
+            className={`px-3 py-2  text-sm font-medium transition ${
               activeTab === tabName
-                ? "bg-blue-100 text-blue-700"
+                ? "bg-slate-300 text-slate-700"
                 : "bg-gray-100 text-gray-700 hover:bg-gray-200"
             }`}
           >
@@ -92,7 +92,7 @@ export default function Results({ report, device, closeMe }) {
                 });
               });
             }}
-            className="px-4 py-2 text-sm rounded-lg bg-green-600 text-white hover:bg-green-700"
+            className="px-4 py-2 text-sm rounded-lg bg-green-800 text-white hover:bg-green-700"
           >
             Save
           </button>

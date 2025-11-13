@@ -150,16 +150,16 @@ export default function StopCard({ stopID, item, reloadList}) {
           expanded ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'
         } overflow-hidden`}
       >
-        <div className="p-4 bg-white flex flex-col gap-4">
+        <div className="p-4 bg-white border border-gray-300 rounded shadow flex flex-col gap-4 ">
           {/* Tabs */}
-          <div className="flex flex-wrap gap-2 mb-3 pb-2">
+          <div className="flex flex-wrap gap-0 mb-3 pb-2">
             {tabs.map((tab) => (
               <button
                 key={tab.name}
                 onClick={() => setActiveTab(tab.name)}
-                className={`px-3 py-2 rounded-xl text-sm font-medium transition ${
+                className={`px-3 py-2 rounded text-sm font-medium transition ${
                   activeTab === tab.name
-                    ? 'bg-blue-100 text-blue-700'
+                    ? 'bg-slate-300 text-slate-700'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
@@ -169,7 +169,7 @@ export default function StopCard({ stopID, item, reloadList}) {
           </div>
 
           {/* Active Tab Content */}
-          <div className="text-gray-700 text-sm">
+          <div className="text-gray-700 text-sm max-w-100 overflow-hidden">
              {tabs.find((tab) => tab.name === activeTab)?.content}
           </div>
 
@@ -180,7 +180,7 @@ export default function StopCard({ stopID, item, reloadList}) {
             className={`flex items-center justify-center gap-2 w-full px-4 py-3 text-sm rounded-lg transition ${
               completed
                 ? 'bg-green-100 text-green-700 cursor-not-allowed'
-                : 'bg-blue-600 text-white hover:bg-blue-700'
+                : 'bg-green-800 text-white hover:bg-green-900'
             } mt-4`}
           >
             <CheckCircle2 className="w-5 h-5" />

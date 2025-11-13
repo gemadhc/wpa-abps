@@ -169,11 +169,11 @@ export default function Assemblies({ list = [], reloadServices, stopID, addressI
         className="relative z-50"
       >
         <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
-        <div className="fixed inset-0 flex items-center justify-center p-4">
-          <Dialog.Panel className="relative bg-white rounded-2xl p-6 shadow-xl max-w-2xl w-full">
+        <div className="fixed inset-0 flex items-center justify-center p-3">
+          <Dialog.Panel className="relative bg-white rounded-2xl p-8 shadow-xl max-w-2xl w-full max-h-200">
             <button
               onClick={() => setOpenResultsDialog(false)}
-              className="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
+              className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 shadow border rounded-2xl"
             >
               <X className="w-5 h-5" />
             </button>
