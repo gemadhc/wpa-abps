@@ -18,7 +18,7 @@ export default function NumberPad({ targetName, onInputChange, fieldValue }: Num
     '1','2','3',
     '4','5','6',
     '7','8','9',
-    '.', '0', 'CL'
+    '0', '.', 'CL'
   ];
 
   const handleClick = (btn: string) => {
@@ -51,7 +51,7 @@ export default function NumberPad({ targetName, onInputChange, fieldValue }: Num
   };
 
   return (
-    <div className="grid grid-cols-3 gap-1 w-full p-0">
+    <div className="grid grid-cols-3 gap-0 w-full p-0">
       {buttons.map((btn) => (
         <button
           key={btn}

@@ -11,18 +11,16 @@ export default function Results({ report, device, closeMe }) {
   const [updatedDevice, setUpdatedDevice] = useState(device);
   const [hasChanges, setHasChanges] = useState(false);
 
-  // Track changes in report or assembly
+  // Track changes
   useEffect(() => {
-    const reportChanged = JSON.stringify(updates) !== JSON.stringify(report);
-    const deviceChanged = JSON.stringify(updatedDevice) !== JSON.stringify(device);
+    const reportChanged =
+      JSON.stringify(updates) !== JSON.stringify(report);
+    const deviceChanged =
+      JSON.stringify(updatedDevice) !== JSON.stringify(device);
+
     setHasChanges(reportChanged || deviceChanged);
   }, [updates, report, updatedDevice, device]);
 
-  useEffect(() => {
-    console.log("Updated Device: ", updatedDevice);
-  }, [updatedDevice]);
-
-  // Helper: cast numeric 0/1 to boolean
   const castBooleans = (obj) => {
     const result = { ...obj };
     Object.keys(result).forEach((key) => {
@@ -34,14 +32,15 @@ export default function Results({ report, device, closeMe }) {
   };
 
   return (
-    <div>
-      {/* Tab Buttons */}
-      <div className="flex flex-wrap gap-0 mb-3 pb-1 border-b border-gray-200 ">
+    <div className="flex flex-col h-full">
+
+      {/* Tabs */}
+      <div className="flex flex-wrap gap-0 mb-3 pb-1 border-b border-gray-200">
         {["Assembly", "Initial", "Final"].map((tabName) => (
           <button
             key={tabName}
             onClick={() => setActiveTab(tabName)}
-            className={`px-3 py-2  text-sm font-medium transition ${
+            className={`px-3 py-2 text-sm font-medium transition ${
               activeTab === tabName
                 ? "bg-slate-300 text-slate-700"
                 : "bg-gray-100 text-gray-700 hover:bg-gray-200"
@@ -52,8 +51,8 @@ export default function Results({ report, device, closeMe }) {
         ))}
       </div>
 
-      {/* Keep all tabs mounted, hide inactive ones */}
-      <div className="text-gray-700 text-sm max-h-150 overflow-y-scroll p-0 relative">
+      {/* Scrollable content */}
+      <div className="flex-1 overflow-y-auto pr-1">
         <div className={activeTab === "Assembly" ? "block" : "hidden"}>
           <Assembly
             device={device}
@@ -76,26 +75,26 @@ export default function Results({ report, device, closeMe }) {
         </div>
       </div>
 
-      {/* Show Save button only if changes exist */}
+      {/* Sticky Save button */}
       {hasChanges && (
-        <div className="flex justify-end mt-6">
+        <div className="sticky bottom-0 left-0 right-0 bg-white border-t pt-3 pb-4 mt-2">
           <button
             onClick={() => {
               const merged = {
                 ...castBooleans(updates),
               };
-              console.log("This is the id: ", report, updatedDevice)
               merged.id = report.id;
-              merged.assemblyID = updatedDevice.id; 
+              merged.assemblyID = updatedDevice.id;
+
               updateReport(merged).then(() => {
                 updateAssembly(updatedDevice).then(() => {
                   closeMe();
                 });
               });
             }}
-            className="px-4 py-2 text-sm rounded-lg bg-green-800 text-white hover:bg-green-700"
+            className="w-full px-4 py-3 text-sm rounded-lg bg-green-800 text-white hover:bg-green-700"
           >
-            Save
+            Save Changes
           </button>
         </div>
       )}

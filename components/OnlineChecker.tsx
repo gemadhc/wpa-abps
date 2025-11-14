@@ -26,19 +26,19 @@ export default function OnlineChecker() {
 
   return (
     <div
-      className={`flex items-center gap-2 px-3 py-1  text-sm font-medium ${
+      className={`flex items-center gap-2 px-1 py-1  text-sm font-medium ${
         isOnline ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'
       }`}
     >
       {isOnline ? (
         <>
-          <Wifi className="w-4 h-4" />
-          <span>Online</span>
+          <Wifi className="w-3 h-3" />
+          
         </>
       ) : (
         <>
-          <WifiOff className="w-4 h-4" />
-          <span>Offline</span>
+          <WifiOff className="w-3 h-3" />
+      
         </>
       )}
     </div>

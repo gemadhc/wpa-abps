@@ -129,7 +129,7 @@ export default function Assemblies({ list = [], reloadServices, stopID, addressI
           <Dialog.Panel className="relative bg-white rounded-2xl p-6 shadow-xl max-w-sm w-full">
             <button
               onClick={() => setOpenReasonDialog(false)}
-              className="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
+              className="absolute top-3 right-3 text-gray-800 hover:text-gray-600"
             >
               <X className="w-5 h-5" />
             </button>
@@ -163,36 +163,56 @@ export default function Assemblies({ list = [], reloadServices, stopID, addressI
       </Dialog>
 
       {/* Results Dialog */}
-      <Dialog
-        open={openResultsDialog}
-        onClose={() => setOpenResultsDialog(false)}
-        className="relative z-50"
+    <Dialog
+  open={openResultsDialog}
+  onClose={() => setOpenResultsDialog(false)}
+  className="relative z-50"
+>
+  {/* Overlay */}
+  <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
+
+  {/* Center wrapper */}
+  <div className="fixed inset-0 flex items-center justify-center p-2 sm:p-4">
+    <Dialog.Panel
+      className="
+        relative bg-white
+        rounded-xl sm:rounded-2xl 
+        shadow-xl 
+        w-full 
+        max-w-sm sm:max-w-lg md:max-w-2xl 
+        max-h-[90vh] 
+        flex flex-col text-black
+      "
+    >
+      {/* Close button */}
+      <button
+        onClick={() => setOpenResultsDialog(false)}
+        className="absolute top-2 right-2 text-gray-900 hover:text-gray-900 shadow border rounded-2xl p-1"
       >
-        <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
-        <div className="fixed inset-0 flex items-center justify-center p-3">
-          <Dialog.Panel className="relative bg-white rounded-2xl p-8 shadow-xl max-w-2xl w-full max-h-200">
-            <button
-              onClick={() => setOpenResultsDialog(false)}
-              className="absolute top-3 right-3 text-gray-400 hover:text-gray-600 shadow border rounded-2xl"
-            >
-              <X className="w-5 h-5" />
-            </button>
+        <X className="w-6 h-6" />
+      </button>
 
-            <Dialog.Title className="text-lg font-semibold text-gray-800 flex items-center gap-2">
-              <FileText className="w-5 h-5 text-blue-600" />
-              Assembly Results
-            </Dialog.Title>
+      <Dialog.Title className="text-base sm:text-lg font-semibold text-gray-800 flex items-center gap-2 p-4 pb-2">
+        <FileText className="w-5 h-5 text-blue-600" />
+        Assembly Results
+      </Dialog.Title>
 
-            <div className="mt-4 text-center text-gray-700 font-medium">
-              {report && device ? (
-                <Results report={report} device={device} closeMe={() => setOpenResultsDialog(false)} />
-              ) : (
-                <>Loading Values ...</>
-              )}
-            </div>
-          </Dialog.Panel>
-        </div>
-      </Dialog>
+      {/* Scrollable content */}
+      <div className="flex-1 overflow-y-auto px-4 pb-4">
+        {report && device ? (
+          <Results
+            report={report}
+            device={device}
+            closeMe={() => setOpenResultsDialog(false)}
+          />
+        ) : (
+          <>Loading Values ...</>
+        )}
+      </div>
+    </Dialog.Panel>
+  </div>
+</Dialog>
+
     </div>
   );
 }
