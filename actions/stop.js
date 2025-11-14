@@ -1,85 +1,83 @@
+import { getToken as getAuthToken } from './session.js'; // helper to get JWT
 const server = process.env.SERVER;
 
-const request = (id) => 
-	fetch(`${server}/stop?` + new URLSearchParams({ id }), {
-    	method: "GET",
-    	credentials: "include"
-    
-  	});
- const update = (obj) => 
- 	fetch(`${server}/stop`, {
-    	method: "PUT",
-    	body: JSON.stringify( obj ),
-    	credentials: "include"
-    
-  	});
-const services = (id) =>
-	fetch(`${server}/stop/services?` + new URLSearchParams({id}), {
-    	method: "GET",
-    	credentials: "include"
-    
-  	});
-const complete = (id) =>
-	fetch(`${server}/stop/complete`, {
-    	method: "PUT",
-    	body: JSON.stringify({stopID: id}), 
-    	credentials: "include", 
-    	headers: {
-    		"Content-Type": "application/json"
-    	} 
-  	});
-export const requestStop = async (id) =>{
-	try {
-	    const response = await request(id);
-	    const data = await response.json();
-	    if (!response.ok) {
-	      throw new Error(data.message || "Failed to fetch stop");
-	    }
-	    return data;
-	  } catch (err) {
-	    // Always throw error so createAsyncThunk or calling code can catch it
-	    throw err;
-	  }
-}
-export const updateStop = async (obj) =>{
-	try {
-	    const response = await update(obj);
-	    const data = await response.json();
-	    if (!response.ok) {
-	      throw new Error(data.message || "Failed to update stop");
-	    }
-	    return data;
-	  } catch (err) {
-	    // Always throw error so createAsyncThunk or calling code can catch it
-	    throw err;
-	  } 
-}
+/**
+ * Generic fetch wrapper to include JWT
+ */
+const fetchWithJWT = (url, options = {}) => {
+  const token = getAuthToken();
+  const headers = {
+    'Content-Type': 'application/json',
+    ...(options.headers || {}),
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+  return fetch(url, { ...options, headers });
+};
 
-export const requestServices = async (id) =>{
-	try {
-	    const response = await services(id);
-	    const data = await response.json();
-	    if (!response.ok) {
-	      throw new Error(data.message || "Failed to fetch services");
-	    }
-	    return data.list;
-	  } catch (err) {
-	    // Always throw error so createAsyncThunk or calling code can catch it
-	    throw err;
-	  } 
-}
+// ---- API calls ---- //
+const requestFetch = (id) =>
+  fetchWithJWT(`${server}/stop?` + new URLSearchParams({ id }));
 
-export const completeStop = async( id) => {
-	try {
-	    const response = await complete(id);
-	    const data = await response.json();
-	    if (!response.ok) {
-	      throw new Error(data.message || "Failed to fetch services");
-	    }
-	    return data;
-	  } catch (err) {
-	    // Always throw error so createAsyncThunk or calling code can catch it
-	    throw err;
-	  } 
-}
+const updateFetch = (obj) =>
+  fetchWithJWT(`${server}/stop`, {
+    method: 'PUT',
+    body: JSON.stringify(obj),
+  });
 
+const servicesFetch = (id) =>
+  fetchWithJWT(`${server}/stop/services?` + new URLSearchParams({ id }));
+
+const completeFetch = (id) =>
+  fetchWithJWT(`${server}/stop/complete`, {
+    method: 'PUT',
+    body: JSON.stringify({ stopID: id }),
+  });
+
+// ---- Exported async functions ---- //
+export const requestStop = async (id) => {
+  try {
+    const response = await requestFetch(id);
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Failed to fetch stop');
+    return data;
+  } catch (err) {
+    console.error('requestStop error:', err);
+    throw err;
+  }
+};
+
+export const updateStop = async (obj) => {
+  try {
+    const response = await updateFetch(obj);
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Failed to update stop');
+    return data;
+  } catch (err) {
+    console.error('updateStop error:', err);
+    throw err;
+  }
+};
+
+export const requestServices = async (id) => {
+  try {
+    const response = await servicesFetch(id);
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Failed to fetch services');
+    return data.list;
+  } catch (err) {
+    console.error('requestServices error:', err);
+    throw err;
+  }
+};
+
+export const completeStop = async (id) => {
+  try {
+    const response = await completeFetch(id);
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Failed to complete stop');
+    return data;
+  } catch (err) {
+    console.error('completeStop error:', err);
+    throw err;
+  }
+};

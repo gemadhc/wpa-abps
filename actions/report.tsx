@@ -1,357 +1,169 @@
+import { getToken as getAuthToken } from './session.js'; // helper to get JWT
 const server = process.env.SERVER;
 const office = process.env.OFFICE;
 
-const readReport = (id) => 
-	fetch(`${office}/report?` + new URLSearchParams({id}), {
-    	method: "GET",
-    	credentials: "include"
-    
- 	});
+/**
+ * Generic fetch wrapper to include JWT
+ */
+const fetchWithJWT = (url, options = {}) => {
+  const token = getAuthToken();
+  const headers = {
+    'Content-Type': 'application/json',
+    ...(options.headers || {}),
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+  return fetch(url, { ...options, headers });
+};
 
-const update = (obj) => 
-	fetch(`${server}/report`, {
-    	method: "PUT",
-    	body: JSON.stringify({obj}),
-    	credentials: "include", 
-    	headers: {
-    		'Content-Type': 'application/json'
-    	}
-    
- 	});
+// ---- API endpoints ---- //
+const readReportFetch = (id) => fetchWithJWT(`${office}/report?` + new URLSearchParams({ id }));
 
-const approved = (obj, id)=> 
-	fetch(`${server}/report/approved`, {
-    	method: "PUT",
-    	body: JSON.stringify({ id: id, obj: obj}),
-    	credentials: "include"
-    
- 	});
-const assembly = (obj, id) =>
-	fetch(`${server}/report/assembly`, {
-    	method: "PUT",
-    	body: JSON.stringify({ id: id, obj: obj}),
-    	credentials: "include"
-    
- 	});
-const finalDC = (obj, id) => 
-	fetch(`${server}/report/finalDC`, {
-    	method: "PUT",
-    	body: JSON.stringify({ id: id, obj: obj}),
-    	credentials: "include"
-    
- 	});
-const finalRP = (obj, id) =>
-	fetch(`${server}/report/finalRP`, {
-    	method: "PUT",
-    	body: JSON.stringify({ id: id, obj: obj}),
-    	credentials: "include"
-    
- 	});
-const finalSystem = (obj, id) =>
-	fetch(`${server}/report/finalSystem`, {
-    	method: "PUT",
-    	body: JSON.stringify({ id: id, obj: obj}),
-    	credentials: "include"
-    
- 	});
-const finalXVB = (obj, id) =>
-	fetch(`${server}/report/finalXVB`, {
-    	method: "PUT",
-    	body: JSON.stringify({ id: id, obj: obj}),
-    	credentials: "include"
-    
- 	});
-const ag = (obj, id) =>
-	fetch(`${server}/report/ag`, {
-    	method: "PUT",
-    	body: JSON.stringify({ id: id, obj: obj}),
-    	credentials: "include"
-    
- 	});
-const initialDC = (obj, id) => 
-	fetch(`${server}/report/initialDC`, {
-    	method: "PUT",
-    	body: JSON.stringify({ id: id, obj: obj}),
-    	credentials: "include"
-    
- 	});
-const initialRP = (obj, id) =>
-	fetch(`${server}/report/initialRP`, {
-    	method: "PUT",
-    	body: JSON.stringify({ id: id, obj: obj}),
-    	credentials: "include"
-    
- 	});
-const initialXVB = (obj, id) =>
-	fetch(`${server}/report/initialXVB`, {
-    	method: "PUT",
-    	body: JSON.stringify({ id: id, obj: obj}),
-    	credentials: "include"
-    
- 	});
-const parts = (obj, id) =>
-	fetch(`${server}/report/parts`, {
-    	method: "PUT",
-    	body: JSON.stringify({ id: id, obj: obj}),
-    	credentials: "include"
-    
- 	});
-const remarks = (obj, id) =>
-	fetch(`${server}/report/remarks`, {
-    	method: "PUT",
-    	body: JSON.stringify({ id: id, obj: obj}),
-    	credentials: "include"
-    
- 	});
-const system = (obj, id) =>
-	fetch(`${server}/report/system`, {
-    	method: "PUT",
-    	body: JSON.stringify({ id: id, obj: obj}),
-    	credentials: "include"
-    
- 	});
-const removed = (obj, id) => 
-	fetch(`${server}/report/removed`, {
-    	method: "PUT",
-    	body: JSON.stringify({ id: id, obj: obj}),
-    	credentials: "include"
-    
- 	});
-const status = (id, newStatus) => 
-	fetch(`${server}/report/removed`, {
-    	method: "PUT",
-    	body: JSON.stringify({ id: id, newStatus: newStatus}),
-    	credentials: "include"
-    
- 	});
+const updateFetch = (obj) =>
+  fetchWithJWT(`${server}/report`, {
+    method: 'PUT',
+    body: JSON.stringify({ obj }),
+  });
 
-export const requestReport = async ( id ) => {
-	try {
-	    const response = await readReport(id);
-	    const data = await response.json();
-	    if (!response.ok) {
-	      throw new Error(data.message || "Failed to read report");
-	    }
-	    if(data.Report.length ){
-	    	return data.Report[0];
-	    }else{
-	    	return {}
-	    }
-	  } catch (err) {
-	    // Always throw error so createAsyncThunk or calling code can catch it
-	    throw err;
-	  } 
+const approvedFetch = (obj, id) =>
+  fetchWithJWT(`${server}/report/approved`, {
+    method: 'PUT',
+    body: JSON.stringify({ id, obj }),
+  });
 
-}
+const assemblyFetch = (obj, id) =>
+  fetchWithJWT(`${server}/report/assembly`, {
+    method: 'PUT',
+    body: JSON.stringify({ id, obj }),
+  });
 
-export const updateReport = async(obj) =>{
-	try {
-	    const response = await update(obj);
-	    const data = await response.json();
-	    if (!response.ok) {
-	      throw new Error(data.message || "Failed to read report");
-	    }
-	   	return data
-	} catch (err) {
-	    // Always throw error so createAsyncThunk or calling code can catch it
-	    throw err;
-	} 
-}
+const finalDCFetch = (obj, id) =>
+  fetchWithJWT(`${server}/report/finalDC`, {
+    method: 'PUT',
+    body: JSON.stringify({ id, obj }),
+  });
 
-export const updateApproved =  async (obj, id) => {
-	try {
-	    const response = await approved(obj, id);
-	    const data = await response.json();
-	    if (!response.ok) {
-	      throw new Error(data.message || "Failed to update stop");
-	    }
-	    return data;
-	  } catch (err) {
-	    // Always throw error so createAsyncThunk or calling code can catch it
-	    throw err;
-	  } 
-}
-export const updateAssembly =  async (obj, id) => {
-	try {
-	    const response = await assembly(obj, id);
-	    const data = await response.json();
-	    if (!response.ok) {
-	      throw new Error(data.message || "Failed to update stop");
-	    }
-	    return data;
-	  } catch (err) {
-	    // Always throw error so createAsyncThunk or calling code can catch it
-	    throw err;
-	  } 
-}
-export const updateFinalDC = async (obj, id) => {
-	try {
-	    const response = await finalDC(obj, id);
-	    const data = await response.json();
-	    if (!response.ok) {
-	      throw new Error(data.message || "Failed to update stop");
-	    }
-	    return data;
-	  } catch (err) {
-	    // Always throw error so createAsyncThunk or calling code can catch it
-	    throw err;
-	  } 
-}
-export const updateFinalRP = async (obj, id) => {
-	try {
-	    const response = await finalRP(obj, id);
-	    const data = await response.json();
-	    if (!response.ok) {
-	      throw new Error(data.message || "Failed to update stop");
-	    }
-	    return data;
-	  } catch (err) {
-	    // Always throw error so createAsyncThunk or calling code can catch it
-	    throw err;
-	  } 
-}
-export const updateFinalSystem = async (obj, id) => {
-	try {
-	    const response = await finalSystem(obj, id);
-	    const data = await response.json();
-	    if (!response.ok) {
-	      throw new Error(data.message || "Failed to update stop");
-	    }
-	    return data;
-	  } catch (err) {
-	    // Always throw error so createAsyncThunk or calling code can catch it
-	    throw err;
-	  } 
-}
-export const updateFinalXVB = async (obj, id) => {
-	try {
-	    const response = await finalXVB(obj, id);
-	    const data = await response.json();
-	    if (!response.ok) {
-	      throw new Error(data.message || "Failed to update stop");
-	    }
-	    return data;
-	  } catch (err) {
-	    // Always throw error so createAsyncThunk or calling code can catch it
-	    throw err;
-	  } 
-}
-export const updateAG = async (obj, id) => {
-	try {
-	    const response = await ag(obj, id);
-	    const data = await response.json();
-	    if (!response.ok) {
-	      throw new Error(data.message || "Failed to update stop");
-	    }
-	    return data;
-	  } catch (err) {
-	    // Always throw error so createAsyncThunk or calling code can catch it
-	    throw err;
-	  } 
-}
-export const updateInitialDC = async (obj, id) => {
-	try {
-	    const response = await initialDC(obj, id);
-	    const data = await response.json();
-	    if (!response.ok) {
-	      throw new Error(data.message || "Failed to update stop");
-	    }
-	    return data;
-	  } catch (err) {
-	    // Always throw error so createAsyncThunk or calling code can catch it
-	    throw err;
-	  } 
-}
-export const updateInitialRP = async (obj, id) =>{
-	try {
-	    const response = await initialRP(obj, id);
-	    const data = await response.json();
-	    if (!response.ok) {
-	      throw new Error(data.message || "Failed to update stop");
-	    }
-	    return data;
-	  } catch (err) {
-	    // Always throw error so createAsyncThunk or calling code can catch it
-	    throw err;
-	  } 
-}
-export const updateInitialXVB = async (obj, id) => {
-	try {
-	    const response = await initiaXVB(obj, id);
-	    const data = await response.json();
-	    if (!response.ok) {
-	      throw new Error(data.message || "Failed to update stop");
-	    }
-	    return data;
-	  } catch (err) {
-	    // Always throw error so createAsyncThunk or calling code can catch it
-	    throw err;
-	  } 
-}
-export const updateParts = async (obj, id)=>{
-	try {
-	    const response = await parts(obj, id);
-	    const data = await response.json();
-	    if (!response.ok) {
-	      throw new Error(data.message || "Failed to update stop");
-	    }
-	    return data;
-	  } catch (err) {
-	    // Always throw error so createAsyncThunk or calling code can catch it
-	    throw err;
-	  } 
-}
-export const updateRemarks = async (obj, id) =>{
-	try {
-	    const response = await remarks(obj, id);
-	    const data = await response.json();
-	    if (!response.ok) {
-	      throw new Error(data.message || "Failed to update stop");
-	    }
-	    return data;
-	  } catch (err) {
-	    // Always throw error so createAsyncThunk or calling code can catch it
-	    throw err;
-	  } 
-}
-export const updateSystem = async (obj, id) => {
-	try {
-	    const response = await system(obj, id);
-	    const data = await response.json();
-	    if (!response.ok) {
-	      throw new Error(data.message || "Failed to update stop");
-	    }
-	    return data;
-	  } catch (err) {
-	    // Always throw error so createAsyncThunk or calling code can catch it
-	    throw err;
-	  } 
-}
-export const updateRemoved = async (obj, id) =>{
-	try {
-	    const response = await removed(obj, id);
-	    const data = await response.json();
-	    if (!response.ok) {
-	      throw new Error(data.message || "Failed to update stop");
-	    }
-	    return data;
-	  } catch (err) {
-	    // Always throw error so createAsyncThunk or calling code can catch it
-	    throw err;
-	  } 
-}
+const finalRPFetch = (obj, id) =>
+  fetchWithJWT(`${server}/report/finalRP`, {
+    method: 'PUT',
+    body: JSON.stringify({ id, obj }),
+  });
 
+const finalSystemFetch = (obj, id) =>
+  fetchWithJWT(`${server}/report/finalSystem`, {
+    method: 'PUT',
+    body: JSON.stringify({ id, obj }),
+  });
 
-export const updateStatus= async (id, newstatus) =>{
-	try {
-	    const response = await status(id, newstatus);
-	    const data = await response.json();
-	    if (!response.ok) {
-	      throw new Error(data.message || "Failed to update stop");
-	    }
-	    return data;
-	  } catch (err) {
-	    // Always throw error so createAsyncThunk or calling code can catch it
-	    throw err;
-	  } 
-}
+const finalXVBFetch = (obj, id) =>
+  fetchWithJWT(`${server}/report/finalXVB`, {
+    method: 'PUT',
+    body: JSON.stringify({ id, obj }),
+  });
+
+const agFetch = (obj, id) =>
+  fetchWithJWT(`${server}/report/ag`, {
+    method: 'PUT',
+    body: JSON.stringify({ id, obj }),
+  });
+
+const initialDCFetch = (obj, id) =>
+  fetchWithJWT(`${server}/report/initialDC`, {
+    method: 'PUT',
+    body: JSON.stringify({ id, obj }),
+  });
+
+const initialRPFetch = (obj, id) =>
+  fetchWithJWT(`${server}/report/initialRP`, {
+    method: 'PUT',
+    body: JSON.stringify({ id, obj }),
+  });
+
+const initialXVBFetch = (obj, id) =>
+  fetchWithJWT(`${server}/report/initialXVB`, {
+    method: 'PUT',
+    body: JSON.stringify({ id, obj }),
+  });
+
+const partsFetch = (obj, id) =>
+  fetchWithJWT(`${server}/report/parts`, {
+    method: 'PUT',
+    body: JSON.stringify({ id, obj }),
+  });
+
+const remarksFetch = (obj, id) =>
+  fetchWithJWT(`${server}/report/remarks`, {
+    method: 'PUT',
+    body: JSON.stringify({ id, obj }),
+  });
+
+const systemFetch = (obj, id) =>
+  fetchWithJWT(`${server}/report/system`, {
+    method: 'PUT',
+    body: JSON.stringify({ id, obj }),
+  });
+
+const removedFetch = (obj, id) =>
+  fetchWithJWT(`${server}/report/removed`, {
+    method: 'PUT',
+    body: JSON.stringify({ id, obj }),
+  });
+
+const statusFetch = (id, newStatus) =>
+  fetchWithJWT(`${server}/report/removed`, {
+    method: 'PUT',
+    body: JSON.stringify({ id, newStatus }),
+  });
+
+// ---- Exported async functions ---- //
+export const requestReport = async (id) => {
+  try {
+    const res = await readReportFetch(id);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Failed to read report');
+    return data.Report?.length ? data.Report[0] : {};
+  } catch (err) {
+    console.error('requestReport error:', err);
+    throw err;
+  }
+};
+
+export const updateReport = async (obj) => {
+  try {
+    const res = await updateFetch(obj);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Failed to update report');
+    return data;
+  } catch (err) {
+    console.error('updateReport error:', err);
+    throw err;
+  }
+};
+
+// Helper to generate all PUT updaters
+const createUpdater = (fetchFn) => async (obj, id) => {
+  try {
+    const res = await fetchFn(obj, id);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || 'Failed to update report');
+    return data;
+  } catch (err) {
+    console.error('update error:', err);
+    throw err;
+  }
+};
+
+export const updateApproved = createUpdater(approvedFetch);
+export const updateAssembly = createUpdater(assemblyFetch);
+export const updateFinalDC = createUpdater(finalDCFetch);
+export const updateFinalRP = createUpdater(finalRPFetch);
+export const updateFinalSystem = createUpdater(finalSystemFetch);
+export const updateFinalXVB = createUpdater(finalXVBFetch);
+export const updateAG = createUpdater(agFetch);
+export const updateInitialDC = createUpdater(initialDCFetch);
+export const updateInitialRP = createUpdater(initialRPFetch);
+export const updateInitialXVB = createUpdater(initialXVBFetch);
+export const updateParts = createUpdater(partsFetch);
+export const updateRemarks = createUpdater(remarksFetch);
+export const updateSystem = createUpdater(systemFetch);
+export const updateRemoved = createUpdater(removedFetch);
+export const updateStatus = createUpdater(statusFetch);

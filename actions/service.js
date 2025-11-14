@@ -1,53 +1,53 @@
+import { getToken as getAuthToken } from './session.js'; // helper to get JWT
 const server = process.env.SERVER;
 
-const ready = (id) => 
-	fetch(`${server}/service/ready`, {
-    	method: "PUT",
-    	body: JSON.stringify({id: id}) ,
-    	credentials: "include", 
-    	headers: {
-    		"Content-Type": 'application/json'
-    	}
- 	});
+/**
+ * Generic fetch wrapper to include JWT
+ */
+const fetchWithJWT = (url, options = {}) => {
+  const token = getAuthToken();
+  const headers = {
+    'Content-Type': 'application/json',
+    ...(options.headers || {}),
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+  return fetch(url, { ...options, headers });
+};
 
-const not_ready = (id, reason) => 
-	fetch(`${server}/service/not-ready` , {
-    	method: "PUT",
-    	body: JSON.stringify({id: id, reason: reason}) ,
-    	credentials: "include", 
-    	headers: {
-    		"Content-Type": 'application/json'
-    	}
-    
- 	});
+// ---- API calls ---- //
+const readyFetch = (id) =>
+  fetchWithJWT(`${server}/service/ready`, {
+    method: 'PUT',
+    body: JSON.stringify({ id }),
+  });
 
-export const setAsReady = async ( id ) => {
-	try {
-	    const response = await ready(id);
-	    const data = await response.json();
-	    if (!response.ok) {
-	      throw new Error(data.message || "Failed to read report");
-	    }
-	    return data;
-	  } catch (err) {
-	    // Always throw error so createAsyncThunk or calling code can catch it
-	    throw err;
-	  } 
+const notReadyFetch = (id, reason) =>
+  fetchWithJWT(`${server}/service/not-ready`, {
+    method: 'PUT',
+    body: JSON.stringify({ id, reason }),
+  });
 
-}
+// ---- Exported async functions ---- //
+export const setAsReady = async (id) => {
+  try {
+    const response = await readyFetch(id);
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Failed to set service as ready');
+    return data;
+  } catch (err) {
+    console.error('setAsReady error:', err);
+    throw err;
+  }
+};
 
-export const setAsNotReady = async ( id, reason ) => {
-	try {
-	    const response = await not_ready(id, reason);
-	    const data = await response.json();
-	    if (!response.ok) {
-	      throw new Error(data.message || "Failed to read report");
-	    }
-	    return data;
-	  } catch (err) {
-	    // Always throw error so createAsyncThunk or calling code can catch it
-	    throw err;
-	  } 
-
-}
-
+export const setAsNotReady = async (id, reason) => {
+  try {
+    const response = await notReadyFetch(id, reason);
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Failed to set service as not ready');
+    return data;
+  } catch (err) {
+    console.error('setAsNotReady error:', err);
+    throw err;
+  }
+};

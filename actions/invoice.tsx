@@ -1,161 +1,137 @@
+import { getToken as getAuthToken } from './session.js'; // helper to get JWT
 const server = process.env.SERVER;
 const office = process.env.OFFICE;
 
-const request = (id) => 
-	fetch(`${server}/invoice?` + new URLSearchParams({ id }), {
-    	method: "GET",
-    	credentials: "include"
- });
+/**
+ * Generic fetch wrapper to include JWT
+ */
+const fetchWithJWT = (url, options = {}) => {
+  const token = getAuthToken();
+  const headers = {
+    'Content-Type': 'application/json',
+    ...(options.headers || {}),
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+  return fetch(url, { ...options, headers });
+};
 
-const status = (id, newStatus) => 
-	fetch(`${office}/invoices/status`, {
-    	method: "PUT",
-    	body: JSON.stringify({id: id, newStatus: newStatus}), 
-    	credentials: "include", 
-    	headers:{
-    		"Content-Type": "application/json"
-    	}
- });
+// ---- API calls ---- //
 
-const requestLineItems = (id) => 
-	fetch(`${server}/invoice/lineitems?` + new URLSearchParams({id: id}), {
-    	method: "GET",
-    	credentials: "include"
-    
- });
+const requestInvoiceFetch = (id) =>
+  fetchWithJWT(`${server}/invoice?` + new URLSearchParams({ id }));
 
+const requestBillingFetch = (id) =>
+  fetchWithJWT(`${server}/invoice/billing?` + new URLSearchParams({ id }));
 
-const updateLineItem = (id, obj) =>
-	fetch(`${office}/lineitems`, {
-    	method: "PUT",
-    	body: JSON.stringify({ id: id, obj: obj }), 
-    	credentials: "include",
-    	headers:{
-    		"Content-Type": "application/json"
-    	}
- });
-const removeLineItem = (id)  =>
-	fetch(`${office}/lineitems`, {
-    	method: "DELETE",
-    	body: JSON.stringify({ id: id}), 
-    	credentials: "include", 
-    	headers:{
-    		"Content-Type": "application/json"
-    	}
- });
-const createLineItem = (id) => 
-	fetch(`${office}/lineitems`, {
-    	method: "POST",
-    	body: JSON.stringify({ invoiceID: id}), 
-    	credentials: "include", 
-    	headers:{
-    		"Content-Type": "application/json"
-    	}
- });
+const requestLineItemsFetch = (id) =>
+  fetchWithJWT(`${server}/invoice/lineitems?` + new URLSearchParams({ id }));
 
-const billing = (id) => 
-	fetch(`${server}/invoice/billing?` + new URLSearchParams({id}), {
-    	method: "GET",
-    	credentials: "include"
-    
- });
+const updateLineItemFetch = (id, obj) =>
+  fetchWithJWT(`${office}/lineitems`, {
+    method: 'PUT',
+    body: JSON.stringify({ id, obj }),
+  });
+
+const removeLineItemFetch = (id) =>
+  fetchWithJWT(`${office}/lineitems`, {
+    method: 'DELETE',
+    body: JSON.stringify({ id }),
+  });
+
+const createLineItemFetch = (invoiceID) =>
+  fetchWithJWT(`${office}/lineitems`, {
+    method: 'POST',
+    body: JSON.stringify({ invoiceID }),
+  });
+
+const updateStatusFetch = (id, newStatus) =>
+  fetchWithJWT(`${office}/invoices/status`, {
+    method: 'PUT',
+    body: JSON.stringify({ id, newStatus }),
+  });
+
+// ---- Exported async functions ---- //
 
 export const requestBilling = async (id) => {
-	try {
-	    const response = await billing(id);
-	    const data = await response.json();
-	    if (!response.ok) {
-	      throw new Error(data.message || "Failed to update stop");
-	    }
-	    if(data.Billing.length){
-	    	return data.Billing[0];
-	    }else{
-	    	return null
-	    }
-	    
-	  } catch (err) {
-	    // Always throw error so createAsyncThunk or calling code can catch it
-	    throw err;
-	  } 
-}
+  try {
+    const response = await requestBillingFetch(id);
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || "Failed to fetch billing");
+    return data.Billing?.length ? data.Billing[0] : null;
+  } catch (err) {
+    console.error("requestBilling error:", err);
+    throw err;
+  }
+};
+
 export const requestInvoice = async (id) => {
-	try {
-	    const response = await request(id);
-	    const data = await response.json();
-	    if (!response.ok) {
-	      throw new Error(data.message || "Failed to update stop");
-	    }
-	    console.log("data: ", data, data.invoice)
-	    return data.invoice
-	 } catch (err) {
-	    // Always throw error so createAsyncThunk or calling code can catch it
-	    throw err;
-	 } 
-}
-export const requestItems = async( id) => {
-	try {
-	    const response = await requestLineItems(id);
-	    const data = await response.json();
-	    if (!response.ok) {
-	      throw new Error(data.message || "Failed to update stop");
-	    }
-	    return data.list;
-	  } catch (err) {
-	    // Always throw error so createAsyncThunk or calling code can catch it
-	    throw err;
-	  } 
-}
+  try {
+    const response = await requestInvoiceFetch(id);
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || "Failed to fetch invoice");
+    return data.invoice;
+  } catch (err) {
+    console.error("requestInvoice error:", err);
+    throw err;
+  }
+};
+
+export const requestItems = async (id) => {
+  try {
+    const response = await requestLineItemsFetch(id);
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || "Failed to fetch line items");
+    return data.list;
+  } catch (err) {
+    console.error("requestItems error:", err);
+    throw err;
+  }
+};
+
 export const updateItem = async (id, obj) => {
-	try {
-	    const response = await updateLineItem(id, obj);
-	    const data = await response.json();
-	    if (!response.ok) {
-	      throw new Error(data.message || "Failed to update stop");
-	    }
-	    return data;
-	  } catch (err) {
-	    // Always throw error so createAsyncThunk or calling code can catch it
-	    throw err;
-	  } 
-}
+  try {
+    const response = await updateLineItemFetch(id, obj);
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || "Failed to update line item");
+    return data;
+  } catch (err) {
+    console.error("updateItem error:", err);
+    throw err;
+  }
+};
+
 export const removeItem = async (id) => {
-	try {
-	    const response = await removeLineItem(id);
-	    const data = await response.json();
-	    if (!response.ok) {
-	      throw new Error(data.message || "Failed to update stop");
-	    }
-	    return data;
-	  } catch (err) {
-	    // Always throw error so createAsyncThunk or calling code can catch it
-	    throw err;
-	  } 
-}
+  try {
+    const response = await removeLineItemFetch(id);
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || "Failed to remove line item");
+    return data;
+  } catch (err) {
+    console.error("removeItem error:", err);
+    throw err;
+  }
+};
 
-export const createItem = async (id) => {
-	try {
-	    const response = await createLineItem(id);
-	    const data = await response.json();
-	    if (!response.ok) {
-	      throw new Error(data.message || "Failed to update stop");
-	    }
-	    return data;
-	  } catch (err) {
-	    // Always throw error so createAsyncThunk or calling code can catch it
-	    throw err;
-	  } 
-}
+export const createItem = async (invoiceID) => {
+  try {
+    const response = await createLineItemFetch(invoiceID);
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || "Failed to create line item");
+    return data;
+  } catch (err) {
+    console.error("createItem error:", err);
+    throw err;
+  }
+};
+
 export const updateStatus = async (id, newStatus) => {
-	try {
-	    const response = await status(id, newStatus);
-	    const data = await response.json();
-	    if (!response.ok) {
-	      throw new Error(data.message || "Failed to update stop");
-	    }
-	    return data;
-	  } catch (err) {
-	    // Always throw error so createAsyncThunk or calling code can catch it
-	    throw err;
-	  } 
-}
-
+  try {
+    const response = await updateStatusFetch(id, newStatus);
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || "Failed to update invoice status");
+    return data;
+  } catch (err) {
+    console.error("updateStatus error:", err);
+    throw err;
+  }
+};

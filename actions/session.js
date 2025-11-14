@@ -1,130 +1,130 @@
 const server = process.env.SERVER;
 const office = process.env.OFFICE;
 
-const request = (id) => 
-	fetch(`${server}/session/addresses?` + new URLSearchParams({ id }), {
-    	method: "GET",
-    	credentials: "include"
- });
+// Helper to get JWT from localStorage
+export const getToken = () => localStorage.getItem('jwtToken');
 
-const updateDefault  = (newDefault) => 
-	fetch(`${server}/session/addresses` , {
-    	method: "PUT",
-    	credentials: "include", 
-    	body:JSON.stringify({ newDefault: newDefault }), 
-    	headers:{
-    		'Content-Type': "application/json"
-    	}
- });
+// Fetch wrappers with JWT
+const request = (id) =>
+  fetch(`${server}/session/addresses?` + new URLSearchParams({ id }), {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${getToken()}`
+    }
+  });
 
-const create  = (obj) => 
-	fetch(`${server}/session/addresses` , {
-    	method: "POST",
-    	credentials: "include", 
-    	body:JSON.stringify({ obj: obj }), 
-    	headers:{
-    		'Content-Type': "application/json"
-    	}
- });
+const updateDefault = (newDefault) =>
+  fetch(`${server}/session/addresses`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${getToken()}`
+    },
+    body: JSON.stringify({ newDefault })
+  });
 
-const requestLogin = (obj) => (
-	fetch(`${office}/session`, {
-		method: "POST", 
-		body: JSON.stringify(obj), 
-		credentials: 'include', 
-		headers: {
-            "Content-Type" : "application/json"
-        }
-	}) 
-)
+const create = (obj) =>
+  fetch(`${server}/session/addresses`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${getToken()}`
+    },
+    body: JSON.stringify({ obj })
+  });
 
-const requestLogout  = () =>(
-	fetch( `${office}/session`, {
-		method: "DELETE", 
-		credentials: 'include'
-	}) 
-)
-const requestSessionCheck = () => (
+// Login requests from the same endpoint but store JWT
+const requestLogin = (obj) =>
+  fetch(`${office}/session`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(obj)
+  });
 
-	fetch(`${office}/session`, {
-		method: "GET",
-		credentials: "include", 
-		headers: {
-			"Content-Type": "application/json"
-		}
-	})
-)
+// Logout removes JWT from storage
+const requestLogout = () =>
+  fetch(`${office}/session`, { method: "DELETE" });
 
+const requestSessionCheck = () =>
+  fetch(`${office}/session`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${getToken()}`
+    }
+  });
 
-export const requestAddresses = async() =>{
-	try{
-		let response = await request(25); 
-		let data = await response.json()
-		return await data.list
-	}catch(err){
-		return err; 
-	}
-}
+// ---- Exported Actions ---- //
 
-export const changeDefaultAddress = async(newDefault) =>{
-	try{
-		let response = await updateDefault(newDefault); 
-		let data = await response.json()
-		return await data
-	}catch(err){
-		return err; 
-	}
-}
+export const requestAddresses = async () => {
+  try {
+    const response = await request(25);
+    const data = await response.json();
+    return data.list;
+  } catch (err) {
+    return err;
+  }
+};
 
-export const createAddress = async(addrObj) =>{
-	try{
-		let response = await create(addrObj); 
-		let data = await response.json()
-		return await data
-	}catch(err){
-		return err; 
-	}
-}
+export const changeDefaultAddress = async (newDefault) => {
+  try {
+    const response = await updateDefault(newDefault);
+    const data = await response.json();
+    return data;
+  } catch (err) {
+    return err;
+  }
+};
 
-export const checkSession = () => {
-	return new Promise(async (resolve, reject) => {
-		const response = await requestSessionCheck() ;
-		const data = await response.json();
-		if (response.ok) {
-			if (JSON.parse(data).active) {
-				resolve(true)
-			} else {
-				resolve(false)
-			}
-		}
-	})
-}
+export const createAddress = async (addrObj) => {
+  try {
+    const response = await create(addrObj);
+    const data = await response.json();
+    return data;
+  } catch (err) {
+    return err;
+  }
+};
 
-export const login = (credentials) => {
-	return new Promise( async (resolve, reject)=>{
-		console.log("Gotta log this one in: ", credentials, server); 
-		const response = await requestLogin(credentials)
-		const data = await response.json(); 
-		if(data.success){
-			resolve(data.user); 
-		}else{
-			console.log("Login failed..."); 
-			resolve(false)
-		}	
-	})
-	
-}
+export const checkSession = async () => {
+  try {
+    const response = await requestSessionCheck();
+    const data = await response.json();
+    return data.active || false;
+  } catch (err) {
+    return false;
+  }
+};
 
-export const logout = async() => {
-	return new Promise( async(resolve, reject) =>{
-		const response = await requestLogout() ; 
-		const data = await response.json(); 
-		localStorage.removeItem('session');
-		if(response.ok){
-			resolve()
-		}else{
-			console.log("Logout failed..."); 
-		}
-	})
-}
+export const login = async (credentials) => {
+  try {
+    const response = await requestLogin(credentials);
+    const data = await response.json();
 
+    if (data.success && data.token) {
+      // Store JWT in localStorage
+      localStorage.setItem('jwtToken', data.token);
+      localStorage.setItem('user', JSON.stringify(data.user));
+      return data.user;
+    } else {
+      console.log("Login failed...");
+      return false;
+    }
+  } catch (err) {
+    console.error("Login error:", err);
+    return false;
+  }
+};
+
+export const logout = async () => {
+  try {
+    await requestLogout();
+  } catch (err) {
+    console.warn("Logout request failed:", err);
+  } finally {
+    // Remove JWT and user info from storage
+    localStorage.removeItem('jwtToken');
+    localStorage.removeItem('user');
+  }
+};

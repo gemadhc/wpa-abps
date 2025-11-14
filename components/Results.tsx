@@ -82,12 +82,13 @@ export default function Results({ report, device, closeMe }) {
           <button
             onClick={() => {
               const merged = {
-                ...castBooleans(updates)
+                ...castBooleans(updates),
               };
-              console.log("This is the id: ", report)
+              console.log("This is the id: ", report, updatedDevice)
               merged.id = report.id;
+              merged.assemblyID = updatedDevice.id; 
               updateReport(merged).then(() => {
-                updateAssembly(merged).then(() => {
+                updateAssembly(updatedDevice).then(() => {
                   closeMe();
                 });
               });
