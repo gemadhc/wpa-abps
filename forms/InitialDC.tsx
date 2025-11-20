@@ -1,49 +1,27 @@
 'use client';
-import FormLayout from "../layouts/FormLayout";
-import { useState, useEffect } from "react";
+import { useReport } from "../contexts/ReportContext";
+import InputWithLabel from "../components/InputWithLabel";
 
-export default function InitialDC({ report, onTargetChange, onReportChange}) {
-  // Define fields, linking number pad fields
-  const fields_1 = [
-    { name: 'RPA_typeII', label: 'Type II', type: "checkbox", full: true },
-    { name: 'RPA1_tight', label: 'Tight', type: "checkbox" },
-    { name: 'RPA1_leaked', label: 'Leaked', type: "checkbox" },
-    { 
-      name: 'RPA1_psid', 
-      label: 'PSID', 
-      type: "text", 
-      noKeyboard: true, 
-      getTargetName: (name: string) => onTargetChange && onTargetChange(name)
-    }
-  ];
-
-  const fields_2 = [
-    { name: 'RPA2_tight', label: 'Tight', type: "checkbox" },
-    { name: 'RPA2_leaked', label: 'Leaked', type: "checkbox" },
-    { 
-      name: 'RPA2_psid', 
-      label: 'PSID', 
-      type: "text", 
-      noKeyboard: true, 
-      getTargetName: (name: string) => onTargetChange && onTargetChange(name)
-    }
-  ];
+export default function InitialDC() {
 
   return (
     <div>
-      <FormLayout
-        fields={fields_1}
-        title="Check #1"
-        hasTitle={true}
-        initialValues={report}
-        onUpdate = {(updated)=>onReportChange(updated)}
+      <h3>Check #1</h3>
+      <InputWithLabel
+        labelName="RPA1_psid"
+        labelGreater="Tight"
+        labelLess="Leaked"
+        breakpoint={1.0}
+        dependents={[{ greaterThan: "RPA1_tight", lessThan: "RPA1_leaked" }]}
       />
-      <br />
-      <FormLayout
-        fields={fields_2}
-        title="Check #2"
-        hasTitle={true}
-        initialValues={report}
+
+      <h3>Check #2</h3>
+      <InputWithLabel
+        labelName="RPA2_psid"
+        labelGreater="Tight"
+        labelLess="Leaked"
+        breakpoint={1.0}
+        dependents={[{ greaterThan: "RPA2_tight", lessThan: "RPA2_leaked" }]}
       />
     </div>
   );

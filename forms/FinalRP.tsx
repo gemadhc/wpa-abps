@@ -21,16 +21,14 @@ export default function FinalRP({report, onTargetChange, onReportChange}){
 				fields = {fields}
 				title="Relief Valve"
 				hasTitle = {true}
-				initialValues = {report}
-				onUpdate = {(updated)=>onReportChange(updated)}
+				totalRows = {1}
 			/>
 			<br/>
 			<FormLayout 
 				fields = {fields_2}
 				title="Check #2"
 				hasTitle = {true}
-				initialValues = {report}
-				onUpdate = {(updated)=>onReportChange(updated)}
+				totalRows = {1}	
 			/>
 		</div>
 	)

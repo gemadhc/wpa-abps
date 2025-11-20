@@ -1,16 +1,22 @@
 'use client';
+
 import { useEffect, useRef } from 'react';
+import { useNumberPad } from "../contexts/NumberPadContext";
 
-type NumberPadProps = {
-  targetName: string;
-  onInputChange: (name: string, value: string) => void;
-  fieldValue: string;
-};
+export default function NumberPad() {
+  const {
+    targetName,
+    fieldValue,
+    updateValue,
+    // closePad,   // no longer needed if always visible
+    isOpen,        // no longer used
+  } = useNumberPad();
 
-export default function NumberPad({ targetName, onInputChange, fieldValue }: NumberPadProps) {
   const inputRef = useRef<HTMLInputElement | null>(null);
 
+  // Bind number pad to target input whenever targetName updates
   useEffect(() => {
+    if (!targetName) return;
     inputRef.current = document.querySelector(`[name="${targetName}"]`);
   }, [targetName]);
 
@@ -22,17 +28,15 @@ export default function NumberPad({ targetName, onInputChange, fieldValue }: Num
   ];
 
   const handleClick = (btn: string) => {
-    // 🔹 Vibrate on tap (mobile only)
-    if (navigator.vibrate) {
-      navigator.vibrate(40); // 40ms vibration
-    }
+    if (navigator.vibrate) navigator.vibrate(40);
+    console.log("handling click: ", btn, targetName)
+    if (!targetName) return;
 
-    if (!targetName || !onInputChange) return;
+    let newValue = String(fieldValue || '');
 
-    let newValue = String(fieldValue) || '';
-
-    if (btn === 'CL') newValue = '';
-    else if (btn === '.') {
+    if (btn === 'CL') {
+      newValue = '';
+    } else if (btn === '.') {
       if (!newValue.includes('.')) newValue += '.';
     } else {
       if (newValue.includes('.')) {
@@ -42,26 +46,32 @@ export default function NumberPad({ targetName, onInputChange, fieldValue }: Num
         newValue += btn;
       }
     }
+    console.log("This is the new value: ", newValue)
+    updateValue(newValue);
 
-    onInputChange(targetName, newValue);
-
-    setTimeout(() => {
+    // Keep focus on the field
+    /*setTimeout(() => {
       inputRef.current?.focus();
-    }, 0);
+    }
+    , 0);*/
   };
 
   return (
-    <div className="grid grid-cols-3 gap-0 w-full p-0">
-      {buttons.map((btn) => (
-        <button
-          key={btn}
-          type="button"
-          onClick={() => handleClick(btn)}
-          className="p-3 text-lg font-semibold rounded border border-sky-700 bg-slate-100 hover:bg-slate-200 transition active:scale-95"
-        >
-          {btn}
-        </button>
-      ))}
+    <div >
+      <div className="grid grid-cols-3 gap-1 w-full">
+
+        {buttons.map((btn) => (
+          <button
+            key={btn}
+            type="button"
+            onClick={() => handleClick(btn)}
+            className="p-2 text-xl font-semibold rounded border border-sky-700 bg-slate-100 hover:bg-slate-200 transition active:scale-95"
+          >
+            {btn}
+          </button>
+        ))}
+
+      </div>
     </div>
   );
 }

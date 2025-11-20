@@ -1,6 +1,6 @@
 import FormLayout from "../layouts/FormLayout"
 
-export default function System({report, onTargetChange, onReportChange}){
+export default function System(){
 	const fields = [ 
 		{ name: 'initialTest_pass', label: 'Pass', type:"checkbox", full: false}, 
 		{ name: 'initialTest_fail', label: 'Fail', type:"checkbox", full: false },
@@ -16,8 +16,6 @@ export default function System({report, onTargetChange, onReportChange}){
 			fields = {fields}
 			title = "System"
 			hasTitle = {true}
-			initialValues = { report }
-			onUpdate = {(updated)=>onReportChange(updated)}
 		/>
 	)
 }

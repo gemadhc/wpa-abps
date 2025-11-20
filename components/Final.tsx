@@ -4,93 +4,62 @@ import FinalSystem from "../forms/FinalSystem"
 import FinalDC from "../forms/FinalDC"
 import FinalRP from "../forms/FinalRP"
 import FinalXVB from "../forms/FinalXVB"
+import FinalAG from "../forms/FinalAG"
 import NumberPad from "./NumberPad"
 import { useState, useEffect } from 'react';
+import { ReportProvider, useReport } from "../contexts/ReportContext";
 
-export default function Final({report, device, onReportChange}){
-	const [targetField, setTargetField] = useState<string | null>(null);
-  	const [currentValue, setCurrentValue] = useState('')
-  	const [fieldValues, setFieldValues] = useState(null)
-
-  	const handleFieldChange = (name, newval)=>{
-	    console.log("Event: ", name, newval)
-	    report[name] = newval; 
-	    let newFields = {...report}
-	    setFieldValues(newFields)
-	  }
-
-	useEffect(()=>{
-	    if(report){
-	      setFieldValues(report)
-	    }
-	}, [report])
+export default function Final(){
+	const {formData} = useReport()
+    // Render appropriate device form (device type exists in merged formData)
+ 	const deviceType = formData?.type;
 
 	const renderDeviceForm = () => {
-	    switch (device.type) {
+	    switch (deviceType) {
 	      case "DC":
 	      case "DCDA":
 	      case "DCDAII":
 	        return (
-	        	<FinalDC 
-	        		report={fieldValues} 
-	        		onTargetChange={(name) => setTargetField(name)} // called on focus of a number pad field
-            		onReportChange = { (updated) => onReportChange(updated) }
-	        />);
+	        	<FinalDC />);
 	      case "RP": 
 	      case "RPDA":
 	      case "RPDAII":
 	      	return ( 
-	      			<FinalRP 
-	      				report ={fieldValues}
-	      				onTargetChange={(name) => setTargetField(name)} // called on focus of a number pad field
-            			onReportChange = { (updated) => onReportChange(updated) }
-	      			/> 
+	      			<FinalRP /> 
 	      			)
 	      case "PVB":
 	      case "SVB":
 	      case "AVB":
 	      	return ( 
-	      			<FinalXVB 
-	      				report = {fieldValues}
-	      				onTargetChange={(name) => setTargetField(name)} // called on focus of a number pad field
-            			onReportChange = { (updated) => onReportChange(updated) }
-	      			/>)
+	      			<FinalXVB />)
 	      case "AG":
-	      	return ( <FinalAG
-	      				report = {fieldValues} 
-	      				onTargetChange={(name) => setTargetField(name)} // called on focus of a number pad field
-            			onReportChange = { (updated) => onReportChange(updated) }
-	      			/> )
+	      	return ( <FinalAG /> )
 	      default:
 	        return <>No device type</>;
 	    }
 	  };
 	return(
 		<div className =" grid grid-cols-10 gap-8 pb-50">
-			<div className = "col-span-10">
-				<Parts  
-					report = {fieldValues} 
-					onTargetChange={(name) => setTargetField(name)} // called on focus of a number pad field
-            		onReportChange = { (updated) => onReportChange(updated) }
-				/>
-			</div>
-			<div className = "col-span-5">
-				{renderDeviceForm()}
-			</div>
-			<div className = "col-span-5">
-				<NumberPad 
-					targetName={targetField}
-            		fieldValue={report[targetField] || ""}
-            		onInputChange = { handleFieldChange }
-				/>
-			</div>
-			<div className = "col-span-10">
-				<FinalSystem  
-					report = {fieldValues}
-					onTargetChange={(name) => setTargetField(name)} // called on focus of a number pad field
-            		onReportChange = { (updated) => onReportChange(updated) }
-				/>
-			</div>
+			{
+				deviceType == "AG" ? 
+					<div className = "h-200 col-span-10 p-5"><i> Nothing to show here</i> </div>
+				: 
+				<>
+					<div className = "col-span-10">
+						<Parts  />
+					</div>
+					<div className = "col-span-5">
+						{renderDeviceForm()}
+					</div>
+					<div className = "col-span-5">
+						<NumberPad />
+					</div>
+					<div className = "col-span-10">
+						<FinalSystem  />
+					</div>
+				</>
+			}
+			
 		</div>
 	)
 }

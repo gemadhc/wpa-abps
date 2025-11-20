@@ -1,6 +1,6 @@
 import FormLayout from "../layouts/FormLayout"
 
-export default function Parts( {report, onTargetChange, onReportChange}){
+export default function Parts(){
 	const fields = [ 
 		{ name: 'disc', label: 'Disc',  type:"checkbox" },
 		{ name: 'o_ring', label: 'O-Ring',  type:"checkbox" },
@@ -28,16 +28,12 @@ export default function Parts( {report, onTargetChange, onReportChange}){
 				fields = {fields_1}
 				title = "Services"
 				hasTitle = {true}
-				initialValues = {report}
-				onUpdate = {(updated)=>onReportChange(updated)}
 			/>
 			<br/>
 			<FormLayout 
 				fields = {fields}
 				title = "Parts"
 				hasTitle = {true}
-				initialValues = {report}
-				onUpdate = {(updated)=>onReportChange(updated)}
 			/>
 		</div>
 	)

@@ -31,7 +31,7 @@ const approvedFetch = (obj, id) =>
   });
 
 const assemblyFetch = (obj, id) =>
-  fetchWithJWT(`${server}/report/assembly`, {
+  fetchWithJWT(`${server}/assembly`, {
     method: 'PUT',
     body: JSON.stringify({ id, obj }),
   });
