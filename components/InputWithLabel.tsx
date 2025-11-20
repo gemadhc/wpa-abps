@@ -95,7 +95,7 @@ export default function InputWithLabel({
           id={labelName}
           name={labelName}
           value={val}
-          readOnly={noKeyboard}
+          readOnly={true}
           inputMode={noKeyboard ? "none" : "decimal"}
           placeholder=" "
           onFocus={handleFocus}
