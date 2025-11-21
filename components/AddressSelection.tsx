@@ -67,11 +67,13 @@ export default function AddressSelection({addresses = [], reload}) {
         <div className="fixed inset-0 bg-black/40" aria-hidden="true" />
 
         {/* Dialog panel */}
+
         <div className="fixed inset-0 flex items-center justify-center p-4 pt-50 overflow-y-scroll">
           <Dialog.Panel className="bg-white rounded-xl shadow-lg max-w-sm w-full p-4">
             {/* Header */}
             <div className="flex justify-between items-center mb-3 border-b pb-2">
               <Dialog.Title className="text-base font-semibold text-gray-800">
+
                 Select Address
               </Dialog.Title>
               <button
@@ -81,7 +83,7 @@ export default function AddressSelection({addresses = [], reload}) {
                 <X className="w-5 h-5" />
               </button>
             </div>
-
+            <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow border border-gray-200">
             {/* Address List */}
             <ul className="divide-y divide-gray-200">
               { addresses.map((address) => (
@@ -96,7 +98,10 @@ export default function AddressSelection({addresses = [], reload}) {
                 </li>
               ))}
             </ul>
+
             <br/> <br/>
+
+            </div>
             <NewAddress 
               handleNew = {handleNew}
             />
