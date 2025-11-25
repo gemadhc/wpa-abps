@@ -46,7 +46,9 @@ export default function StopCard({ stopID, item, reloadList}) {
 
   const tabs = [
     { name: 'Details', content: 
-      <Details item={item} /> },
+      <Details 
+        item={item} 
+      /> },
     { name: 'Assemblies', content: 
       <Assemblies 
         list={services}  
@@ -125,7 +127,11 @@ export default function StopCard({ stopID, item, reloadList}) {
           <div className="text-sm text-gray-500">
             {item.street}, {item.city}, {item.state} {item.zipcode}
           </div>
-          <div className="text-sm text-gray-600 mt-2 italic">{item.comment}</div>
+          <div className="text-sm text-gray-600 mt-2 italic">
+            {(item.comment || "").length > 90
+              ? `${item.comment.slice(0, 90)}…`
+            : item.comment}
+          </div>
           <div className="text-xs text-gray-400 mt-1">
             Scheduled by:{' '}
             <span className="font-medium text-gray-700">{item.tester_name}</span>
@@ -150,7 +156,7 @@ export default function StopCard({ stopID, item, reloadList}) {
           expanded ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'
         } overflow-hidden`}
       >
-        <div className="p-4 bg-white border border-gray-300 rounded shadow flex flex-col gap-4 ">
+        <div className="p-4 bg-white border border-gray-300 rounded shadow flex flex-col gap-4">
           {/* Tabs */}
           <div className="flex flex-wrap gap-0 mb-3 pb-2">
             {tabs.map((tab) => (
@@ -169,7 +175,7 @@ export default function StopCard({ stopID, item, reloadList}) {
           </div>
 
           {/* Active Tab Content */}
-          <div className="text-gray-700 text-sm max-w-100 overflow-hidden">
+          <div className="text-gray-700 text-sm max-w-full  max-h-100 overflow-scroll pb-10">
              {tabs.find((tab) => tab.name === activeTab)?.content}
           </div>
 
@@ -177,7 +183,7 @@ export default function StopCard({ stopID, item, reloadList}) {
           <button
             onClick={handleCompleteStop}
             disabled={completed}
-            className={`flex items-center justify-center gap-2 w-full px-4 py-3 text-sm rounded-lg transition ${
+            className={`sticky bottom-0 flex items-center justify-center gap-2 w-full px-4 py-3 text-sm rounded-lg transition ${
               completed
                 ? 'bg-green-100 text-green-700 cursor-not-allowed'
                 : 'bg-green-800 text-white hover:bg-green-900'

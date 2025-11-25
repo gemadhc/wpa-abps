@@ -21,13 +21,13 @@ export default function PaymentApp({ amount, invoiceID, lineItems, billing, addr
   const [paid, setPaid] = useState(false);
 
   const [cardData, setCardData] = useState({
-    cardName: 'emulate=10201',
-    cardNumber: '5111005111051128',
-    expiryMonth: '10',
-    expiryYear: '2030',
-    cvv: '134',
-    zip: '97011',
-    email: 'gemadhc@gmail.com',
+    cardName: '',
+    cardNumber: '',
+    expiryMonth: '',
+    expiryYear: '',
+    cvv: '',
+    zip: '',
+    email: '',
   });
 
   const [cashAmount, setCashAmount] = useState(amount);

@@ -20,7 +20,11 @@ export default function Details({ stopDetails, item }) {
   const phoneLink = `tel:${phone.replace(/[^0-9]/g, '')}`;
 
   return (
-    <div className="grid grid-cols-2 gap-y-3 gap-x-2 text-sm text-gray-700 p-3 bg-white rounded-2xl shadow-sm">
+    <div className="grid grid-cols-2 gap-y-5 gap-x-2 text-sm text-gray-700 p-5 bg-white rounded-2xl">
+      <div className="col-span-2 p-0 font-bold">
+        {item.comment}
+      </div>
+
       {/* Name */}
       <div className="flex items-center gap-2">
         <FileText className="w-4 h-4 text-blue-500" />

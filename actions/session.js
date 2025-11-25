@@ -106,10 +106,10 @@ export const login = async (credentials) => {
       // Store JWT in localStorage
       localStorage.setItem('jwtToken', data.token);
       localStorage.setItem('user', JSON.stringify(data.user));
-      return data.user;
+      return data
     } else {
       console.log("Login failed...");
-      return false;
+      return data;
     }
   } catch (err) {
     console.error("Login error:", err);

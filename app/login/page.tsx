@@ -4,40 +4,47 @@ import { useState } from "react";
 import { login } from "../../actions/session.js";
 import { useSession } from "../../helpers/session";
 import { useRouter } from "next/navigation";
-import { Loader2 } from "lucide-react"; // ⬅️ nice loading icon
+import { Loader2 } from "lucide-react";
 
 export default function Home() {
-  const [formData, setFormData] = useState({
-    username: '',
-    password: '',
-  });
-  const [loading, setLoading] = useState(false); // ✅ loading state
+  const [formData, setFormData] = useState({ username: '', password: '' });
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const { setSession } = useSession();
   const router = useRouter();
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData(prev => ({ ...prev, [name]: value }));
+    setErrorMessage(""); // reset error on typing
   };
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    setLoading(true); // show animation
+    setLoading(true);
+    setErrorMessage("");
 
     try {
       const data = await login(formData);
-      console.log("setting this session: ", data);
+      console.log("API response:", data);
 
+      // If the response is a string, treat it as an error message
+      if (typeof data === "string") {
+        setErrorMessage(data);
+        return;
+      }
+
+      // Otherwise, assume successful session object
       setSession(data);
       localStorage.setItem("session", JSON.stringify(data));
 
-      // Small delay for smoother UX
       setTimeout(() => {
-        router.push("/dispatch");
+        router.push("/reset");
       }, 500);
+
     } catch (err) {
       console.error("Login error:", err);
-      alert("Invalid login. Please try again.");
+      setErrorMessage("An unexpected error occurred. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -46,7 +53,6 @@ export default function Home() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <div className="w-full max-w-sm bg-white shadow-md rounded-xl p-6 border border-gray-200">
-        {/* Title */}
         <h1 className="text-center text-xl font-semibold text-gray-800 mb-4">
           Welcome Back
         </h1>
@@ -54,14 +60,9 @@ export default function Home() {
           Please sign in to continue
         </p>
 
-        {/* Login Form */}
         <form onSubmit={handleLogin} className="space-y-4">
-          {/* Email */}
           <div>
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
               Email
             </label>
             <input
@@ -76,12 +77,8 @@ export default function Home() {
             />
           </div>
 
-          {/* Password */}
           <div>
-            <label
-              htmlFor="password"
-              className="block text-sm font-medium text-gray-700 mb-1"
-            >
+            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
               Password
             </label>
             <input
@@ -96,14 +93,15 @@ export default function Home() {
             />
           </div>
 
-          {/* Submit Button */}
+          {errorMessage && (
+            <p className="text-red-600 text-sm">{errorMessage}</p>
+          )}
+
           <button
             type="submit"
             disabled={loading}
             className={`w-full flex justify-center items-center gap-2 bg-blue-600 text-white rounded-lg py-2 font-medium transition ${
-              loading
-                ? "opacity-75 cursor-not-allowed"
-                : "hover:bg-blue-700"
+              loading ? "opacity-75 cursor-not-allowed" : "hover:bg-blue-700"
             }`}
           >
             {loading ? (
@@ -117,11 +115,10 @@ export default function Home() {
           </button>
         </form>
 
-        {/* Footer */}
         <p className="text-center text-xs text-gray-500 mt-6">
           © {new Date().getFullYear()} American Backflow & Plumbing Services, Inc.
         </p>
       </div>
     </div>
-  );
+  ); 
 }
