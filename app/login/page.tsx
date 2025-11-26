@@ -39,7 +39,7 @@ export default function Home() {
       localStorage.setItem("session", JSON.stringify(data));
 
       setTimeout(() => {
-        router.push("/reset");
+        router.push("/dispatch");
       }, 500);
 
     } catch (err) {

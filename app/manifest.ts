@@ -5,7 +5,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: 'Next.js PWA',
     short_name: 'NextPWA',
     description: 'A Progressive Web App built with Next.js',
-    start_url: '/login',
+    start_url: '/dispatch',
     display: 'standalone',
     background_color: '#ffffff',
     theme_color: '#000000',
