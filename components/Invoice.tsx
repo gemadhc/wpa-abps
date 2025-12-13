@@ -13,20 +13,31 @@ import {
 } from 'lucide-react';
 import LineItems from './LineItems';
 import PaymentApp from './PaymentApp';
-import {updateStatus} from "../actions/invoice"
+import {updateStatus, requestQuickbooksID} from "../actions/invoice"
 
 
 export default function Invoice({ items = [], billing, invoice, reload, address}) {
   const [isVoided, setIsVoided] = useState(false);
   const [openPaymentDialog, setOpenPaymentDialog] = useState(false);
   const total = items.reduce( (sum, itm) => sum + itm.quantity * itm.unitPriceDefined, 0 )
-
+  const [mycustomer, setMyCustomer] = useState(null)
   useEffect(()=>{
     console.log("Invoice: ", invoice)
     if(invoice){
       setIsVoided( invoice.status == "VOID" || invoice.status == "VOIDED" )
     }else{
       setIsVoided(false)
+    }
+  }, [invoice])
+
+  useEffect(()=>{
+    if(invoice.customerID){
+     requestQuickbooksID(invoice.customerID).then((data, err) => {
+       console.log("Thisis the QQQQ: ", data)
+       if(data.Customer[0].quickbooksID){
+        setMyCustomer(data.Customer[0].quickbooksID)
+       }
+     })
     }
   }, [invoice])
 
@@ -87,19 +98,25 @@ export default function Invoice({ items = [], billing, invoice, reload, address}
             <Menu.Items className="absolute right-0 mt-2 w-44 origin-top-right bg-white border border-gray-100 divide-y divide-gray-100 rounded-lg shadow-lg focus:outline-none z-50">
               <div className="py-1">
                 {/* Take Payment */}
-                <Menu.Item>
-                  {({ active }) => (
-                    <button
-                      onClick={handleOpenPayment}
-                      className={`${
-                        active ? 'bg-gray-50 text-green-600' : 'text-gray-700'
-                      } flex items-center w-full px-3 py-2 text-sm gap-2`}
-                    >
-                      <DollarSign className="w-4 h-4" />
-                      Take Payment
-                    </button>
-                  )}
-                </Menu.Item>
+                {
+                  mycustomer ? 
+                     <Menu.Item>
+                      {({ active }) => (
+                        <button
+                          onClick={handleOpenPayment}
+                          className={`${
+                            active ? 'bg-gray-50 text-green-600' : 'text-gray-700'
+                          } flex items-center w-full px-3 py-2 text-sm gap-2`}
+                        >
+                          <DollarSign className="w-4 h-4" />
+                          Take Payment
+                        </button>
+                      )}
+                    </Menu.Item>
+                  : 
+                    <> </>
+                }
+               
 
                 {/* Void / Unvoid */}
                 <Menu.Item>
@@ -192,6 +209,8 @@ export default function Invoice({ items = [], billing, invoice, reload, address}
               billing = {billing} 
               address = {address}
               invoice = {invoice}
+              customer = {mycustomer}
+              reload = { ()=> reload() }
               closeMe = { ()=> handleClosePayment() }
             />
             

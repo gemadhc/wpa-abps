@@ -19,9 +19,9 @@ export  const getLine = (lineItems) => {
       });
   };
 
-export const cutomerReference = ( customer) =>{
+export const customerReference = ( customer) =>{
   return(
-    { value: 1165 }
+    { value: customer}
   )
 }
 

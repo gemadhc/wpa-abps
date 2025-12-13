@@ -1,22 +1,33 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import {updateStatus, requestQuickbooksID} from "../actions/invoice"
 import {
   createToken,
   createCharge,
   createSalesReceipt,
   emailSalesReceipt
-} from "../actions/quickbooks.js"
+} from "../actions/quickbooks.js";
 import {
   getLine,
   formatAddress,
   getCustomFields,
-  cutomerReference,
+  customerReference,
   getTxnDate
-} from "../helpers/quickbooks"
+} from "../helpers/quickbooks";
 
+export default function PaymentApp({
+  amount,
+  invoiceID,
+  lineItems,
+  billing,
+  address,
+  invoice,
+  customer,
+  reload, 
+  closeMe
+}) {
 
-export default function PaymentApp({ amount, invoiceID, lineItems, billing, address, invoice, customer, closeMe }) {
   const [paymentType, setPaymentType] = useState('CARD');
   const [paid, setPaid] = useState(false);
 
@@ -34,78 +45,83 @@ export default function PaymentApp({ amount, invoiceID, lineItems, billing, addr
   const [checkNumber, setCheckNumber] = useState('');
   const [feedback, setFeedback] = useState({ message: '', type: '' });
 
-  const currentYear = new Date().getFullYear();
-  const years = Array.from({ length: 12 }, (_, i) => String(currentYear + i));
-  const months = Array.from({ length: 12 }, (_, i) =>
-    String(i + 1).padStart(2, '0')
-  );
-
-  useEffect(() => {
-    console.log(`params: ${amount}, ${invoiceID} , ${lineItems}, ${billing}, ${address.street}, ${invoice} ${customer}`);
+  const years = useMemo(() => {
+    const current = new Date().getFullYear();
+    return Array.from({ length: 12 }, (_, i) => String(current + i));
   }, []);
 
-  // ✅ CARD PAYMENT HANDLER
+  const months = useMemo(
+    () => Array.from({ length: 12 }, (_, i) => String(i + 1).padStart(2, '0')),
+    []
+  );
+
+  /** SUCCESS HANDLER */
+  const finishSuccess = async () => {
+    setPaid(true);
+    setFeedback({ message: 'PAID!', type: 'success' });
+    updateStatus(invoiceID, "PAID").then((
+      reload()
+    ))
+    setTimeout(() => {
+      closeMe();
+      setPaid(false);
+    }, 1800);
+  };
+
+  /** CREATE SALES RECEIPT & EMAIL */
+  const createReceiptAndEmail = async (salesBody) => {
+    const sales = await createSalesReceipt(salesBody, invoiceID);
+    await emailSalesReceipt(sales.Id, salesBody.BillEmail.Address);
+    finishSuccess();
+  };
+
+  /** CARD PAYMENT */
   const handleCardPayment = async (e) => {
     e.preventDefault();
-    setFeedback({ message: 'Encrypting Card', type: 'info' });
+    setFeedback({ message: 'Encrypting card…', type: 'info' });
 
     try {
-      createToken(cardData).then(async (data) => {
-        if (!data?.value) {
-          let errors = data?.errors?.map(e => e.message).join(" | ");
-          setFeedback({ message: errors, type: 'error' });
-          return;
-        }
+      const tokenRes = await createToken(cardData);
 
-        setFeedback({ message: 'Charging Card...', type: 'info' });
+      if (!tokenRes?.value) {
+        const errors = tokenRes?.errors?.map(e => e.message).join(" | ");
+        return setFeedback({ message: errors || 'Card token error', type: 'error' });
+      }
 
-        const chargeBody = {
-          currency: 'USD',
-          amount,
-          context: { mobile: 'false', isEcommerce: 'true' },
-          token: data.value,
-        };
+      setFeedback({ message: 'Charging card…', type: 'info' });
 
-        let chargeresponse = await createCharge(chargeBody);
+      const chargeBody = {
+        currency: 'USD',
+        amount,
+        context: { mobile: 'false', isEcommerce: 'true' },
+        token: tokenRes.value,
+      };
 
-        if (chargeresponse.status === "DECLINED" || chargeresponse.status === "CANCELLED") {
-          setFeedback({ message: `Charge was ${chargeresponse.status}`, type: 'error' });
-          return;
-        }
+      const charge = await createCharge(chargeBody);
 
-        setFeedback({ message: 'Creating Sales Receipt...', type: 'info' });
+      if (['DECLINED', 'CANCELLED'].includes(charge.status)) {
+        return setFeedback({ message: `Charge ${charge.status}`, type: 'error' });
+      }
 
-        const salesBody = {
-          Line: getLine(lineItems),
-          CustomerRef: cutomerReference(customer),
-          TxnDate: getTxnDate(),
-          BillAddr: formatAddress(billing),
-          ShipAddr: formatAddress(address),
-          CustomField: getCustomFields(invoice, address, billing),
-          DocNumber: `FP${invoiceID}`,
-          PaymentMethodRef: {
-            value: process.env.VISA_METHOD_REF,
-            name: 'Visa',
-          },
-          TxnSource: 'IntuitPayment',
-          BillEmail: { Address: cardData.email }
-        };
+      setFeedback({ message: 'Creating sales receipt…', type: 'info' });
 
-        let sales = await createSalesReceipt(salesBody, invoiceID);
+      const salesBody = {
+        Line: getLine(lineItems),
+        CustomerRef: customerReference(customer),
+        TxnDate: getTxnDate(),
+        BillAddr: formatAddress(billing),
+        ShipAddr: formatAddress(address),
+        CustomField: getCustomFields(invoice, address, billing),
+        DocNumber: `FP${invoiceID}`,
+        PaymentMethodRef: {
+          value: process.env.VISA_METHOD_REF,
+          name: 'Visa',
+        },
+        TxnSource: 'IntuitPayment',
+        BillEmail: { Address: cardData.email }
+      };
 
-        setFeedback({ message: 'Emailing Receipt...', type: 'info' });
-        await emailSalesReceipt(sales.Id, cardData.email);
-
-        // ✅ SUCCESS — trigger animation
-        setPaid(true);
-        setFeedback({ message: 'PAID!', type: 'success' });
-
-        // ❗ Close modal after animation
-        setTimeout(() => {
-          closeMe();
-          setPaid(false);
-        }, 2000);
-      });
+      await createReceiptAndEmail(salesBody);
 
     } catch (err) {
       console.error(err);
@@ -113,99 +129,58 @@ export default function PaymentApp({ amount, invoiceID, lineItems, billing, addr
     }
   };
 
-  // ✅ FLOATING INPUT COMPONENT
-  const FloatingInput = ({ label, type = 'text', value, onChange, ...props }) => (
-    <div className="relative">
-      <input
-        type={type}
-        value={value}
-        onChange={onChange}
-        placeholder=" "
-        {...props}
-        className="peer w-full border border-gray-300 rounded-lg px-3 pt-5 pb-1 text-sm text-gray-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition"
-      />
-      <label className="absolute left-3 top-1.5 text-xs text-gray-500 peer-placeholder-shown:top-3 peer-placeholder-shown:text-sm peer-placeholder-shown:text-gray-400 transition-all">
-        {label}
-      </label>
-    </div>
-  );
+  /** CASH PAYMENT */
+  const handleCashPayment = async (e) => {
+    e.preventDefault();
+    setFeedback({ message: 'Creating sales receipt…', type: 'info' });
 
-  const handleCashPayment = async (e)=>{
-    e.preventDefault()
-    //create sales receipt
-    setFeedback({ message: 'Creating Sales Receipt...', type: 'info' });
     const salesBody = {
-          Line: getLine(lineItems),
-          CustomerRef: cutomerReference(customer),
-          TxnDate: getTxnDate(),
-          BillAddr: formatAddress(billing),
-          ShipAddr: formatAddress(address),
-          CustomField: getCustomFields(invoice, address, billing),
-          PrivateNote: `Field cash payment $${cashAmount}`, 
-          DocNumber: `FP${invoiceID}`,
-          PaymentMethodRef: {
-            value: process.env.CASH_METHOD_REF,
-            name: 'Visa',
-          },
-          TxnSource: 'IntuitPayment',
-          BillEmail: { Address: cardData.email }
-        };
-    console.log("Creating this payment: ", salesBody)
-    let sales = await createSalesReceipt(salesBody, invoiceID);
+      Line: getLine(lineItems),
+      CustomerRef: customerReference(customer),
+      TxnDate: getTxnDate(),
+      BillAddr: formatAddress(billing),
+      ShipAddr: formatAddress(address),
+      CustomField: getCustomFields(invoice, address, billing),
+      PrivateNote: `Field cash payment: $${cashAmount}`,
+      DocNumber: `FP${invoiceID}`,
+      PaymentMethodRef: {
+        value: process.env.CASH_METHOD_REF,
+        name: 'Cash',
+      },
+      TxnSource: 'IntuitPayment',
+      BillEmail: { Address: cardData.email }
+    };
 
-        setFeedback({ message: 'Emailing Receipt...', type: 'info' });
-        await emailSalesReceipt(sales.Id, cardData.email);
+    await createReceiptAndEmail(salesBody);
+  };
 
-        // ✅ SUCCESS — trigger animation
-        setPaid(true);
-        setFeedback({ message: 'PAID!', type: 'success' });
+  /** CHECK PAYMENT */
+  const handleCheckPayment = async (e) => {
+    e.preventDefault();
+    setFeedback({ message: 'Creating sales receipt…', type: 'info' });
 
-        // ❗ Close modal after animation
-        setTimeout(() => {
-          closeMe();
-          setPaid(false);
-        }, 2000);
-
-  } 
-  const handleCheckPayment = async (e)=>{
-    e.preventDefault()
-    setFeedback({ message: 'Creating Sales Receipt...', type: 'info' });
     const salesBody = {
-          Line: getLine(lineItems),
-          CustomerRef: cutomerReference(customer),
-          TxnDate: getTxnDate(),
-          BillAddr: formatAddress(billing),
-          ShipAddr: formatAddress(address),
-          CustomField: getCustomFields(invoice, address, billing),
-          PrivateNote: `Field check payment Check # ${checkNumber}`, 
-          DocNumber: `FP${invoiceID}`,
-          PaymentRefNum: `${checkNumber}`, 
-          PaymentMethodRef: {
-            value: process.env.CHECK_METHOD_REF,
-            name: 'Visa',
-          },
-          TxnSource: 'IntuitPayment',
-          BillEmail: { Address: cardData.email }
-        };
-    console.log("Creating this payment: ", salesBody)
-    let sales = await createSalesReceipt(salesBody, invoiceID);
+      Line: getLine(lineItems),
+      CustomerRef: customerReference(customer),
+      TxnDate: getTxnDate(),
+      BillAddr: formatAddress(billing),
+      ShipAddr: formatAddress(address),
+      CustomField: getCustomFields(invoice, address, billing),
+      PrivateNote: `Field check payment • Check #${checkNumber}`,
+      DocNumber: `FP${invoiceID}`,
+      PaymentRefNum: checkNumber,
+      PaymentMethodRef: {
+        value: process.env.CHECK_METHOD_REF,
+        name: 'Check',
+      },
+      TxnSource: 'IntuitPayment',
+      BillEmail: { Address: cardData.email }
+    };
 
-        setFeedback({ message: 'Emailing Receipt...', type: 'info' });
-        await emailSalesReceipt(sales.Id, cardData.email);
+    await createReceiptAndEmail(salesBody);
+  };
 
-        // ✅ SUCCESS — trigger animation
-        setPaid(true);
-        setFeedback({ message: 'PAID!', type: 'success' });
-
-        // ❗ Close modal after animation
-        setTimeout(() => {
-          closeMe();
-          setPaid(false);
-        }, 2000);
-  }
-
-  // ✅ Validation
-  const isCardFormValid =
+  const isCardValid =
     cardData.cardName &&
     cardData.cardNumber &&
     cardData.expiryMonth &&
@@ -214,25 +189,24 @@ export default function PaymentApp({ amount, invoiceID, lineItems, billing, addr
     cardData.zip &&
     cardData.email;
 
-  const isCashValid = cashAmount !== '';
-  const isCheckValid = checkNumber !== '';
+  const isCashValid = cashAmount;
+  const isCheckValid = checkNumber;
 
   const feedbackColor =
     feedback.type === 'success'
       ? 'text-green-600'
       : feedback.type === 'error'
-      ? 'text-red-600'
-      : 'text-blue-600';
-
+        ? 'text-red-600'
+        : 'text-blue-600';
 
   return (
-    <div className="relative p-0 bg-white max-w-md mx-auto overflow-hidden">
+    <div className="relative bg-white p-4 max-w-md mx-auto overflow-hidden">
 
-      {/* ✅ PAID ANIMATION OVERLAY */}
+      {/* PAID OVERLAY */}
       <AnimatePresence>
         {paid && (
           <motion.div
-            key="paid-overlay"
+            key="paid"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -246,181 +220,198 @@ export default function PaymentApp({ amount, invoiceID, lineItems, billing, addr
             >
               <div className="text-5xl font-bold text-green-600">✅</div>
               <div className="text-3xl font-bold text-green-700 mt-3">PAID</div>
-              <p className="mt-2 text-gray-500">Payment Successful</p>
+              <p className="mt-1 text-gray-500">Payment Successful</p>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* ✅ MAIN UI */}
       <h2 className="text-lg font-semibold text-gray-800 mb-3">Take Payment</h2>
 
-      {/* Dropdown */}
-      <div className="relative mb-3">
+      {/* Payment Type */}
+      <div className="mb-3">
+        <label className="text-xs font-medium text-gray-600 mb-1 block">Payment Type</label>
         <select
           value={paymentType}
           onChange={(e) => {
             setPaymentType(e.target.value);
             setFeedback({ message: '', type: '' });
           }}
-          className="peer w-full border border-gray-300 rounded-lg px-3 pt-5 pb-1 text-sm text-black focus:ring-2 focus:ring-blue-500 focus:outline-none appearance-none"
+          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-black focus:ring-2 focus:ring-blue-500 focus:outline-none"
         >
-          <option value="">Select payment type</option>
           <option value="CARD">CARD</option>
           <option value="CASH">CASH</option>
           <option value="CHECK">CHECK</option>
         </select>
-        <label className="absolute left-3 top-1.5 text-xs text-gray-500">
-          Payment Type
-        </label>
       </div>
 
       {feedback.message && (
-        <p className={`mt-2 text-sm font-medium ${feedbackColor}`}>
-          {feedback.message}
-        </p>
+        <p className={`mt-2 text-sm font-medium ${feedbackColor}`}>{feedback.message}</p>
       )}
 
-      <div className="mt-4 text-gray-700 font-medium space-y-3">
+      <div className="mt-4 space-y-4">
 
-        {/* ✅ CARD FORM */}
+        {/* CARD FORM */}
         {paymentType === 'CARD' && (
           <form onSubmit={handleCardPayment} className="flex flex-col gap-3">
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Name on Card</label>
+              <input
+                type="text"
+                value={cardData.cardName}
+                onChange={(e) => setCardData({ ...cardData, cardName: e.target.value })}
+                required
+                className="w-full border text-black border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+              />
+            </div>
 
-            <FloatingInput
-              label="Name on Card"
-              value={cardData.cardName}
-              onChange={(e) => setCardData({ ...cardData, cardName: e.target.value })}
-              required
-            />
-
-            <FloatingInput
-              label="Card Number"
-              value={cardData.cardNumber}
-              onChange={(e) => setCardData({ ...cardData, cardNumber: e.target.value })}
-              maxLength={19}
-              required
-            />
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Card Number</label>
+              <input
+                type="text"
+                value={cardData.cardNumber}
+                onChange={(e) => setCardData({ ...cardData, cardNumber: e.target.value })}
+                maxLength={19}
+                required
+                className="w-full border text-black border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+              />
+            </div>
 
             <div className="flex gap-2">
-              <div className="relative w-1/2">
-                <select
+              <div className="w-1/2">
+                <label className="block text-xs font-medium text-gray-600 mb-1">Exp Month</label>
+                <input
+                  type="text"
                   value={cardData.expiryMonth}
                   onChange={(e) => setCardData({ ...cardData, expiryMonth: e.target.value })}
-                  className="peer w-full border border-gray-300 rounded-lg px-3 pt-5 pb-1 text-sm"
-                >
-                  <option value="">MM</option>
-                  {months.map((m) => <option key={m}>{m}</option>)}
-                </select>
-                <label className="absolute left-3 top-1.5 text-xs text-gray-500">
-                  Exp Month
-                </label>
+                  placeholder="MM"
+                  className="w-full border text-black border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                />
               </div>
-
-              <div className="relative w-1/2">
-                <select
+              <div className="w-1/2">
+                <label className="block text-xs font-medium text-gray-600 mb-1">Exp Year</label>
+                <input
+                  type="text"
                   value={cardData.expiryYear}
                   onChange={(e) => setCardData({ ...cardData, expiryYear: e.target.value })}
-                  className="peer w-full border border-gray-300 rounded-lg px-3 pt-5 pb-1 text-sm"
-                >
-                  <option value="">YYYY</option>
-                  {years.map((y) => <option key={y}>{y}</option>)}
-                </select>
-                <label className="absolute left-3 top-1.5 text-xs text-gray-500">
-                  Exp Year
-                </label>
+                  placeholder="YYYY"
+                  className="w-full border text-black border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                />
               </div>
             </div>
 
-            <FloatingInput
-              label="CVV"
-              value={cardData.cvv}
-              onChange={(e) => setCardData({ ...cardData, cvv: e.target.value })}
-              maxLength={4}
-              required
-            />
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">CVV</label>
+              <input
+                type="text"
+                value={cardData.cvv}
+                onChange={(e) => setCardData({ ...cardData, cvv: e.target.value })}
+                maxLength={4}
+                required
+                className="w-full border  text-black border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+              />
+            </div>
 
-            <FloatingInput
-              label="ZIP Code"
-              value={cardData.zip}
-              onChange={(e) => setCardData({ ...cardData, zip: e.target.value })}
-              required
-            />
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">ZIP Code</label>
+              <input
+                type="text"
+                value={cardData.zip}
+                onChange={(e) => setCardData({ ...cardData, zip: e.target.value })}
+                required
+                className="w-full border text-black  border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+              />
+            </div>
 
-            <FloatingInput
-              label="Email Address"
-              type="email"
-              value={cardData.email}
-              onChange={(e) => setCardData({ ...cardData, email: e.target.value })}
-              required
-            />
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Email</label>
+              <input
+                type="email"
+                value={cardData.email}
+                onChange={(e) => setCardData({ ...cardData, email: e.target.value })}
+                required
+                className="w-full text-black border border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+              />
+            </div>
 
             <button
               type="submit"
-              disabled={!isCardFormValid}
+              disabled={!isCardValid}
               className={`px-4 py-2 rounded-lg text-white text-sm font-medium ${
-                isCardFormValid ? "bg-blue-600 hover:bg-blue-700" : "bg-gray-400"
+                isCardValid ? 'bg-blue-600 hover:bg-blue-700' : 'bg-gray-400'
               }`}
             >
-              Pay {`$${amount}`}
+              Pay ${amount}
             </button>
           </form>
         )}
 
-        {/* ✅ CASH */}
+        {/* CASH FORM */}
         {paymentType === 'CASH' && (
-          <form onSubmit={ handleCashPayment } className="flex flex-col gap-3">
-            <FloatingInput
-              label="Amount Received"
-              type="number"
-              value={cashAmount}
-              onChange={(e) => setCashAmount(e.target.value)}
-              required
-            />
-            <FloatingInput
-              label="email"
-              type="email"
-              value={cardData.email}
-              onChange={(e) => setCardData({ ...cardData, email: e.target.value })}
-              required
-            />
+          <form onSubmit={handleCashPayment} className="flex flex-col gap-3">
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Amount Received</label>
+              <input
+                type="number"
+                value={cashAmount}
+                onChange={(e) => setCashAmount(e.target.value)}
+                required
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-black focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Email</label>
+              <input
+                type="email"
+                value={cardData.email}
+                onChange={(e) => setCardData({ ...cardData, email: e.target.value })}
+                required
+                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm text-black focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none"
+              />
+            </div>
             <button
               type="submit"
               disabled={!isCashValid}
               className={`px-4 py-2 rounded-lg text-white text-sm font-medium ${
-                isCashValid ? "bg-green-600 hover:bg-green-700" : "bg-gray-400"
+                isCashValid ? 'bg-green-600 hover:bg-green-700' : 'bg-gray-400'
               }`}
             >
-              Submit Cash Payment {`$${amount}`}
+              Submit Cash Payment ${amount}
             </button>
           </form>
         )}
 
-        {/* ✅ CHECK */}
+        {/* CHECK FORM */}
         {paymentType === 'CHECK' && (
-          <form onSubmit={handleCheckPayment } className="flex flex-col gap-3">
-            <FloatingInput
-              label="Check Number"
-              type="text"
-              value={checkNumber}
-              onChange={(e) => setCheckNumber(e.target.value)}
-              required
-            />
-            <FloatingInput
-              label="email"
-              type="email"
-              value={cardData.email}
-              onChange={(e) => setCardData({ ...cardData, email: e.target.value })}
-              required
-            />
+          <form onSubmit={handleCheckPayment} className="flex flex-col gap-3">
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Check Number</label>
+              <input
+                type="text"
+                value={checkNumber}
+                onChange={(e) => setCheckNumber(e.target.value)}
+                required
+                className="w-full border  text-black border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none"
+              />
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Email</label>
+              <input
+                type="email"
+                value={cardData.email}
+                onChange={(e) => setCardData({ ...cardData, email: e.target.value })}
+                required
+                className="w-full border text-black border-gray-300 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-purple-500 focus:border-purple-500 outline-none"
+              />
+            </div>
             <button
               type="submit"
               disabled={!isCheckValid}
               className={`px-4 py-2 rounded-lg text-white text-sm font-medium ${
-                isCheckValid ? "bg-purple-600 hover:bg-purple-700" : "bg-gray-400"
+                isCheckValid ? 'bg-purple-600 hover:bg-purple-700' : 'bg-gray-400'
               }`}
             >
-              Submit Check Payment of {`$${amount}`}
+              Submit Check Payment ${amount}
             </button>
           </form>
         )}
