@@ -31,6 +31,10 @@ const updateLineItemFetch = (id, obj) =>
     method: 'PUT',
     body: JSON.stringify({ id, obj }),
   });
+const requestQBID = (customerID) =>
+  fetchWithJWT(`${office}/customers/quickbooksID?` + new URLSearchParams({customerID}), {
+    method: 'GET',
+  });
 
 const removeLineItemFetch = (id) =>
   fetchWithJWT(`${office}/lineitems`, {
@@ -111,6 +115,19 @@ export const removeItem = async (id) => {
     throw err;
   }
 };
+
+export const requestQuickbooksID = async (customerID) => {
+  try {
+    const response = await requestQBID(customerID);
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || "Failed to remove line item");
+    return data;
+  } catch (err) {
+    console.error("removeItem error:", err);
+    throw err;
+  }
+};
+
 
 export const createItem = async (invoiceID) => {
   try {
