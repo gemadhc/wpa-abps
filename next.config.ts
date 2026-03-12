@@ -2,9 +2,9 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
 env:{
-  SERVER: "https://abps-erp.com/field",
-  QUICKBOOKS: "https://abps-erp.com/quickbooks",
-  OFFICE: "https://abps-erp.com/backflow",
+  SERVER: "https://sandbox.abps-erp.com/field",
+  QUICKBOOKS: "https://sandbox.abps-erp.com/quickbooks",
+  OFFICE: "https://sandbox.abps-erp.com/backflow",
   TOKEN_SERVER : "https://api.intuit.com/quickbooks/v4/payments/tokens",
   VISA_METHOD_REF: "9", /* 9 for production and 3 for sandbox*/
   CASH_METHOD_REF: "4", 

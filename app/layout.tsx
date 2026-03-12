@@ -15,7 +15,7 @@ function LayoutContent({ children }) {
   const pathname = usePathname();
   const { session, setSession } = useSession();
 
-  const handleDispatch = () => router.push('/dispatch');
+  const handleDispatch = () => router.push('/offline');
   const handleMore = () => router.push('/more');
 
   const handleLogout = async () => {
@@ -38,9 +38,9 @@ function LayoutContent({ children }) {
   return (
     <>
       {/* HEADER */}
-      <header className="fixed top-0 left-0 right-0 z-50 h-10 pt-2 bg-slate-800 font-bold text-slate-100 shadow-xl">
+      <header className="fixed top-0 left-0 right-0 z-50 h-15 pt-5 bg-slate-800 text-white shadow-xxl">
         <div className="flex flex-row gap-2 justify-evenly">
-          <p className="companyName">American Backflow & Plumbing Services, Inc.</p>
+          <p className="companyName text-xl">ABPS</p>
           <OnlineChecker />
         </div>
       </header>

@@ -29,7 +29,8 @@
 
 .companyName{
   font-family: 'goudyheapregular';
-  font-size: 12px;
+  font-size: 1em;
+  letter-spacing:3;
 }
 
 .myfooter{
@@ -44,11 +45,11 @@ body {
 
 }
 p{
-  font-size: 16px;
+  font-size: 22px;
   
 }
 h1{
-  font-size: 42px;
+  font-size: 16px;
   font-family: "oswald", sans-serif;
   font-weight: 400;
   font-style: normal;
