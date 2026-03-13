@@ -119,6 +119,11 @@ export default function PaymentApp({
         },
         TxnSource: 'IntuitPayment',
         BillEmail: { Address: cardData.email }
+
+      };
+      salesBody.CreditCardPayment = {
+          CreditChargeInfo: { ProcessPayment: 'true' },
+          CreditChargeResponse: { CCTransId: charge.id },
       };
 
       await createReceiptAndEmail(salesBody);

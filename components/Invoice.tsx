@@ -19,8 +19,29 @@ import {updateStatus, requestQuickbooksID} from "../actions/invoice"
 export default function Invoice({ items = [], billing, invoice, reload, address}) {
   const [isVoided, setIsVoided] = useState(false);
   const [openPaymentDialog, setOpenPaymentDialog] = useState(false);
+  const [allowPayment, setAllowPayment] = useState(navigator.onLine)
   const total = items.reduce( (sum, itm) => sum + itm.quantity * itm.unitPriceDefined, 0 )
   const [mycustomer, setMyCustomer] = useState(null)
+
+
+  useEffect(() => {
+    const handleOnline = () => setAllowPayment(true);
+    const handleOffline = () => setAllowPayment(false);
+
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+
+    // Cleanup on unmount
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []); 
+
+  useEffect(()=>{
+    setOpenPaymentDialog(allowPayment && openPaymentDialog)
+
+  }, [allowPayment])
   useEffect(()=>{
     console.log("Invoice: ", invoice)
     if(invoice){
@@ -99,7 +120,7 @@ export default function Invoice({ items = [], billing, invoice, reload, address}
               <div className="py-1">
                 {/* Take Payment */}
                 {
-                  mycustomer ? 
+                  mycustomer  && allowPayment ? 
                      <Menu.Item>
                       {({ active }) => (
                         <button
