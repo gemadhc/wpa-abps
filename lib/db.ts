@@ -13,8 +13,15 @@ export async function getDB() {
   dbInstance = await openDB('offline-db', 1, {
     upgrade(db) {
       const todoStore = db.createObjectStore('poplist', { keyPath: 'id' })
-      const stoplistStore = db.createObjectStore('stoplist', { keyPath: 'id' })
+      const billingStore = db.createObjectStore('billing_details', { keyPath: 'invoiceID' })
+      const invoiceStore = db.createObjectStore('invoice', { keyPath: 'invoiceID' })
+      const lineItemsStore = db.createObjectStore('lineItems', { keyPath: 'invoiceID' })
+      const stoplistStore = db.createObjectStore('stoplist', { keyPath: 'stopID' })
+
       todoStore.createIndex('by-synced', 'synced')
+      billingStore.createIndex('by-synced', 'synced')
+      invoiceStore.createIndex('by-synced', 'synced')
+      lineItemsStore.createIndex('by-synced', 'synced')
       stoplistStore.createIndex('by-synced', 'synced')
     },
   })

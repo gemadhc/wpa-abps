@@ -7,6 +7,12 @@ import Assemblies from './Assemblies';
 import Invoice from './Invoice';
 import { requestServices, completeStop} from "../actions/stop";
 import { requestBilling, requestInvoice, requestItems } from "../actions/invoice";
+import { syncStops } from "../lib/sync"
+
+
+import { getStops, createStop, updateStop} from "../lib/stop_db"
+import { getBilling, createItem} from "../lib/billing_db"
+
 
 export default function StopCard({ stopID, item, reloadList}) {
   const [expanded, setExpanded] = useState(false);
@@ -76,20 +82,46 @@ export default function StopCard({ stopID, item, reloadList}) {
 
   const handleConfirmCompletion = () => {
     if (!confirmed) {
-     
       return;
     }
-    completeStop(item.stopID).then((data, err) =>{
+
+    updateStop(item).then(async (data, err) =>{
+      await syncStops()
       reloadList()
       setCompleted(true);
       setOpenConfirmDialog(false);
-    })
-    
+    })    
+
   };
+
+  const loadBilling = async () =>{
+    const cached = await getBilling(item.invoiceID)
+    console.log("cached...", cached)
+    setMyBilling(cached)
+    if (!navigator.onLine) {
+        console.log("Offline: using cached stops")
+        return
+    }
+    //request from network
+    requestBilling(item.invoiceID).then( async (dt)=> {
+      dt.invoiceID = item.invoiceID; 
+      setMyBilling(dt)
+      console.log("adding this to the indexed db: ", dt)
+      createItem(dt)
+    });
+    
+    return; 
+  }
+  const loadInvoice = async() => {}
+  const loadItems = async() => {}
+  const loadServices = async() => {}
+  const loadReports = async() => {}
+
 
   useEffect(() => {
     if (expanded) {
-      requestBilling(item.invoiceID).then(setMyBilling);
+      loadBilling(); 
+
       requestInvoice(item.invoiceID).then(setMyInvoice);
       requestItems(item.invoiceID).then(setMyLines);
       requestServices(item.stopID).then(setServices);
@@ -236,7 +268,7 @@ export default function StopCard({ stopID, item, reloadList}) {
                 Cancel
               </button>
               <button
-                onClick={handleConfirmCompletion}
+                onClick={ handleConfirmCompletion }
                 className="px-4 py-2 text-sm bg-blue-600 text-white hover:bg-blue-700 rounded-lg"
               >
                 Complete Stop
