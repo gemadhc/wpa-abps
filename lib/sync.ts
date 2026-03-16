@@ -1,7 +1,9 @@
 import { getUnsyncedPopList, markAsSynced } from './db'
 import { getUnsyncedStops, markStopAsSynced } from "./stop_db.ts" 
+import { getUnsyncedInvoices, markInvoiceAsSynced } from "./invoice_db.ts" 
 
 import { completeStop } from "../actions/stop.js" 
+import {updateStatus, requestQuickbooksID} from "../actions/invoice"
 
 
 export async function syncItems() {
@@ -47,7 +49,26 @@ export async function syncStops(){
 }
 
 
-export async function syncInvoice(){}
+export async function syncInvoices(){
+  if (!navigator.onLine) {
+    console.log('Offline - will sync later')
+    return
+  }
+  const unsyncedItems = await getUnsyncedInvoices()
+  if (unsyncedItems.length === 0) {
+    return
+  }
+  console.log(`Syncing ${unsyncedItems.length} items... }`)
+  for (const item of unsyncedItems) {
+    try {
+      console.log("sending this to server: ", item)
+      await updateStatus(item.id, item.status)
+      await markInvoiceAsSynced(item.id)
+    } catch (error) {
+      console.error('Sync failed:', error)
+    }
+  }
+}
 export async function syncLineItems(){}
 export async function syncServices(){}
 
@@ -58,7 +79,7 @@ if (typeof window !== 'undefined') {
     console.log('Back online! Syncing...')
     syncItems()
     syncStops(); 
-    syncInvoice(); 
+    syncInvoices(); 
     syncLineItems();
     syncServices(); 
   })

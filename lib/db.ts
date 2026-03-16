@@ -14,7 +14,7 @@ export async function getDB() {
     upgrade(db) {
       const todoStore = db.createObjectStore('poplist', { keyPath: 'id' })
       const billingStore = db.createObjectStore('billing_details', { keyPath: 'invoiceID' })
-      const invoiceStore = db.createObjectStore('invoice', { keyPath: 'invoiceID' })
+      const invoiceStore = db.createObjectStore('invoices', { keyPath: 'id' })
       const lineItemsStore = db.createObjectStore('lineItems', { keyPath: 'invoiceID' })
       const stoplistStore = db.createObjectStore('stoplist', { keyPath: 'stopID' })
 

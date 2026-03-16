@@ -1,7 +1,5 @@
 import { getDB }  from "./db.ts"
 
-
-
 export async function getBilling(id) {
 	try{
 		const db = await getDB()

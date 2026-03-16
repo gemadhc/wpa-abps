@@ -13,7 +13,9 @@ import {
 } from 'lucide-react';
 import LineItems from './LineItems';
 import PaymentApp from './PaymentApp';
-import {updateStatus, requestQuickbooksID} from "../actions/invoice"
+import { updateStatus, requestQuickbooksID } from "../actions/invoice"
+import { updateInvoiceStatus } from "../lib/invoice_db.ts"
+import { syncInvoices } from "../lib/sync"
 
 
 export default function Invoice({ items = [], billing, invoice, reload, address}) {
@@ -65,13 +67,17 @@ export default function Invoice({ items = [], billing, invoice, reload, address}
   // Handlers
   const handleToggleVoid = () => {
     if(invoice.status == "VOID" || invoice.status == "VOIDED"){
-      updateStatus(invoice.id, "Scheduled").then((data, err) =>{
+      /*updateStatus(invoice.id, "Scheduled").then((data, err) =>{
         reload()
-      })
-    }else{
+      })*/
+      updateInvoiceStatus(invoice, "Scheduled")
+      syncInvoices()
+    }else{/*
       updateStatus(invoice.id, "VOID").then((data, err) =>{
         reload()
-      })
+      })*/
+      updateInvoiceStatus(invoice, "VOID")
+      syncInvoices()
     }
   };
 

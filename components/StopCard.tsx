@@ -12,6 +12,7 @@ import { syncStops } from "../lib/sync"
 
 import { getStops, createStop, updateStop} from "../lib/stop_db"
 import { getBilling, createItem} from "../lib/billing_db"
+import { createItem as createInvoice } from "../lib/invoice_db"
 
 
 export default function StopCard({ stopID, item, reloadList}) {
@@ -70,6 +71,7 @@ export default function StopCard({ stopID, item, reloadList}) {
         invoice={myInvoice} 
         reload = { 
           () => {
+
             requestInvoice(item.invoiceID).then(setMyInvoice);
             requestItems(item.invoiceID).then(setMyLines)
           }}
@@ -122,9 +124,13 @@ export default function StopCard({ stopID, item, reloadList}) {
     if (expanded) {
       loadBilling(); 
 
-      requestInvoice(item.invoiceID).then(setMyInvoice);
-      requestItems(item.invoiceID).then(setMyLines);
-      requestServices(item.stopID).then(setServices);
+     requestInvoice(item.invoiceID).then((data) =>{
+      setMyInvoice(data)
+      createInvoice( data )
+     });
+    
+     // requestItems(item.invoiceID).then(setMyLines);
+      //requestServices(item.stopID).then(setServices);
     }
 
   }, [expanded]);
