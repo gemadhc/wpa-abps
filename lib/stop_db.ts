@@ -36,7 +36,7 @@ export async function getStops() {
 export async function createStop(item) {
 	try{
 		const db = await getDB()
-  		return db.put('stoplist', item)
+  	return db.put('stoplist', item)
 	}catch(err){
 		return 
 	}

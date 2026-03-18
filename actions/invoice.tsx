@@ -31,6 +31,12 @@ const updateLineItemFetch = (id, obj) =>
     method: 'PUT',
     body: JSON.stringify({ id, obj }),
   });
+
+const updateStatusSyncFetch = (item) =>
+   fetchWithJWT(`${office}/lineitems/sync`, {
+    method: 'PUT',
+    body: JSON.stringify({ item }),
+  });
 const requestQBID = (customerID) =>
   fetchWithJWT(`${office}/customers/quickbooksID?` + new URLSearchParams({customerID}), {
     method: 'GET',
@@ -152,3 +158,17 @@ export const updateStatus = async (id, newStatus) => {
     throw err;
   }
 };
+
+
+
+export const updateLineItemStatus = async (item) => {
+  try {
+    const response = await updateStatusSyncFetch(item);
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || "Failed to update invoice status");
+    return data;
+  } catch (err) {
+    console.error("updateStatus error:", err);
+    throw err;
+  }
+}

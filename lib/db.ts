@@ -15,7 +15,9 @@ export async function getDB() {
       const todoStore = db.createObjectStore('poplist', { keyPath: 'id' })
       const billingStore = db.createObjectStore('billing_details', { keyPath: 'invoiceID' })
       const invoiceStore = db.createObjectStore('invoices', { keyPath: 'id' })
-      const lineItemsStore = db.createObjectStore('lineItems', { keyPath: 'invoiceID' })
+      const lineItemsStore = db.createObjectStore('lineItems', { keyPath: 'offline_id' })
+      const reportsStore = db.createObjectStore('reports', { keyPath: 'offline_id'})
+      const servicesStore = db.createObjectStore('services' ,{keyPath: 'offline_id'})
       const stoplistStore = db.createObjectStore('stoplist', { keyPath: 'stopID' })
 
       todoStore.createIndex('by-synced', 'synced')
@@ -23,6 +25,8 @@ export async function getDB() {
       invoiceStore.createIndex('by-synced', 'synced')
       lineItemsStore.createIndex('by-synced', 'synced')
       stoplistStore.createIndex('by-synced', 'synced')
+      servicesStore.createIndex('by-synced', 'synced')
+      reportsStore.createIndex('by-synced', 'synced')
     },
   })
   return dbInstance
