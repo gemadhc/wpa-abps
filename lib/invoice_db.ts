@@ -21,6 +21,19 @@ export async function updateInvoiceStatus(invoice, newstatus) {
 	await db.put('invoices', updated)
 }
 
+
+export async function getInvoice(id) {
+	try{
+		const db = await getDB()
+  		let item = db.get('invoices', id)
+  		return item
+	}catch(err){
+		console.log("err", err)
+		return err
+	}
+ 
+}
+
 export async function createItem(item) {
 	try{
 		const db = await getDB()

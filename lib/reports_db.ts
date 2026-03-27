@@ -21,17 +21,24 @@ export async function updateReport(updates){
 }	
 
 
-export async function createItem(item) {
+export async function createItem(item, reportID) {
 	try{
 		const db = await getDB()
-		item.offline_id  = crypto.randomUUID()
+		item.reportID  = reportID
   	return db.put('reports', item)	
 	}catch(err){
 		console.log(err)
 	}
 }
 
+/*read documentation to clean list */
+export const clearReports = () =>{
+	try{
 
+	}catch(err){
+		console.log(err)
+	}
+}
 
 export const getUnsyncedReports = async () => {
   const db = await getDB()

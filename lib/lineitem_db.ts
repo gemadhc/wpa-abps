@@ -12,14 +12,26 @@ export async function getLineItem(id) {
  
 }
 
-export async function addLineItem(item){
+export async function getLineItems(invoiceID) {
 	try{
 		const db = await getDB()
-		console.log("This is the item to be added: ", item)
-		item.offline_id = crypto.randomUUID()
-		item.action = "EXISTING"
+  		let item = db.get('lineItems', invoiceID)
+  		return item
+	}catch(err){
+		console.log("err", err)
+		return err
+	}
+ 
+}
+
+export async function addLineItems(items, invoiceID){
+	try{
+		const db = await getDB()
+		let item = {};
+		item.list = items
+		item.invoiceID = invoiceId; 
 		item.synced = false
-  		return db.put('lineItems', item)
+  	return db.put('lineItems', item)
 	}catch(err){
 		console.log(err)
 	}

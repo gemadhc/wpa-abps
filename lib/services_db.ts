@@ -21,17 +21,18 @@ export async function updateService(updates){
 }	
 
 
-export async function createItem(item) {
+export async function createItem(list, stopID) {
 	try{
 		const db = await getDB()
-		item.offline_id  = crypto.randomUUID()
-  	return db.put('services', item)	
+		let obj = {};
+		obj.stopID = stopID; 
+		obj.list = list; 
+  	return db.put('services', obj); 
+  		
 	}catch(err){
 		console.log(err)
 	}
 }
-
-
 
 export const getUnsyncedServices = async () => {
   const db = await getDB()

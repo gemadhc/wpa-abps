@@ -7,12 +7,19 @@ import Assemblies from './Assemblies';
 import Invoice from './Invoice';
 import { requestServices, completeStop} from "../actions/stop";
 import { requestBilling, requestInvoice, requestItems } from "../actions/invoice";
+
+import { requestReport } from "../actions/report";
+import { requestAssembly, createAssembly } from "../actions/assembly";
+
+
+
 import { syncStops } from "../lib/sync"
-
-
 import { getStops, createStop, updateStop} from "../lib/stop_db"
 import { getBilling, createItem} from "../lib/billing_db"
-import { createItem as createInvoice } from "../lib/invoice_db"
+import { createItem as createInvoice, getInvoice } from "../lib/invoice_db"
+import { createItem as createService} from "../lib/services_db"
+import { getLineItems, addLineItems, removeLineItem,  createLineItem} from "../lib/lineitem_db"
+import {createItem as createReport, getReport as cacheReport, cleanReports} from "../lib/reports_db" 
 
 
 export default function StopCard({ stopID, item, reloadList}) {
@@ -97,8 +104,7 @@ export default function StopCard({ stopID, item, reloadList}) {
   };
 
   const loadBilling = async () =>{
-    const cached = await getBilling(item.invoiceID)
-    console.log("cached...", cached)
+    let cached = await getBilling(item.invoiceID)
     setMyBilling(cached)
     if (!navigator.onLine) {
         console.log("Offline: using cached stops")
@@ -108,29 +114,93 @@ export default function StopCard({ stopID, item, reloadList}) {
     requestBilling(item.invoiceID).then( async (dt)=> {
       dt.invoiceID = item.invoiceID; 
       setMyBilling(dt)
-      console.log("adding this to the indexed db: ", dt)
       createItem(dt)
     });
     
     return; 
   }
-  const loadInvoice = async() => {}
-  const loadItems = async() => {}
-  const loadServices = async() => {}
-  const loadReports = async() => {}
+
+  const loadInvoice = async() => {
+    let cached = await getInvoice(item.invoiceID)
+    setMyInvoice(cached)
+    if (!navigator.onLine) {
+        console.log("Offline: using cached stops")
+        return
+    }
+    requestInvoice(item.invoiceID).then((data) =>{
+        setMyInvoice(data)
+        createInvoice( data )
+    });
+    return; 
+  }
 
 
-  useEffect(() => {
+  const loadServices = async() => {
+    let cached = await getServices(item.stopID)
+    console.log("Cached:" , cached)
+    setServices(cached.list)
+    if (!navigator.onLine) {
+        console.log("Offline: using cached stops")
+        return
+    }
+
+    requestServices(item.stopID).then((data) =>{
+      setServices(data); 
+      createService(data, item.stopID); 
+    });
+    return; 
+  }
+
+  const loadItems = async() => {
+    let cached = await getLienItems(item.invoiceID)
+
+    console.log("Cached:" , cached)
+    setMyLines(cached.list)
+    if (!navigator.onLine) {
+        console.log("Offline: using cached stops")
+        return
+    }
+
+   requestItems(item.invoiceID).then((data) =>{
+      setMyLines(data); 
+      addLineItems(data, item.invoiceID); 
+    });
+    return; 
+
+  }
+
+
+  const loadReport = async(serviceItem) => {
+    let cached = await cacheReoirt(serviceItem.testReportID)
+
+    if (!navigator.onLine) {
+        console.log("Offline: using cached stops")
+        return
+    }
+
+    requestReport(serviceItem.testReportID).then((report) =>{
+      requestAssembly(serviceItem.assemblyID).then((assembly) =>{
+        obj = {...report, ...assembly}
+        createReport( obj, service.testReportID )
+      })
+    }) 
+  }
+
+  //-------------------- load reports in the background aka cache reports on load 
+  useEffect(()=>{
+
+    for(let i = 0; i < services.length; i++){
+      loadReport(services[i])
+    }
+  }, [services])
+
+
+  useEffect( () => {
     if (expanded) {
       loadBilling(); 
-
-     requestInvoice(item.invoiceID).then((data) =>{
-      setMyInvoice(data)
-      createInvoice( data )
-     });
-    
-     // requestItems(item.invoiceID).then(setMyLines);
-      //requestServices(item.stopID).then(setServices);
+      loadInvoice(); 
+      loadServices(); 
+      loadItems(); 
     }
 
   }, [expanded]);
