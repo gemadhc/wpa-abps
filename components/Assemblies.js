@@ -1,6 +1,5 @@
-
 'use client';
-import { useState, useEffect} from 'react';
+import { useState, useEffect } from 'react';
 import { requestReport } from "../actions/report";
 import { requestAssembly, createAssembly } from "../actions/assembly";
 import { Dialog } from '@headlessui/react';
@@ -8,263 +7,207 @@ import { CheckCircle2, FileText, X, PlusCircle } from 'lucide-react';
 import Results from "./Results";
 import { setAsReady, setAsNotReady } from "../actions/service";
 import React from 'react';
-import { ReportProvider, useReport } from "../contexts/ReportContext";
+import { ReportProvider } from "../contexts/ReportContext";
 
 export default function Assemblies({ list = [], reloadServices, stopID, addressID }) {
-const [openReasonDialog, setOpenReasonDialog] = useState(false);
-const [openResultsDialog, setOpenResultsDialog] = useState(false);
-const [selectedAssembly, setSelectedAssembly] = useState(null);
-const [reason, setReason] = useState('');
-const [initialReport, setInitialReport] = useState(null);
-const [initialDevice, setInitialDevice] = useState(null);
 
-const handleRowClick = (assembly) => {
-  setSelectedAssembly(assembly);
-  Promise.all([
-    requestReport(assembly.testReportID),
-    requestAssembly(assembly.assemblyID),
-  ]).then(([report, device]) => {
-    setInitialReport(report);
-    setInitialDevice(device);
-    setOpenResultsDialog(true);
-  });
-};
+  const [openReasonDialog, setOpenReasonDialog] = useState(false);
+  const [openResultsDialog, setOpenResultsDialog] = useState(false);
+  const [selectedAssembly, setSelectedAssembly] = useState(null);
+  const [reason, setReason] = useState('');
+  const [initialReport, setInitialReport] = useState(null);
+  const [initialDevice, setInitialDevice] = useState(null);
 
-const handleToggleReady = (assembly, e) => {
-  e.stopPropagation();
-  if (assembly.ready) {
+  const handleRowClick = (assembly) => {
     setSelectedAssembly(assembly);
-  setOpenReasonDialog(true);
-  } else {
-   setAsReady(assembly.serviceID).then(() => reloadServices());
-  }
-};
-
-const [unableToLocate, setUnableToLocate] = useState(false)
-const [ranOutOfTime, setRanOutOfTime] = useState(false)
-const [removed, setRemoved] = useState(false)
-const [applyToAll, setApplyToAll] = useState(false)
-
-const handleSubmitReason = async () => {
-  if(applyToAll){
-    let arr = []
-    for(let i = 0; i < list.length; i++){
-      arr.push( await setAsNotReady(list[i].serviceID, reason) )
-    }
-    Promise.all(arr).then((data, err) =>{
-      reloadServices();
-      setOpenReasonDialog(false);
-      setReason('');
-      setUnableToLocate(false)
-      setRanOutOfTime(false)
-      setRemoved(false)
-      setApplyToAll(false)
-    })
-  }else{
-    setAsNotReady(selectedAssembly.serviceID, reason).then(() => {
-      reloadServices();
-      setOpenReasonDialog(false);
-      setReason('');
-      setUnableToLocate(false)
-      setRanOutOfTime(false)
-      setRemoved(false)
-      setApplyToAll(false)
+    Promise.all([
+      requestReport(assembly.testReportID),
+      requestAssembly(assembly.assemblyID),
+    ]).then(([report, device]) => {
+      setInitialReport(report);
+      setInitialDevice(device);
+      setOpenResultsDialog(true);
     });
   };
-};
 
-useEffect(()=>{
-  let newreason = ''
-  if(unableToLocate){
-    newreason = `${newreason} Unable To Locate.` 
-  }
+  const handleToggleReady = (assembly) => {
+    if (assembly.ready) {
+      setSelectedAssembly(assembly);
+      setOpenReasonDialog(true);
+    } else {
+      setAsReady(assembly.serviceID).then(() => reloadServices());
+    }
+  };
 
-  if(ranOutOfTime){
-    newreason = `${newreason} Ran out of time.` 
-  }
+  const [unableToLocate, setUnableToLocate] = useState(false);
+  const [ranOutOfTime, setRanOutOfTime] = useState(false);
+  const [removed, setRemoved] = useState(false);
+  const [applyToAll, setApplyToAll] = useState(false);
 
-  if(removed){
-    newreason = `${newreason} Removed.` 
-  }
-  setReason(newreason)
+  const handleSubmitReason = async () => {
+    if (applyToAll) {
+      await Promise.all(
+        list.map(item => setAsNotReady(item.serviceID, reason))
+      );
+    } else {
+      await setAsNotReady(selectedAssembly.serviceID, reason);
+    }
 
-}, [unableToLocate, ranOutOfTime, removed])
-
-const handleAddAssembly = () => {
-  createAssembly(addressID, stopID).then(() => {
     reloadServices();
-  });
-};
+    setOpenReasonDialog(false);
+    setReason('');
+    setUnableToLocate(false);
+    setRanOutOfTime(false);
+    setRemoved(false);
+    setApplyToAll(false);
+  };
 
-return ( 
-  <div className="overflow-x-auto bg-white rounded-2xl shadow-sm p-3"> 
-  <table className="min-w-full text-sm text-gray-700"> 
-    <thead> 
-      <tr className="text-left border-b text-gray-500 uppercase text-xs"> 
-        <th className="py-2 px-2">Assembly</th> 
-        <th className="py-2 px-2">Service</th>
-        <th className="py-2 px-2 text-center">Ready</th> 
-      </tr> 
-    </thead>
-    <tbody>
+  useEffect(() => {
+    let newreason = '';
+    if (unableToLocate) newreason += ' Unable To Locate.';
+    if (ranOutOfTime) newreason += ' Ran out of time.';
+    if (removed) newreason += ' Removed.';
+    setReason(newreason);
+  }, [unableToLocate, ranOutOfTime, removed]);
+
+  const handleAddAssembly = () => {
+    createAssembly(addressID, stopID).then(() => {
+      reloadServices();
+    });
+  };
+
+  return (
+    <div className="space-y-0 p-0">
+      
+      {/* CARDS */}
       {list.map((assembly, ind) => (
-        <React.Fragment key={ind}>
-          <tr
-            onClick={() => handleRowClick(assembly)}
-            className="border-b last:border-none hover:bg-gray-50 cursor-pointer transition"
-          >
-            <td className="py-2 px-2 flex items-center gap-2">
-              {assembly.serial_number || `Assembly ${ind + 1}`} <br />
-              {assembly.location}
-            </td>
-            <td className="py-2 px-2">
-              {assembly.serviceType || '—'} <br />
-              {assembly.state}
-            </td>
-            <td className="py-2 px-2 text-center" onClick={(e) => e.stopPropagation()}>
-              <input
-                type="checkbox"
-                checked={assembly.ready ?? true}
-                onChange={(e) => handleToggleReady(assembly, e)}
-                className="w-5 h-5 accent-blue-600 cursor-pointer text-black"
-              />
-            </td>
-          </tr>
+        <div
+          key={ind}
+          onClick={() => handleRowClick(assembly)}
+          className="bg-slate-50 rounded-xxl shadow-sm p-4  transition"
+        >
 
+          {/* HEADER */}
+          <div className="flex justify-between items-start">
+            <div>
+              <p className="font-semibold text-gray-900 text-base">
+                SN# {assembly.serial_number || `Assembly ${ind + 1}`}
+              </p>
+              <p className="text-sm text-gray-500">
+                {assembly.location}
+              </p>
+            </div>
+
+            {/* READY BUTTON */}
+            <input
+              type="checkbox"
+              checked={assembly.ready ?? true}
+              onChange={(e) => handleToggleReady(assembly, e)}
+              onClick={(e) => e.stopPropagation()}
+              className="w-6 h-6 rounded-md border-gray-300 text-green-600 focus:ring-green-500"
+            />
+          </div>
+
+          {/* SERVICE INFO */}
+          <div className="text-sm text-gray-700">
+            <p>{assembly.serviceType || '—'}</p>
+            <p className="text-gray-500">{assembly.state}</p>
+          </div>
+
+          {/* REASON */}
           {assembly.reason && (
-            <tr>
-              <td colSpan={3} className="text-sm text-black px-4 py-1 italic">
-                Reason: {assembly.reason}
-              </td>
-            </tr>
+            <div className="bg-red-50 text-red-700 text-sm p-2 rounded-lg">
+              {assembly.reason}
+            </div>
           )}
-        </React.Fragment>
+
+        </div>
       ))}
-    </tbody>
-  </table>
 
-  {/* Add Assembly Button */}
-  <div className="flex justify-start mt-4">
-    <button
-      onClick={handleAddAssembly}
-      className="flex items-center gap-2 px-4 py-2 text-sm border shadow
-        rounded-lg bg-gray-200 text-white hover:bg-gray-500 transition"
-    >
-      <PlusCircle className="w-4 h-4 text-slate-500" />
-    </button>
-  </div>
-
-  {/* Reason Dialog */}
-  <Dialog
-    open={openReasonDialog}
-    onClose={() => setOpenReasonDialog(false)}
-    className="relative z-50"
-  >
-    <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
-    <div className="fixed inset-0 flex items-center justify-center p-4">
-      <Dialog.Panel className="relative bg-white rounded-2xl p-6 shadow-xl max-w-sm w-full">
-        <button
-          onClick={() => setOpenReasonDialog(false)}
-          className="absolute top-3 right-3 text-gray-800 hover:text-gray-600"
-        >
-          <X className="w-5 h-5" />
-        </button>
-
-        <Dialog.Title className="text-lg font-semibold text-gray-800 flex items-center gap-2">
-          <CheckCircle2 className="w-5 h-5 text-blue-600" />
-          Mark as Not Ready
-        </Dialog.Title>
-
-        <textarea
-          value={reason}
-          onChange={(e) => setReason(e.target.value)}
-          placeholder="Enter reason..."
-          className="w-full border border-gray-300 rounded-lg mt-3 p-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none text-black"
-          rows={3}
-        />
-        <div className = "text-black">
-          <input  
-            checked = {unableToLocate}
-            onChange = {(e) => setUnableToLocate(e.target.checked) }
-            type= "checkbox"/>
-          <label> Unable to locate </label>
-        </div>
-        <div className = "text-black">
-          <input  
-            checked = {ranOutOfTime}
-            onChange = {(e) => setRanOutOfTime(e.target.checked) }
-            type= "checkbox"/>
-          <label> Ran out of time </label>
-        </div>
-        <div className = "text-black">
-          <input  
-            checked = {removed}
-            onChange = { (e) => setRemoved(e.target.checked) }
-            type= "checkbox"
-          />
-          <label> Removed </label>
-        </div>
-        <hr/>
-        <div className = "text-black">
-          <input  
-            type= "checkbox"
-            checked = {applyToAll}
-            onChange = { (e) => setApplyToAll(e.target.checked) }
-          />
-          <label> Apply to all</label>
-        </div>
-
-        <div className="flex justify-end gap-3 mt-4">
-          <button
-            onClick={handleSubmitReason}
-            className="px-4 py-2 text-sm rounded-lg bg-blue-600 text-white hover:bg-blue-700"
-          >
-            Submit
-          </button>
-        </div>
-      </Dialog.Panel>
-    </div>
-  </Dialog>
-
-  {/* Results Dialog */}
-  <Dialog
-    open={openResultsDialog}
-    onClose={() => setOpenResultsDialog(false)}
-    className="relative z-50"
-  >
-    <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
-    <div className="fixed inset-0 flex items-center justify-center p-2 sm:p-4">
-      <Dialog.Panel
-        className="relative bg-white rounded-xl sm:rounded-2xl shadow-xl
-          w-full max-w-sm sm:max-w-lg md:max-w-2xl max-h-[90vh] flex flex-col text-black"
+      {/* ADD BUTTON */}
+      <button
+        onClick={handleAddAssembly}
+        className="w-full flex items-center justify-center gap-2 p-3 rounded-xl bg-gray-300 text-gray-800 font-medium active:bg-blue-700 transition"
       >
-        <button
-          onClick={() => setOpenResultsDialog(false)}
-          className="absolute top-2 right-2 text-gray-900 hover:text-gray-900 shadow border rounded-2xl p-1"
-        >
-          <X className="w-6 h-6" />
-        </button>
+        <PlusCircle className="w-5 h-5" />
+        Add Assembly
+      </button>
 
-        <Dialog.Title className="text-base sm:text-lg font-semibold text-gray-800 flex items-center gap-2 p-4 pb-2">
-          <FileText className="w-5 h-5 text-blue-600" />
-          Assembly Results
-        </Dialog.Title>
+      {/* REASON DIALOG */}
+      <Dialog open={openReasonDialog} onClose={() => setOpenReasonDialog(false)} className="relative z-50">
+        <div className="fixed inset-0 bg-black/30" />
+        <div className="fixed inset-0 flex items-center justify-center p-4">
+          <Dialog.Panel className="bg-white rounded-2xl p-5 w-full max-w-sm text-black">
 
-        <div className="flex-1 overflow-y-auto px-4 pb-4">
-          {initialReport && initialDevice ? (
-            <ReportProvider initialReport={initialReport} initialDevice={initialDevice}>
-              <Results 
-                closeMe={() => setOpenResultsDialog(false)}  
-                reloadServices = { ()=> reloadServices() } />
-            </ReportProvider>
-          ) : (
-            <>Loading report...</>
-          )}
+            <Dialog.Title className="font-semibold text-lg mb-3">
+              Mark as Not Ready
+            </Dialog.Title>
+
+            <textarea
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              className="w-full border rounded-lg p-2 text-sm mb-3"
+            />
+
+            <div className="space-y-2 text-sm flex flex-col">
+              <label><input type="checkbox" checked={unableToLocate} onChange={e => setUnableToLocate(e.target.checked)} /> Unable to locate</label>
+              <label><input type="checkbox" checked={ranOutOfTime} onChange={e => setRanOutOfTime(e.target.checked)} /> Ran out of time</label>
+              <label><input type="checkbox" checked={removed} onChange={e => setRemoved(e.target.checked)} /> Removed</label>
+            </div>
+
+            <div className="mt-3 border-t pt-2">
+              <label className="text-sm">
+                <input type="checkbox" checked={applyToAll} onChange={e => setApplyToAll(e.target.checked)} /> Apply to all
+              </label>
+            </div>
+
+            <button
+              onClick={handleSubmitReason}
+              className="mt-4 w-full bg-blue-600 text-white p-2 rounded-lg"
+            >
+              Submit
+            </button>
+
+          </Dialog.Panel>
         </div>
-      </Dialog.Panel>
-    </div>
-  </Dialog>
-</div>
+      </Dialog>
 
-);
+      {/* RESULTS DIALOG */}
+      <Dialog open={openResultsDialog} onClose={() => setOpenResultsDialog(false)} className="relative z-50 ">
+        <div className="fixed inset-0 flex items-center justify-center p-0 ">
+
+          <Dialog.Panel className="bg-white  w-full  h-full flex flex-col text-black">
+
+            <div className = " px-5 flex flex-row justify-between py-5">
+              <div className="font-semibold">
+                Assembly Results
+              </div>
+              <button
+                onClick={() => setOpenResultsDialog(false)}
+                className=" border rounded"
+              >
+                <X />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto ">
+              {initialReport && initialDevice ? (
+                <ReportProvider initialReport={initialReport} initialDevice={initialDevice}>
+                  <Results
+                    closeMe={() => setOpenResultsDialog(false)}
+                    reloadServices={() => reloadServices()}
+                  />
+                </ReportProvider>
+              ) : (
+                <>Loading...</>
+              )}
+            </div>
+
+          </Dialog.Panel>
+
+        </div>
+      </Dialog>
+
+    </div>
+  );
 }

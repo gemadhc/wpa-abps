@@ -8,6 +8,7 @@ export interface Item {
 }
 
 let dbInstance: IDBPDatabase | null = null
+
 export async function getDB() {
   if (dbInstance) return dbInstance
   dbInstance = await openDB('offline-db', 1, {

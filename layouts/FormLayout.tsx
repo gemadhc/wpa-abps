@@ -26,7 +26,7 @@ export default function Form({ fields, title, hasTitle = false, totalRows = 2 })
   };
 
   const inputBase =
-    'peer w-full border border-gray-300 rounded-md p-5 text-base focus:border-blue-500 focus:ring-1 focus:ring-blue-400';
+    'peer w-full border border-gray-300 rounded-md p-5 text-base focus:border-pink-500 focus:ring-2 focus:ring-pink-400';
 
   return (
     <div className="flex flex-col gap-4 w-full text-base">

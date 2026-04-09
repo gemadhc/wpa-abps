@@ -1,9 +1,10 @@
 import { getDB }  from "./db.ts"
 
-export async function getService(id) {
+export async function getServices(id) {
 	try{
 		const db = await getDB()
-  		let item = db.get('services', id)
+  		let item = await db.get('services', id)
+  		console.log('after retriaval: ', item)
   		return item
 	}catch(err){
 		console.log("err", err)
@@ -11,6 +12,7 @@ export async function getService(id) {
 	}
  
 }
+
 
 export async function updateService(updates){
 	const db = await getDB()

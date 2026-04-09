@@ -13,11 +13,10 @@ import { updateAssembly } from "../actions/assembly"
 // Internal Body Component (uses form context only)
 // ---------------------------------------------------
 function ResultsBody({ closeMe, reloadServices }) {
-  const [activeTab, setActiveTab] = useState('Assembly');
+  const [activeTab, setActiveTab] = useState('Device');
   const {formData} = useReport()
   const saveAll = () =>{
     return new Promise(async (resolve, reject) =>{
-      console.log("Saving: ", formData)
       await updateReport(formData)
       await updateAssembly(formData)
       resolve()
@@ -27,12 +26,12 @@ function ResultsBody({ closeMe, reloadServices }) {
   return (
     <div className="flex flex-col h-full">
       {/* Tabs */}
-      <div className="flex flex-wrap gap-0 mb-3 pb-1 border-b border-gray-200">
-        {['Assembly', 'Initial', 'Final'].map((tabName) => (
+      <div className="flex flex-row gap-0 mb-3 pb-1 border-b border-gray-200">
+        {['Device', 'Initial Results', 'Repairs'].map((tabName) => (
           <button
             key={tabName}
             onClick={() => setActiveTab(tabName)}
-            className={`px-3 py-2 text-sm font-medium transition ${
+            className={`px-3 py-2 w-full text-lg font-medium transition ${
               activeTab === tabName
                 ? 'bg-slate-300 text-slate-700'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -44,15 +43,15 @@ function ResultsBody({ closeMe, reloadServices }) {
       </div>
 
       {/* Scrollable tab content */}
-      <div className="flex-1 overflow-y-auto pr-1">
-        {activeTab === 'Assembly' && <Assembly />}
-        {activeTab === 'Initial' && <Initial />}
-        {activeTab === 'Final' && <Final /> }
+      <div className="flex-1 overflow-y-auto px-3">
+        {activeTab === 'Device' && <Assembly />}
+        {activeTab === 'Initial Results' && <Initial />}
+        {activeTab === 'Repairs' && <Final /> }
       </div>
 
       {/* Sticky Save Button */}
      
-      <div className="sticky bottom-0 left-0 right-0 bg-white border-t pt-3 pb-4 mt-2">
+      <div className="sticky bottom-0 left-0 right-0 bg-green-800 border-t pt-3 pb-20 mt-2">
         <button
           onClick={() =>
             saveAll().then(() => {

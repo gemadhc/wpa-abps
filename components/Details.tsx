@@ -20,58 +20,68 @@ export default function Details({ stopDetails, item }) {
   const phoneLink = `tel:${phone.replace(/[^0-9]/g, '')}`;
 
   return (
-    <div className="grid grid-cols-2 gap-y-5 gap-x-2 text-sm text-gray-700 p-5 bg-white rounded-2xl">
-      <div className="col-span-2 p-0 font-bold">
-        {item.comment}
-      </div>
+    <div className="bg-white rounded-2xl ">
 
-      {/* Name */}
-      <div className="flex items-center gap-2">
-        <FileText className="w-4 h-4 text-blue-500" />
-        <span className="font-medium">{name}</span>
-      </div>
+  {/* COMMENT / HEADER */}
+  <div className="text-base font-semibold text-gray-900 leading-snug mb-10">
+    {item.comment}
+  </div>
 
-      {/* Phone */}
-      <div className="flex items-center gap-2">
-        <Phone className="w-4 h-4 text-green-500" />
-        <a href={phoneLink} className="text-blue-600 hover:underline">
-          {phone}
-        </a>
-      </div>
+  {/* INFO BLOCK */}
+  <div className="space-y-3 text-sm text-gray-700">
 
-      {/* Gate Number */}
-      <div className="flex items-center gap-2">
-        <Lock className="w-4 h-4 text-gray-500" />
-        <span>{gate_number}</span>
-      </div>
-
-    
-
-      {/* Apple Maps */}
-      <div className="flex items-center gap-2">
-        <MapPin className="w-4 h-4 text-red-500" />
-        <a
-          href={appleMapsLink}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-blue-600 hover:underline"
-        >
-          Apple Maps
-        </a>
-      </div>
-
-      {/* Google Maps */}
-      <div className="flex items-center gap-2">
-        <MapPinned className="w-4 h-4 text-yellow-500" />
-        <a
-          href={googleMapsLink}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-blue-600 hover:underline"
-        >
-          Google Maps
-        </a>
-      </div>
+    {/* Name */}
+    <div className="flex items-center gap-3">
+      <FileText className="w-5 h-5 text-blue-500 flex-shrink-0" />
+      <span className="font-medium text-gray-900">{name}</span>
     </div>
+
+    {/* Phone (BIG TAP TARGET) */}
+    <a
+      href={phoneLink}
+      className="flex items-center gap-3 p-3 rounded-xl bg-green-50 active:bg-green-100 transition"
+    >
+      <Phone className="w-5 h-5 text-green-600 flex-shrink-0" />
+      <span className="text-green-700 font-medium text-base">
+        {phone}
+      </span>
+    </a>
+
+    {/* Gate */}
+    {gate_number && (
+      <div className="flex items-center gap-3">
+        <Lock className="w-5 h-5 text-gray-500 flex-shrink-0" />
+        <span className="text-gray-800">Gate: {gate_number}</span>
+      </div>
+    )}
+
+  </div>
+
+  {/* ACTION BUTTONS (MAPS) */}
+  <div className="grid grid-cols-2 gap-3 pt-2">
+
+    <a
+      href={appleMapsLink}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex items-center justify-center gap-2 p-3 rounded-xl bg-gray-100 active:bg-gray-200 transition text-sm font-medium"
+    >
+      <MapPin className="w-5 h-5 text-gray-700" />
+      Apple Maps
+    </a>
+
+    <a
+      href={googleMapsLink}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex items-center justify-center gap-2 p-3 rounded-xl bg-yellow-50 active:bg-yellow-100 transition text-sm font-medium"
+    >
+      <MapPinned className="w-5 h-5 text-yellow-600" />
+      Google Maps
+    </a>
+
+  </div>
+
+</div>
   );
 }

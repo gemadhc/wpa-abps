@@ -36,17 +36,17 @@ function LayoutContent({ children }) {
   const isActive = (path) => pathname.startsWith(path);
 
   return (
-    <>
+    <div className="flex flex-col h-screen">
       {/* HEADER */}
-      <header className="fixed top-0 left-0 right-0 z-50 h-15 pt-5 bg-slate-800 text-white shadow-xxl">
-        <div className="flex flex-row gap-2 justify-evenly">
-          <p className="companyName text-xl">ABPS</p>
+      <header className="fixed top-0 left-0 right-0 z-50 h-10 pb-1 pt-1 pr-5 bg-slate-800 text-white ">
+        <div className="flex flex-row gap-2 justify-end">
+          <p className="companyName text-xl">AB&PS</p>
           <OnlineChecker />
         </div>
       </header>
 
       {/* MAIN */}
-      <main className="flex-1 mt-12 mb-16 overflow-y-auto bg-gray-50">
+      <main className="pt-10 mt-0 mb-16 overflow-y-auto bg-gray-50">
         {children}
       </main>
 
@@ -88,7 +88,7 @@ function LayoutContent({ children }) {
 
         </footer>
       )}
-    </>
+    </div>
   );
 }
 

@@ -49,7 +49,8 @@ export default function Home() {
     <div className="min-h-screen bg-white text-gray-900 flex flex-col">
       {/* HEADER SECTION */}
       <div className="flex flex-row items-center justify-evenly py-2 border-b border-gray-200 bg-gray-50 sticky top-0 z-10">
-        <DatePicker value={myDate} onSelected={handleDateChange} />
+        <DatePicker value={myDate} onSelected={handleDateChange}
+         />
         <div className="w-10 p-1 font-semibold text-center bg-blue-50 rounded-lg">
           {list.length}
         </div>
@@ -61,7 +62,7 @@ export default function Home() {
       </div>
 
       {/* LIST SECTION */}
-      <div className="flex-1 max-h-200 overflow-y-scroll p-3 space-y-0 bg-slate-50 pb-500">
+      <div className="flex-1 max-h-200 overflow-y-scroll p-0 space-y-0 bg-white pb-500">
         {
           list.length ?
             <ListSorted  

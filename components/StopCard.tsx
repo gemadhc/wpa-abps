@@ -17,7 +17,7 @@ import { syncStops } from "../lib/sync"
 import { getStops, createStop, updateStop} from "../lib/stop_db"
 import { getBilling, createItem} from "../lib/billing_db"
 import { createItem as createInvoice, getInvoice } from "../lib/invoice_db"
-import { createItem as createService} from "../lib/services_db"
+import { createItem as createService, getServices} from "../lib/services_db"
 import { getLineItems, addLineItems, removeLineItem,  createLineItem} from "../lib/lineitem_db"
 import {createItem as createReport, getReport as cacheReport, cleanReports} from "../lib/reports_db" 
 
@@ -134,8 +134,8 @@ export default function StopCard({ stopID, item, reloadList}) {
     return; 
   }
 
-
   const loadServices = async() => {
+    console.log("Retrieving services for : ", item, item.stopID)
     let cached = await getServices(item.stopID)
     console.log("Cached:" , cached)
     setServices(cached.list)
@@ -143,7 +143,6 @@ export default function StopCard({ stopID, item, reloadList}) {
         console.log("Offline: using cached stops")
         return
     }
-
     requestServices(item.stopID).then((data) =>{
       setServices(data); 
       createService(data, item.stopID); 
@@ -151,11 +150,10 @@ export default function StopCard({ stopID, item, reloadList}) {
     return; 
   }
 
-  const loadItems = async() => {
-    let cached = await getLienItems(item.invoiceID)
 
-    console.log("Cached:" , cached)
-    setMyLines(cached.list)
+  const loadItems = async() => {
+    let cached = await getLineItems(item.invoiceID)
+    setMyLines(cached?.list || [])
     if (!navigator.onLine) {
         console.log("Offline: using cached stops")
         return
@@ -171,7 +169,7 @@ export default function StopCard({ stopID, item, reloadList}) {
 
 
   const loadReport = async(serviceItem) => {
-    let cached = await cacheReoirt(serviceItem.testReportID)
+    let cached = await cacheReport(serviceItem.testReportID)
 
     if (!navigator.onLine) {
         console.log("Offline: using cached stops")
@@ -180,8 +178,8 @@ export default function StopCard({ stopID, item, reloadList}) {
 
     requestReport(serviceItem.testReportID).then((report) =>{
       requestAssembly(serviceItem.assemblyID).then((assembly) =>{
-        obj = {...report, ...assembly}
-        createReport( obj, service.testReportID )
+        let obj = {...report, ...assembly}
+        createReport( obj, serviceItem.testReportID )
       })
     }) 
   }
@@ -213,7 +211,7 @@ export default function StopCard({ stopID, item, reloadList}) {
   return (
     <div className="bg-white rounded-2xl shadow-md border border-gray-200 overflow-hidden transition-all hover:shadow-lg max-w-xl mx-auto">
       {/* Header */}
-      <div className={`flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 ${headerBg} border-b gap-2`}>
+      <div className={`flex flex-row sm:flex-row justify-between items-start sm:items-center p-3 ${headerBg} border-b gap-2`}>
         <div className="flex-1">
           <div className="text-sm text-gray-600 font-medium mb-1">
             {isTimed ? (
@@ -233,7 +231,8 @@ export default function StopCard({ stopID, item, reloadList}) {
             {item.location_name}
           </div>
           <div className="text-sm text-gray-500">
-            {item.street}, {item.city}, {item.state} {item.zipcode}
+            {item?.street.toLowerCase() || ''} <br/>
+            {item?.city.toLowerCase() || '' }  {item?.state || '' } {item?.zipcode.toLowerCase() || '' }
           </div>
           <div className="text-sm text-gray-600 mt-2 italic">
             {(item.comment || "").length > 90
@@ -261,43 +260,46 @@ export default function StopCard({ stopID, item, reloadList}) {
       {/* Accordion / Tabs */}
       <div
         className={`transition-all duration-300 ease-in-out ${
-          expanded ? 'max-h-[2000px] opacity-100' : 'max-h-0 opacity-0'
+          expanded ? 'max-h-150 opacity-100' : 'max-h-0 opacity-0'
         } overflow-hidden`}
       >
-        <div className="p-4 bg-white border border-gray-300 rounded shadow flex flex-col gap-4">
+        <div className="px-0 bg-slate-80 border border-gray-300 rounded shadow flex flex-col gap-4 ">
           {/* Tabs */}
-          <div className="flex flex-wrap gap-0 mb-3 pb-2">
+          <div className="flex gap-0 mb-3 pb-0 bg-green-100">
             {tabs.map((tab) => (
               <button
                 key={tab.name}
                 onClick={() => setActiveTab(tab.name)}
-                className={`px-3 py-2 rounded text-sm font-medium transition ${
+                className={`px-3 py-2 w-full text-sm font-medium transition ${
                   activeTab === tab.name
-                    ? 'bg-slate-300 text-slate-700'
+                    ? 'bg-slate-300 text-sky-700 '
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                 }`}
               >
                 {tab.name}
               </button>
             ))}
+
+           
+
+
           </div>
 
           {/* Active Tab Content */}
-          <div className="text-gray-700 text-sm max-w-full  max-h-100 overflow-scroll pb-10">
+          <div className="text-gray-700 text-sm max-w-full  max-h-100 overflow-scroll pb-10 px-8">
              {tabs.find((tab) => tab.name === activeTab)?.content}
           </div>
 
           {/* Complete Stop Button */}
-          <button
+           <button
             onClick={handleCompleteStop}
             disabled={completed}
-            className={`sticky bottom-0 flex items-center justify-center gap-2 w-full px-4 py-3 text-sm rounded-lg transition ${
+            className={`px-3 py-2 w-full transition ml-2 rounded-xl  border border-green-500 ${
               completed
                 ? 'bg-green-100 text-green-700 cursor-not-allowed'
                 : 'bg-green-800 text-white hover:bg-green-900'
-            } mt-4`}
+            }`}
           >
-            <CheckCircle2 className="w-5 h-5" />
             {completed ? 'Completed' : 'Complete Stop'}
           </button>
         </div>

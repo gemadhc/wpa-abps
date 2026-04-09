@@ -3,7 +3,7 @@ import { getDB }  from "./db.ts"
 export async function getLineItem(id) {
 	try{
 		const db = await getDB()
-  		let item = db.get('lineItems', id)
+  		let item = await db.get('lineItems', id)
   		return item
 	}catch(err){
 		console.log("err", err)
@@ -15,7 +15,7 @@ export async function getLineItem(id) {
 export async function getLineItems(invoiceID) {
 	try{
 		const db = await getDB()
-  		let item = db.get('lineItems', invoiceID)
+  		let item = await db.get('lineItems', invoiceID)
   		return item
 	}catch(err){
 		console.log("err", err)
