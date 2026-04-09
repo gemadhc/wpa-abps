@@ -93,12 +93,12 @@ export default function Invoice({ items = [], billing, invoice, reload, address}
     : 'bg-green-100 text-green-700';
 
   return (
-    <div className="bg-white shadow-sm rounded-2xl p-4 sm:p-6 space-y-5">
+    <div className="bg-white shadow-sm rounded-2xl">
       {/* Header Section */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between border-b pb-3 gap-3">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between px-5 pb-1 gap-3 bg-gray-50 rounded">
         {/* Left: Invoice Number + Status */}
         <div className="flex items-center justify-between gap-2 flex-wrap">
-          <h2 className="text-base sm:text-lg font-semibold text-gray-800">
+          <h2>
             #{invoice.id}
           </h2>
           <span
@@ -183,8 +183,8 @@ export default function Invoice({ items = [], billing, invoice, reload, address}
       </div>
 
       {/* Billing Address */}
-      <div className="bg-gray-50 border rounded-xl p-4 text-sm">
-        <h3 className="font-medium text-gray-700 mb-1">Billing Address</h3>
+      <div className="px-8 md:px-15 py-10 text-sm">
+        <h2 className="font-medium text-gray-700 mb-1">Billing To </h2>
         {billing ? (
           <p className="text-gray-600 leading-relaxed">
             {billing.name}
@@ -200,25 +200,27 @@ export default function Invoice({ items = [], billing, invoice, reload, address}
       </div>
 
       {/* Line Items */}
-      <LineItems 
-        items={items} 
-        invoiceID = { invoice.id }
-        reloadItems = { reload }
-    
-      />
+      <div className = "px-8 md:px-15  pb-60">
+         <h2 className="font-medium text-gray-700 mb-1">Work Performed</h2>
+        <LineItems 
+          items={items} 
+          invoiceID = { invoice.id }
+          reloadItems = { reload }
+        />
+      </div>
 
       {/* Payment Dialog */}
       <Dialog
         open={openPaymentDialog}
         onClose={handleClosePayment}
-        className="relative z-50"
+        className="relative z-50 "
       >
-        <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
-        <div className="fixed inset-0 flex items-center justify-center p-2 sm:p-4">
-          <Dialog.Panel className="bg-white rounded-2xl shadow-xl w-full max-w-sm sm:max-w-md p-4 sm:p-6">
+        <div className="fixed inset-0 bg-black/30 " aria-hidden="true"  />
+        <div className="fixed inset-0 flex items-center justify-center  sm:p-4">
+          <Dialog.Panel className="bg-white  shadow-xl w-full sm:max-w-md p-4 sm:p-6 min-h-screen">
             <div className="flex items-center justify-between mb-3">
               <Dialog.Title className="text-base sm:text-lg font-semibold text-gray-800">
-                
+                Process Payment
               </Dialog.Title>
               <button
                 onClick={handleClosePayment}

@@ -39,7 +39,7 @@ export default function Home() {
       localStorage.setItem("session", JSON.stringify(data));
 
       setTimeout(() => {
-        router.push("/dispatch");
+        router.push("/offline");
       }, 500);
 
     } catch (err) {
@@ -51,7 +51,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <div className="absolute b-0 min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <div className="w-full max-w-sm bg-white shadow-md rounded-xl p-6 border border-gray-200">
         <h1 className="text-center text-xl font-semibold text-gray-800 mb-4">
           Welcome Back
@@ -100,7 +100,7 @@ export default function Home() {
           <button
             type="submit"
             disabled={loading}
-            className={`w-full flex justify-center items-center gap-2 bg-blue-600 text-white rounded-lg py-2 font-medium transition ${
+            className={`w-full flex justify-center items-center gap-2 bg-slate-600 text-white rounded-lg py-2 font-medium transition ${
               loading ? "opacity-75 cursor-not-allowed" : "hover:bg-blue-700"
             }`}
           >

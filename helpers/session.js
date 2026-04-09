@@ -26,7 +26,7 @@ export const SessionProvider = ({ children }) => {
   useEffect(() => {
     if (session) {
       // Only redirect to /dispatch if not already there
-      if (pathname === '/login') router.push('/dispatch');
+      if (pathname === '/login') router.push('/offline');
     } else {
       // If not logged in, redirect to /login (except when already there)
       if (pathname !== '/login') router.push('/login');

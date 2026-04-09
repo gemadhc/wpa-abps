@@ -3,9 +3,11 @@
 import { useEffect, useState } from "react";
 import StopCard from "../../components/StopCard";
 import { routeStops } from "../../helpers/googlemaps.js";
+import WaterLoader from "../../components/WaterLoader"
 
 export default function StopsList({ stops, reloadList }) {
   const [sortedStops, setSortedStops] = useState([]);
+  const [sorting, setSorting] = useState(false)
 
   // Helper: determine if a stop has a specific time window
   const isTimedStop = (stop) => {
@@ -16,6 +18,7 @@ export default function StopsList({ stops, reloadList }) {
   useEffect(() => {
     const sortAndRouteStops = async () => {
       try {
+        setSorting(true)
         // Split stops into 3 categories
         const timedStops = stops
           .filter((s) => isTimedStop(s) && s.status !== "COMPLETED")
@@ -44,6 +47,7 @@ export default function StopsList({ stops, reloadList }) {
           ...routedStopsWithFlag,
           ...completedStops,
         ]);
+        setSorting(false)
       } catch (err) {
         console.error("Error routing stops:", err);
         // Fallback: set all stops with default flag
@@ -55,15 +59,25 @@ export default function StopsList({ stops, reloadList }) {
   }, [stops]);
 
   return (
-    <div>
-      {sortedStops.map((stop) => (
-        <StopCard
-          key={stop.stopID}
-          stopID={stop.stopID}
-          item={stop}
-          reloadList={reloadList}
-        />
-      ))}
+    <div className ="no-scrollbar">
+      {
+        sorting ? 
+          <div className = "pt-15 "> 
+              <p className = "text-slate-500 font-bold text-center "> Sorting and Routing </p>
+              <WaterLoader />
+            </div>
+        : 
+          <> 
+            {sortedStops.map((stop) => (
+              <StopCard
+                key={stop.stopID}
+                stopID={stop.stopID}
+                item={stop}
+                reloadList={reloadList}
+              />
+            ))}
+          </>
+      }
     </div>
   );
 }

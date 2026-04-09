@@ -35,7 +35,7 @@ export default function Page() {
     requestIfActivated().then((data) => {
       if (data.isActivated) {
         setStatus("verified"); // trigger verified animation
-        setTimeout(() => router.push("/dispatch"), 1500); // delay before redirect
+        setTimeout(() => router.push("/offline"), 1500); // delay before redirect
       } else {
         setStatus("ready"); // show password form
       }
@@ -59,7 +59,7 @@ export default function Page() {
     try {
       await updatePassword(password);
       setStatus("verified");
-      setTimeout(() => router.push("/dispatch"), 1500);
+      setTimeout(() => router.push("/offline"), 1500);
     } catch (err) {
       console.error(err);
       setError("An unexpected error occurred. Please try again.");

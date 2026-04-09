@@ -14,11 +14,14 @@ import { updateAssembly } from "../actions/assembly"
 // ---------------------------------------------------
 function ResultsBody({ closeMe, reloadServices }) {
   const [activeTab, setActiveTab] = useState('Device');
+  const [saving, setSaving] = useState(false)
   const {formData} = useReport()
   const saveAll = () =>{
     return new Promise(async (resolve, reject) =>{
+      setSaving(true)
       await updateReport(formData)
       await updateAssembly(formData)
+      setSaving(false)
       resolve()
     })
   }
@@ -27,7 +30,7 @@ function ResultsBody({ closeMe, reloadServices }) {
     <div className="flex flex-col h-full">
       {/* Tabs */}
       <div className="flex flex-row gap-0 mb-3 pb-1 border-b border-gray-200">
-        {['Device', 'Initial Results', 'Repairs'].map((tabName) => (
+        {['Device', 'Initial', 'Repairs'].map((tabName) => (
           <button
             key={tabName}
             onClick={() => setActiveTab(tabName)}
@@ -43,25 +46,31 @@ function ResultsBody({ closeMe, reloadServices }) {
       </div>
 
       {/* Scrollable tab content */}
-      <div className="flex-1 overflow-y-auto px-3">
+      <div className="flex-1 overflow-y-auto px-10 no-scrollbar">
         {activeTab === 'Device' && <Assembly />}
-        {activeTab === 'Initial Results' && <Initial />}
+        {activeTab === 'Initial' && <Initial />}
         {activeTab === 'Repairs' && <Final /> }
       </div>
 
       {/* Sticky Save Button */}
      
-      <div className="sticky bottom-0 left-0 right-0 bg-green-800 border-t pt-3 pb-20 mt-2">
+      <div className="sticky bottom-0 left-0 right-0 bg-green-800  shoadow-xl rounded-tl-lg rounded-tr-lg  mt-2 ">
         <button
+          disabled = { saving }
           onClick={() =>
             saveAll().then(() => {
               closeMe?.();
               reloadServices()
             })
           }
-          className="w-full px-4 py-3 text-sm rounded-lg bg-green-800 text-white hover:bg-green-700"
+          className="w-full px-4  pt-10 text-lg rounded-lg bg-green-700 text-white hover:bg-green-500 pb-20 hover:bg-green-600 disabled:bg-gray-500"
         >
-          Save Changes
+          {
+            saving? 
+              <>Saving...</>
+            : 
+              <>Save</>
+          }
         </button>
       </div>
     

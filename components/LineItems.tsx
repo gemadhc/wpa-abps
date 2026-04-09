@@ -10,6 +10,10 @@ export default function LineItems({ items: initialItems = [], invoiceID, reloadI
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editedItem, setEditedItem] = useState<any>({});
   const [itemOptions, setItemOptions] = useState([]);
+  const [creating, setCreating] = useState(false)
+  const [removing, setRemoving] = useState(false)
+  const [saving, setSaving] = useState(false)
+
 
   useEffect(() => {
     getQuickbooksItems().then((data) => {
@@ -27,16 +31,20 @@ export default function LineItems({ items: initialItems = [], invoiceID, reloadI
   };
 
   const handleSave = (id: number) => {
+    setSaving(true)
     updateItem(editedItem.id, editedItem).then(() => {
       reloadItems();
       setEditingId(null);
       setEditedItem({});
+      setSaving(false)
     });
   };
 
   const handleRemove = (id: number) => {
+    setRemoving(true)
     removeItem(id).then(() => {
       reloadItems();
+      setRemoving(false)
     });
   };
 
@@ -62,8 +70,10 @@ export default function LineItems({ items: initialItems = [], invoiceID, reloadI
   };
 
   const handleAddNewItem = () => {
+    setCreating(true)
     createItem(invoiceID).then(() => {
       reloadItems();
+      setCreating(false)
     });
   };
 
@@ -90,21 +100,33 @@ export default function LineItems({ items: initialItems = [], invoiceID, reloadI
                       onClick={() => handleSave(itm.id)}
                       className="p-1 text-green-600 hover:bg-green-50 rounded-lg"
                     >
-                      <Save className="w-4 h-4" />
+                      {
+                        saving ? 
+                          <> Saving... </>
+                        : 
+                          <Save className="w-6 h-6" />
+                      }
+                      
+                      
                     </button>
                   ) : (
                     <button
                       onClick={() => handleEdit(itm)}
                       className="p-1 text-blue-600 hover:bg-blue-50 rounded-lg"
                     >
-                      <Pencil className="w-4 h-4" />
+                      <Pencil className="w-6 h-6" />
                     </button>
                   )}
                   <button
                     onClick={() => handleRemove(itm.id)}
                     className="p-1 text-red-600 hover:bg-red-50 rounded-lg"
                   >
-                    <Trash2 className="w-4 h-4" />
+                    {
+                      removing ? 
+                        <> Removing ... </>
+                      : 
+                        <Trash2 className="w-6 h-6" />
+                    }
                   </button>
                 </div>
               </div>
@@ -191,11 +213,20 @@ export default function LineItems({ items: initialItems = [], invoiceID, reloadI
 
       <div className="flex justify-between md:justify-end items-center px-4 py-3 bg-gray-50 border-t rounded-b-2xl">
         <button
+          disabled = { creating } 
           onClick={handleAddNewItem}
-          className="flex items-center gap-1 text-blue-600 text-sm font-medium hover:underline"
+          className="flex items-center gap-1 text-blue-600 text-sm font-medium hover:underline disabled:bg-gray-200 disabled:cursor-not-allowed"
         >
-          <PlusCircle className="w-4 h-4" /> Add New Line Item
+          <PlusCircle className="w-4 h-4" />
+          {
+            creating ? 
+              <> Loading... </> 
+            : 
+              <> Add New Line Item </>
+          } 
+          
         </button>
+
         <div className="text-sm font-semibold text-gray-700">
           Total: ${total.toFixed(2)}
         </div>

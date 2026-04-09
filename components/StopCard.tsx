@@ -10,6 +10,7 @@ import { requestBilling, requestInvoice, requestItems } from "../actions/invoice
 
 import { requestReport } from "../actions/report";
 import { requestAssembly, createAssembly } from "../actions/assembly";
+import WaterLoader from "../components/WaterLoader"
 
 
 
@@ -35,6 +36,7 @@ export default function StopCard({ stopID, item, reloadList}) {
   const [myLines, setMyLines] = useState([]);
   const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(false)
+  const [completing, setCompleting] = useState(false)
 
   useEffect(()=>{
   }, [myInvoice])
@@ -66,7 +68,15 @@ export default function StopCard({ stopID, item, reloadList}) {
     { name: 'Assemblies', content: 
       <Assemblies 
         list={services}  
-        reloadServices = { ()=> requestServices(item.stopID).then(setServices) } 
+        reloadServices = { 
+            () => {
+              setLoading(true)
+              requestServices(item.stopID).then((data)=>{
+                setServices(data)
+                setLoading(false)
+              }) 
+            }
+          } 
         stopID = {stopID} 
         addressID = {item.addressID}
       /> 
@@ -78,9 +88,10 @@ export default function StopCard({ stopID, item, reloadList}) {
         invoice={myInvoice} 
         reload = { 
           () => {
-
+            setLoading(true)
             requestInvoice(item.invoiceID).then(setMyInvoice);
             requestItems(item.invoiceID).then(setMyLines)
+            setLoading(false)
           }}
         address = { item }
       /> 
@@ -93,14 +104,15 @@ export default function StopCard({ stopID, item, reloadList}) {
     if (!confirmed) {
       return;
     }
-
+    setCompleting(true)
+    
     updateStop(item).then(async (data, err) =>{
       await syncStops()
       reloadList()
       setCompleted(true);
       setOpenConfirmDialog(false);
+      setCompleting(false)
     })    
-
   };
 
   const loadBilling = async () =>{
@@ -136,9 +148,10 @@ export default function StopCard({ stopID, item, reloadList}) {
 
   const loadServices = async() => {
     console.log("Retrieving services for : ", item, item.stopID)
+    setLoading(true)
     let cached = await getServices(item.stopID)
     console.log("Cached:" , cached)
-    setServices(cached.list)
+    setServices(cached?.list || [] )
     if (!navigator.onLine) {
         console.log("Offline: using cached stops")
         return
@@ -146,6 +159,7 @@ export default function StopCard({ stopID, item, reloadList}) {
     requestServices(item.stopID).then((data) =>{
       setServices(data); 
       createService(data, item.stopID); 
+      setLoading(false)
     });
     return; 
   }
@@ -209,9 +223,9 @@ export default function StopCard({ stopID, item, reloadList}) {
       : 'bg-gray-50 border-gray-200';
 
   return (
-    <div className="bg-white rounded-2xl shadow-md border border-gray-200 overflow-hidden transition-all hover:shadow-lg max-w-xl mx-auto">
+    <div className="bg-white rounded-2xl shadow-md border border-gray-200 overflow-hidden no-scrollbar transition-all hover:shadow-lg max-w-xl mx-auto">
       {/* Header */}
-      <div className={`flex flex-row sm:flex-row justify-between items-start sm:items-center p-3 ${headerBg} border-b gap-2`}>
+      <div className={`flex flex-row sm:flex-row justify-between items-start sm:items-center p-3 ${headerBg} border-b gap-2 `}>
         <div className="flex-1">
           <div className="text-sm text-gray-600 font-medium mb-1">
             {isTimed ? (
@@ -279,15 +293,23 @@ export default function StopCard({ stopID, item, reloadList}) {
                 {tab.name}
               </button>
             ))}
-
-           
-
-
           </div>
 
           {/* Active Tab Content */}
-          <div className="text-gray-700 text-sm max-w-full  max-h-100 overflow-scroll pb-10 px-8">
-             {tabs.find((tab) => tab.name === activeTab)?.content}
+          <div className="text-gray-700 text-sm max-w-full  max-h-80 overflow-scroll no-scrollbar pb-10 px-5">
+            {
+              loading ? 
+                <div className = "pt-15 "> 
+                  <p className = "text-slate-500 font-bold text-center "> Loading Stop Details </p>
+                  <WaterLoader />
+                </div>
+              : 
+                <>
+                  {tabs.find((tab) => tab.name === activeTab)?.content}
+                </>
+            }
+             
+            
           </div>
 
           {/* Complete Stop Button */}
@@ -298,7 +320,8 @@ export default function StopCard({ stopID, item, reloadList}) {
               completed
                 ? 'bg-green-100 text-green-700 cursor-not-allowed'
                 : 'bg-green-800 text-white hover:bg-green-900'
-            }`}
+            }
+            `}
           >
             {completed ? 'Completed' : 'Complete Stop'}
           </button>
@@ -347,9 +370,17 @@ export default function StopCard({ stopID, item, reloadList}) {
               </button>
               <button
                 onClick={ handleConfirmCompletion }
-                className="px-4 py-2 text-sm bg-blue-600 text-white hover:bg-blue-700 rounded-lg"
+                disabled = { !confirmed }
+                className="px-4 py-2 text-sm bg-blue-600 text-white hover:bg-blue-700 rounded-lg
+                 disabled:bg-gray-500 disabled:cursor-not-allowed"
               >
-                Complete Stop
+                {
+                  completing ?
+                    <> Completing ... </>
+                  : 
+                    <> Complete Stop </>
+                }
+                
               </button>
             </div>
           </Dialog.Panel>

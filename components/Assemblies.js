@@ -6,6 +6,7 @@ import { Dialog } from '@headlessui/react';
 import { CheckCircle2, FileText, X, PlusCircle } from 'lucide-react';
 import Results from "./Results";
 import { setAsReady, setAsNotReady } from "../actions/service";
+import WaterLoader from "../components/WaterLoader"
 import React from 'react';
 import { ReportProvider } from "../contexts/ReportContext";
 
@@ -17,16 +18,23 @@ export default function Assemblies({ list = [], reloadServices, stopID, addressI
   const [reason, setReason] = useState('');
   const [initialReport, setInitialReport] = useState(null);
   const [initialDevice, setInitialDevice] = useState(null);
+  const [loadAssembly, setLoadAssembly ] = useState(false); 
+
 
   const handleRowClick = (assembly) => {
     setSelectedAssembly(assembly);
+    setOpenResultsDialog(true);
+    setLoadAssembly(true)
     Promise.all([
       requestReport(assembly.testReportID),
       requestAssembly(assembly.assemblyID),
     ]).then(([report, device]) => {
       setInitialReport(report);
       setInitialDevice(device);
-      setOpenResultsDialog(true);
+      setTimeout( () =>{
+        setLoadAssembly(false)
+      }, 2000)
+      
     });
   };
 
@@ -77,40 +85,43 @@ export default function Assemblies({ list = [], reloadServices, stopID, addressI
   };
 
   return (
-    <div className="space-y-0 p-0">
+    <div className="space-y-3 p-0 no-scrollbar">
       
       {/* CARDS */}
       {list.map((assembly, ind) => (
         <div
           key={ind}
           onClick={() => handleRowClick(assembly)}
-          className="bg-slate-50 rounded-xxl shadow-sm p-4  transition"
+          className="bg-slate-50 rounded-xxl shadow-sm p-4 transition"
         >
 
           {/* HEADER */}
-          <div className="flex justify-between items-start">
+          <div className="flex justify-between items-start ">
             <div>
-              <p className="font-semibold text-gray-900 text-base">
+              <p className="font-semibold text-gray-900 ">
                 SN# {assembly.serial_number || `Assembly ${ind + 1}`}
               </p>
               <p className="text-sm text-gray-500">
-                {assembly.location}
+                {assembly?.location?.toLowerCase() || '' } 
               </p>
             </div>
 
             {/* READY BUTTON */}
-            <input
-              type="checkbox"
-              checked={assembly.ready ?? true}
-              onChange={(e) => handleToggleReady(assembly, e)}
-              onClick={(e) => e.stopPropagation()}
-              className="w-6 h-6 rounded-md border-gray-300 text-green-600 focus:ring-green-500"
-            />
+            <div className = "flex flex-col">
+              <input
+                type="checkbox"
+                checked={assembly.ready ?? true}
+                onChange={(e) => handleToggleReady(assembly, e)}
+                onClick={(e) => e.stopPropagation()}
+                className="w-4 h-4 rounded-md border-gray-300 text-green-600 focus:ring-green-500 ml-2"
+              />
+              <label className ="italic"> Ready </label>
+            </div>
           </div>
 
           {/* SERVICE INFO */}
-          <div className="text-sm text-gray-700">
-            <p>{assembly.serviceType || '—'}</p>
+          <div className="text-sm text-gray-500">
+            <p>{assembly.serviceType.toUpperCase() || '—'}</p>
             <p className="text-gray-500">{assembly.state}</p>
           </div>
 
@@ -180,7 +191,7 @@ export default function Assemblies({ list = [], reloadServices, stopID, addressI
 
             <div className = " px-5 flex flex-row justify-between py-5">
               <div className="font-semibold">
-                Assembly Results
+               Test Results
               </div>
               <button
                 onClick={() => setOpenResultsDialog(false)}
@@ -189,19 +200,28 @@ export default function Assemblies({ list = [], reloadServices, stopID, addressI
                 <X />
               </button>
             </div>
+              {
 
-            <div className="flex-1 overflow-y-auto ">
-              {initialReport && initialDevice ? (
-                <ReportProvider initialReport={initialReport} initialDevice={initialDevice}>
-                  <Results
-                    closeMe={() => setOpenResultsDialog(false)}
-                    reloadServices={() => reloadServices()}
-                  />
-                </ReportProvider>
-              ) : (
-                <>Loading...</>
-              )}
-            </div>
+                loadAssembly ?
+                  <div className = "pt-15 "> 
+                    <p className = "text-slate-500 font-bold text-center "> Loading Results </p>
+                    <WaterLoader />
+                  </div>
+                : 
+                  <div className="flex-1 overflow-y-auto ">
+                    {initialReport && initialDevice ? (
+                      <ReportProvider initialReport={initialReport} initialDevice={initialDevice}>
+                        <Results
+                          closeMe={() => setOpenResultsDialog(false)}
+                          reloadServices={() => reloadServices()}
+                        />
+                      </ReportProvider>
+                    ) : (
+                      <>Loading...</>
+                    )}
+                  </div>
+              }
+            
 
           </Dialog.Panel>
 

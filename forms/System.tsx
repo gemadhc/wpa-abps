@@ -16,6 +16,7 @@ export default function System(){
 			fields = {fields}
 			title = "System"
 			hasTitle = {true}
+			totalRows = {2}
 		/>
 	)
 }

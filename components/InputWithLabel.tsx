@@ -90,11 +90,11 @@ export default function InputWithLabel({
     <div className="flex flex-row">
       <div className="relative w-full">
         <input
-          className="peer w-full border border-gray-300 rounded-md pt-5 pb-1 pl-2 pr-2 text-sm 
-                     focus:border-blue-500 focus:ring-1 focus:ring-blue-400"
+          className="peer w-full border border-gray-300 rounded-bl-lg pt-5 pb-1 pl-2 pr-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-400"
+          key={``}
           id={labelName}
           name={labelName}
-          value={val}
+          value={val || '' }
           readOnly={true}
           inputMode={noKeyboard ? "none" : "decimal"}
           placeholder=" "
@@ -104,17 +104,18 @@ export default function InputWithLabel({
 
         <label
           htmlFor={labelName}
-          className="absolute left-2 top-1 text-gray-500 text-xs transition-all
-            peer-placeholder-shown:top-5 peer-placeholder-shown:text-gray-800 
+          className={`absolute left-2 top-1 text-gray-500 text-xs transition-all 
+            peer-placeholder-shown:top-5 
+            peer-placeholder-shown:text-gray-800 
             peer-placeholder-shown:text-sm peer-focus:top-1 peer-focus:text-xs 
-            peer-focus:text-blue-600"
+            peer-focus:text-blue-600`}
         >
           PSID
         </label>
       </div>
 
       <div
-        className={`w-20 flex items-center text-xs justify-center p-2 rounded-tr-lg rounded-br-lg ${commonClass}`}
+        className={`w-10 flex items-center text-[10px] justify-center p-2 rounded-tr-lg rounded-br-lg ${commonClass}`}
       >
         {tight ? labelGreater : labelLess}
       </div>

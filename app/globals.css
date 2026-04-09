@@ -45,7 +45,7 @@ body {
 
 }
 p{
-  font-size: 22px;
+  font-size: 16px;
   
 }
 h1{
@@ -55,7 +55,7 @@ h1{
   font-style: normal;
 }
 h2{
-  font-size:26px;
+  font-size:16px;
   font-family: "oswald", sans-serif;
   font-weight: 400;
   font-style: normal;
@@ -106,4 +106,55 @@ ul{
   font-weight: 400;
   font-style: normal;
 }
+
+/* Hide scrollbar for all browsers */
+.scrollbar-hide {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;     /* Firefox */
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari, Opera */
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;  /* IE/Edge */
+  scrollbar-width: none;     /* Firefox */
+}
+
+
+.water-wave {
+  width: 200%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    #1F6B8F,
+    #024E73,
+    #024E73
+  );
+  animation: waveFlow 2s linear infinite;
+}
+
+@keyframes waveFlow {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(0%);
+  }
+}
+
+@keyframes bubble {
+  0% { transform: translateY(10px); opacity: 0; }
+  50% { opacity: 1; }
+  100% { transform: translateY(-10px); opacity: 0; }
+}
+
+.animate-bubble {
+  animation: bubble 1.2s ease-in-out infinite;
+}
+
 

@@ -46,7 +46,7 @@ function LayoutContent({ children }) {
       </header>
 
       {/* MAIN */}
-      <main className="pt-10 mt-0 mb-16 overflow-y-auto bg-gray-50">
+      <main className="pt-10 mt-0 mb-16 overflow-y-auto bg-gray-50 no-scrollbar">
         {children}
       </main>
 

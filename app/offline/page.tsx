@@ -1,66 +1,93 @@
 'use client'
-import { useEffect, useState } from 'react';
-import { Item, addPop, getPops, deletePop} from "../../lib/db"
-import { getStops, createStop, updateStop} from "../../lib/stop_db"
-import { format } from "date-fns"
-import { syncItems }  from "../../lib/sync"
-import { requestDispatch, requestBins } from "../../actions/dispatch"
-import { syncStops } from "../../lib/sync"
+
+import { useState, useEffect } from 'react'
+import { format } from 'date-fns'
+import { toZonedTime } from 'date-fns-tz'
+import { useSession } from "../../helpers/session";
+import DatePicker from "../../components/DatePicker"
+import Bins from "../../components/Bins"
 import ListSorted from "./ListSorted"
+import WaterLoader from "../../components/WaterLoader"
+import { requestDispatch, requestBins } from "../../actions/dispatch"
 
- 
-export default function Home(){
-	const [list, setList] = useState([])
-	const [myDate, setMyDate] = useState(format( new Date(), "yyyy-MM-dd"))
+export default function Home() {
+  const pacificTimeZone = 'America/Los_Angeles'
 
-	const loadStops = async () => {
-		try{
-			const cached = await getStops()
-			console.log("cached...", cached)
-    		setList(cached)
+  const [list, setList] = useState([])
+  const [bins, setBins] = useState([])
+  const [loading, setLoading] = useState(false)
+  
+  // Initialize with Pacific time date
+  const initialPacificDate = toZonedTime(new Date(), pacificTimeZone)
+  const [myDate, setMyDate] = useState(format(initialPacificDate, "yyyy-MM-dd"))
+  const {session} = useSession()
 
-    		if (!navigator.onLine) {
-      			console.log("Offline: using cached stops")
-      			return
-    		}
-			const stopsData = await requestDispatch(myDate)
-			const promises = stopsData.map(stop => {
-				return createStop(stop)
-			})
-			await Promise.all(promises)
-			const newlist = await getStops()
-			setList(newlist)
-		}catch(err){
-			console.log("error creating offline store", err)
-		}
-	}
+  useEffect( ()=>{
+    console.log("This is the session: ", session)
+  }, [session])
 
-	useEffect(()=>{
-		loadStops()
-	}, [])
+  // Function to load stops and bins for a given date
+  const handleDateChange = async (isoDate: string) => {
+    const dateToUse = isoDate || myDate
+    setMyDate(dateToUse)
+    try {
+      setLoading(true)
+      const stopsData = await requestDispatch(dateToUse)
+      setList(stopsData)
+      const binsData = await requestBins(dateToUse)
+      setBins(binsData)
+      setLoading(false);
 
+    } catch (err) {
+      console.error("Error fetching dispatch/bins:", err)
+    }
+  }
 
-	const updateStatus = async(stop)=>{
-		stop.status = "COMPLETED"
-		await updateStop(stop)
-		await syncStops();
-		loadStops()
-	}
+  // Load current day's stops on initial render
+  useEffect(() => {
+    handleDateChange(myDate)
+  }, [])
 
-	const removeFromList = async ()=>{
-		let id = list[list.length - 1].id
-		console.log("removing: ",id)
-		await deletePop(id, 'remove');
-		setList( list.filter( it=> it.id != id) )
-		syncItems()
-	}
+  return (
+    <div className="min-h-screen bg-white text-gray-900 flex flex-col">
+      {/* HEADER SECTION */}
+      <div className="flex flex-row items-center justify-evenly py-2 border-b border-gray-200 bg-gray-50 sticky top-0 z-10">
+        <DatePicker value={myDate} onSelected={handleDateChange}
+         />
+        <div className="w-10 p-1 font-semibold text-center bg-blue-50 rounded-lg">
+          {list.length}
+        </div>
+      </div>
 
-	return(
-		<div>
-			<ListSorted  
-				stops = { list }
-				reloadList =  { () => loadStops() }
-			/>
-		</div>
-	)	
+      {/* BINS COMPONENT */}
+      <div className="p-1 border-b border-gray-200">
+        <Bins list={bins} />
+      </div>
+
+      {/* LIST SECTION */}
+      <div className="flex-1 max-h-200 overflow-y-scroll p-0 space-y-0 bg-white pb-500">
+      	{
+      		loading ? 
+      			<div className = "pt-15"> 
+      				<p className = "text-slate-500 font-bold text-center "> Loading Stops </p>
+      				<WaterLoader />
+      			</div>
+      		: 
+      		<>
+      			{
+		          list.length ?
+		            <ListSorted  
+		              stops={list}
+		              reloadList={() => handleDateChange(myDate)}
+		            />
+		          :
+		            <div className = "p-10 rounded-xl shadow">
+		              <p className = "text-slate-500 font-bold text-center ">No Stops To Show </p>
+		            </div>
+		        }
+      		</>
+      	}
+      </div>
+    </div>
+  )
 }
