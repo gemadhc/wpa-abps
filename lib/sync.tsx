@@ -1,18 +1,19 @@
 import { getUnsyncedPopList, markAsSynced } from './db'
-import { getUnsyncedStops, markStopAsSynced } from "./stop_db.ts" 
-import { getUnsyncedInvoices, markInvoiceAsSynced } from "./invoice_db.ts" 
-import { getUnsyncedLineItems, markLineItemAsSynced } from "./lineitem_db.ts" 
-import { getUnsyncedServices, markServiceAsSynced} from "./services_db.ts"
-import { getUnsyncedReports, markReportAsSynced } from "./reports_db.ts"
+import { getUnsyncedStops, markStopAsSynced } from "./stop_db.tsx" 
+import { getUnsyncedInvoices, markInvoiceAsSynced } from "./invoice_db.tsx" 
+import { getUnsyncedLineItems, markLineItemAsSynced } from "./lineitem_db.tsx" 
+import { getUnsyncedServices, markServiceAsSynced} from "./services_db.tsx"
+import { getUnsyncedReports, markReportAsSynced } from "./reports_db.tsx"
+import { getUnsyncedAssemblies, markAssemblyAsSynced } from "./assemblies_db.tsx"
 
 import { completeStop } from "../actions/stop.js" 
 import {updateStatus, requestQuickbooksID} from "../actions/invoice"
 import  { updateLineItemStatus } from "../actions/invoice"
-
+import { updateReport } from "../actions/report"
+import { updateAssembly} from "../actions/assembly"
 
 export async function syncItems() {
   if (!navigator.onLine) {
-    console.log('Offline - will sync later')
     return
   }
   const unsyncedItems = await getUnsyncedPopList()
@@ -23,27 +24,22 @@ export async function syncItems() {
 
   for (const item of unsyncedItems) {
     try {
-    	console.log("sending this to server: ", item)
       await markAsSynced(item.id)
     } catch (error) {
-      console.error('Sync failed:', error)
     }
   }
 }
 
 export async function syncStops(){
   if (!navigator.onLine) {
-    console.log('Offline - will sync later')
     return
   }
   const unsyncedItems = await getUnsyncedStops()
   if (unsyncedItems.length === 0) {
     return
   }
-  console.log(`Syncing ${unsyncedItems.length} items... }`)
   for (const item of unsyncedItems) {
     try {
-      console.log("sending this to server: ", item)
       await completeStop(item.stopID)
       await markStopAsSynced(item.stopID)
     } catch (error) {
@@ -55,17 +51,14 @@ export async function syncStops(){
 
 export async function syncInvoices(){
   if (!navigator.onLine) {
-    console.log('Offline - will sync later')
     return
   }
   const unsyncedItems = await getUnsyncedInvoices()
   if (unsyncedItems.length === 0) {
     return
   }
-  console.log(`Syncing ${unsyncedItems.length} items... }`)
   for (const item of unsyncedItems) {
     try {
-      console.log("sending this to server: ", item)
       await updateStatus(item.id, item.status)
       await markInvoiceAsSynced(item.id)
     } catch (error) {
@@ -73,6 +66,7 @@ export async function syncInvoices(){
     }
   }
 }
+
 export async function syncLineItems(){
   if (!navigator.onLine) {
     console.log('Offline - will sync later')
@@ -82,10 +76,8 @@ export async function syncLineItems(){
   if (unsyncedItems.length === 0) {
     return
   }
-  console.log(`Syncing ${unsyncedItems.length} items... }`)
   for (const item of unsyncedItems) {
     try {
-      console.log("sending this to server: ", item)
       await updateLineItemStatus(item)
       await markLineItemAsSynced(item.offline_id)
 
@@ -103,13 +95,11 @@ export async function syncServices(){
   if (unsyncedItems.length === 0) {
     return
   }
-  console.log(`Syncing ${unsyncedItems.length} items... }`)
   for (const item of unsyncedItems) {
     try {
-      console.log("sending this to server: ", item)
+      console.log("unsynced service: ", item)
       //await updateLineItemStatus(item)
-      await markServiceAsSynced(item.offline_id)
-
+      await markServiceAsSynced(item.id)
     } catch (error) {
       console.error('Sync failed:', error)
     }
@@ -125,12 +115,31 @@ export async function syncReports(){
   if (unsyncedItems.length === 0) {
     return
   }
-  console.log(`Syncing ${unsyncedItems.length} items... }`)
   for (const item of unsyncedItems) {
     try {
-      console.log("sending this to server: ", item)
-      //await updateLineItemStatus(item)
-      await markReportAsSynced(item.offline_id)
+      console.log("unsynced reports: ", unsyncedItems)
+      await updateReport(item)
+      await markReportAsSynced(item.reportID)
+    } catch (error) {
+      console.error('Sync failed:', error)
+    }
+  }
+
+}
+
+export async function syncAssemblies(){
+  if (!navigator.onLine) {
+    console.log('Offline - will sync later')
+    return
+  }
+  const unsyncedItems = await getUnsyncedAssemblies()
+  if (unsyncedItems.length === 0) {
+    return
+  }
+  for (const item of unsyncedItems) {
+    try {
+      await updateAssembly(item)
+      await markAssemblyAsSynced(item.id)
 
     } catch (error) {
       console.error('Sync failed:', error)

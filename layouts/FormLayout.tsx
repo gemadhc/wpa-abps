@@ -10,11 +10,9 @@ export default function Form({ fields, title, hasTitle = false, totalRows = 2 })
   const { updateField, formData} = useReport(); 
 
   useEffect(()=>{
-    console.log("Form Data in layout: ", formData)
   }, [formData])
 
   useEffect(() => {
-    console.log(fieldValue, targetName)
     updateField(targetName, fieldValue)
   }, [fieldValue, targetName]);
 

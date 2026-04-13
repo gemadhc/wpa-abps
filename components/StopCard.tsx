@@ -19,6 +19,7 @@ import { getStops, createStop, updateStop} from "../lib/stop_db"
 import { getBilling, createItem} from "../lib/billing_db"
 import { createItem as createInvoice, getInvoice } from "../lib/invoice_db"
 import { createItem as createService, getServices} from "../lib/services_db"
+import { createItem as createAssemblyItem, getAssembly as cacheAssembly} from "../lib/assemblies_db"
 import { getLineItems, addLineItems, removeLineItem,  createLineItem} from "../lib/lineitem_db"
 import {createItem as createReport, getReport as cacheReport, cleanReports} from "../lib/reports_db" 
 
@@ -35,7 +36,8 @@ export default function StopCard({ stopID, item, reloadList}) {
   const [myInvoice, setMyInvoice] = useState(null);
   const [myLines, setMyLines] = useState([]);
   const [services, setServices] = useState([]);
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(false) 
+  const [loadingItems, setLoadingItems] = useState( false )
   const [completing, setCompleting] = useState(false)
 
   useEffect(()=>{
@@ -57,6 +59,10 @@ export default function StopCard({ stopID, item, reloadList}) {
         setIsTimed(true);
         setIsSpecificTime(item.startTime === item.endTime);
       }
+
+      if(item.status.toUpperCase() === "COMPLETED"){
+        setCompleted(true)
+      }
     }
   }, [item]);
 
@@ -71,10 +77,8 @@ export default function StopCard({ stopID, item, reloadList}) {
         reloadServices = { 
             () => {
               setLoading(true)
-              requestServices(item.stopID).then((data)=>{
-                setServices(data)
-                setLoading(false)
-              }) 
+              loadServices(); 
+              setLoading(false)
             }
           } 
         stopID = {stopID} 
@@ -86,13 +90,19 @@ export default function StopCard({ stopID, item, reloadList}) {
         items={myLines} 
         billing={myBilling} 
         invoice={myInvoice} 
+        loadingItems = {loadingItems }
+        reloadItems = { 
+          async () => {
+            loadItems(); 
+          }
+        }
         reload = { 
-          () => {
+          async () => {
             setLoading(true)
-            requestInvoice(item.invoiceID).then(setMyInvoice);
-            requestItems(item.invoiceID).then(setMyLines)
+            await Promise.all( [ loadInvoice() ]) 
             setLoading(false)
-          }}
+          }
+        }
         address = { item }
       /> 
     },
@@ -108,7 +118,7 @@ export default function StopCard({ stopID, item, reloadList}) {
     
     updateStop(item).then(async (data, err) =>{
       await syncStops()
-      reloadList()
+      await reloadList()
       setCompleted(true);
       setOpenConfirmDialog(false);
       setCompleting(false)
@@ -119,7 +129,6 @@ export default function StopCard({ stopID, item, reloadList}) {
     let cached = await getBilling(item.invoiceID)
     setMyBilling(cached)
     if (!navigator.onLine) {
-        console.log("Offline: using cached stops")
         return
     }
     //request from network
@@ -136,7 +145,6 @@ export default function StopCard({ stopID, item, reloadList}) {
     let cached = await getInvoice(item.invoiceID)
     setMyInvoice(cached)
     if (!navigator.onLine) {
-        console.log("Offline: using cached stops")
         return
     }
     requestInvoice(item.invoiceID).then((data) =>{
@@ -147,13 +155,10 @@ export default function StopCard({ stopID, item, reloadList}) {
   }
 
   const loadServices = async() => {
-    console.log("Retrieving services for : ", item, item.stopID)
     setLoading(true)
     let cached = await getServices(item.stopID)
-    console.log("Cached:" , cached)
     setServices(cached?.list || [] )
     if (!navigator.onLine) {
-        console.log("Offline: using cached stops")
         return
     }
     requestServices(item.stopID).then((data) =>{
@@ -166,17 +171,19 @@ export default function StopCard({ stopID, item, reloadList}) {
 
 
   const loadItems = async() => {
+    setLoadingItems(true)
     let cached = await getLineItems(item.invoiceID)
     setMyLines(cached?.list || [])
     if (!navigator.onLine) {
-        console.log("Offline: using cached stops")
         return
     }
 
-   requestItems(item.invoiceID).then((data) =>{
+    requestItems(item.invoiceID).then((data) =>{
       setMyLines(data); 
       addLineItems(data, item.invoiceID); 
     });
+
+    setLoadingItems(false)
     return; 
 
   }
@@ -184,26 +191,30 @@ export default function StopCard({ stopID, item, reloadList}) {
 
   const loadReport = async(serviceItem) => {
     let cached = await cacheReport(serviceItem.testReportID)
-
     if (!navigator.onLine) {
-        console.log("Offline: using cached stops")
         return
     }
-
     requestReport(serviceItem.testReportID).then((report) =>{
-      requestAssembly(serviceItem.assemblyID).then((assembly) =>{
-        let obj = {...report, ...assembly}
+        let obj = {...report}
         createReport( obj, serviceItem.testReportID )
-      })
     }) 
   }
 
-  //-------------------- load reports in the background aka cache reports on load 
-  useEffect(()=>{
-
-    for(let i = 0; i < services.length; i++){
-      loadReport(services[i])
+  const loadAssemblies = async(serviceItem) => {
+    let cached = await cacheAssembly(serviceItem.assemblyID )
+    if (!navigator.onLine) {
+        return
     }
+    requestAssembly(serviceItem.assemblyID).then((assembly) =>{
+      let obj = {...assembly}
+      createAssemblyItem( obj, serviceItem.assemblyID )
+    }) 
+  } 
+
+  //-------------------- load reports and assemblies in the background aka cache reports on load 
+  useEffect(()=>{
+    services.map( (serv) => loadReport(serv) )
+    services.map( (serv) => loadAssemblies(serv) )
   }, [services])
 
 
@@ -300,7 +311,7 @@ export default function StopCard({ stopID, item, reloadList}) {
             {
               loading ? 
                 <div className = "pt-15 "> 
-                  <p className = "text-slate-500 font-bold text-center "> Loading Stop Details </p>
+                  <p className = "text-slate-500 font-bold text-center "> Loading Stop... </p>
                   <WaterLoader />
                 </div>
               : 
@@ -316,14 +327,14 @@ export default function StopCard({ stopID, item, reloadList}) {
            <button
             onClick={handleCompleteStop}
             disabled={completed}
-            className={`px-3 py-2 w-full transition ml-2 rounded-xl  border border-green-500 ${
+            className={`px-3 py-2 w-full transition  border border-green-500 ${
               completed
-                ? 'bg-green-100 text-green-700 cursor-not-allowed'
+                ? 'bg-green-100 text-green-700 border-t-3 border-b-3 cursor-not-allowed'
                 : 'bg-green-800 text-white hover:bg-green-900'
             }
             `}
           >
-            {completed ? 'Completed' : 'Complete Stop'}
+            {completed ? 'Completed'  : 'Complete Stop'}
           </button>
         </div>
       </div>
@@ -371,7 +382,7 @@ export default function StopCard({ stopID, item, reloadList}) {
               <button
                 onClick={ handleConfirmCompletion }
                 disabled = { !confirmed }
-                className="px-4 py-2 text-sm bg-blue-600 text-white hover:bg-blue-700 rounded-lg
+                className="px-4 py-2 text-sm bg-slate-600 text-white hover:bg-slate-700 rounded-lg
                  disabled:bg-gray-500 disabled:cursor-not-allowed"
               >
                 {

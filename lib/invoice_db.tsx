@@ -1,4 +1,4 @@
-import { getDB }  from "./db.ts"
+import { getDB }  from "./db.tsx"
 
 export async function getBilling(id) {
 	try{
@@ -14,10 +14,9 @@ export async function getBilling(id) {
 
 export async function updateInvoiceStatus(invoice, newstatus) {
 	const db = await getDB()
-	const myinvoice = await db.get('invoices', invoice.id )
+	const myinvoice = await db.get('invoices', invoice )
 	if (!invoice) return
- 	myinvoice.status = newstatus
-	const updated = { ...myinvoice, synced: false }
+	const updated = { ...myinvoice, synced: false, status: newstatus }
 	await db.put('invoices', updated)
 }
 
@@ -38,6 +37,7 @@ export async function createItem(item) {
 	try{
 		const db = await getDB()
 		item.invoiceID = item.id
+		item.synced = true; 
   		return db.put('invoices', item)
 	}catch(err){
 		console.log(err)

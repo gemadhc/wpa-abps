@@ -1,4 +1,4 @@
-import { getDB }  from "./db.ts"
+import { getDB }  from "./db.tsx"
 
 export async function getBilling(id) {
 	try{
@@ -15,7 +15,7 @@ export async function getBilling(id) {
 export async function createItem(item) {
 	try{
 		const db = await getDB()
-		console.log("This is the item to be added: ", item)
+		item.synced = true; 
   		return db.put('billing_details', item)
 	}catch(err){
 		console.log(err)

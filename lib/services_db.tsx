@@ -1,10 +1,9 @@
-import { getDB }  from "./db.ts"
+import { getDB }  from "./db.tsx"
 
 export async function getServices(id) {
 	try{
 		const db = await getDB()
   		let item = await db.get('services', id)
-  		console.log('after retriaval: ', item)
   		return item
 	}catch(err){
 		console.log("err", err)
@@ -16,9 +15,9 @@ export async function getServices(id) {
 
 export async function updateService(updates){
 	const db = await getDB()
-	const myitem = await db.get('services', updates.offline_id )
+	const myitem = await db.get('services', updates.stopID )
 	if (!myitem) return
-	const updated = { ...myitem, synced: false }
+	const updated = { ...updates, synced: false }
 	await db.put('services', updated)
 }	
 
@@ -29,6 +28,7 @@ export async function createItem(list, stopID) {
 		let obj = {};
 		obj.stopID = stopID; 
 		obj.list = list; 
+		obj.synced = true; 
   	return db.put('services', obj); 
   		
 	}catch(err){

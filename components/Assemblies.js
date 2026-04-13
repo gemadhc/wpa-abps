@@ -10,6 +10,10 @@ import WaterLoader from "../components/WaterLoader"
 import React from 'react';
 import { ReportProvider } from "../contexts/ReportContext";
 
+
+import { getReport,  createItem as createReport } from "../lib/reports_db"
+import { getAssembly, createItem as createAssemblyItem } from "../lib/assemblies_db"
+
 export default function Assemblies({ list = [], reloadServices, stopID, addressID }) {
 
   const [openReasonDialog, setOpenReasonDialog] = useState(false);
@@ -19,15 +23,46 @@ export default function Assemblies({ list = [], reloadServices, stopID, addressI
   const [initialReport, setInitialReport] = useState(null);
   const [initialDevice, setInitialDevice] = useState(null);
   const [loadAssembly, setLoadAssembly ] = useState(false); 
+  const [ saving, setSaving] = useState(true)
+
+
+  const loadReport = async (assembly) => {
+    let cached = await getReport(assembly.testReportID)
+    if(cached) return cached; 
+    if (!navigator.onLine) {
+        return
+    }
+    requestReport(serviceItem.testReportID).then((report) =>{
+        let obj = {...report}
+        createReport( obj, serviceItem.testReportID )
+        return report
+    }) 
+
+  }
+
+
+  const loadDevice = async (assembly) =>{
+    let cached = await getAssembly( assembly.assemblyID )
+    if(cached) return cached; 
+    if (!navigator.onLine) {
+        return
+    }
+    requestAssembly(serviceItem.assemblyID).then((device) =>{
+        let obj = {...device}
+        createAssemblyItem( obj, serviceItem.assemblyID )
+        return device
+    }) 
+  }
 
 
   const handleRowClick = (assembly) => {
     setSelectedAssembly(assembly);
     setOpenResultsDialog(true);
     setLoadAssembly(true)
+
     Promise.all([
-      requestReport(assembly.testReportID),
-      requestAssembly(assembly.assemblyID),
+      loadReport(assembly),
+      loadDevice(assembly)
     ]).then(([report, device]) => {
       setInitialReport(report);
       setInitialDevice(device);
@@ -214,6 +249,7 @@ export default function Assemblies({ list = [], reloadServices, stopID, addressI
                         <Results
                           closeMe={() => setOpenResultsDialog(false)}
                           reloadServices={() => reloadServices()}
+                          saving = { (bool) => setSaving(bool)}
                         />
                       </ReportProvider>
                     ) : (
@@ -221,13 +257,9 @@ export default function Assemblies({ list = [], reloadServices, stopID, addressI
                     )}
                   </div>
               }
-            
-
           </Dialog.Panel>
-
         </div>
       </Dialog>
-
     </div>
   );
 }

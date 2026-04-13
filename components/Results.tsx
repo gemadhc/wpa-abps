@@ -6,8 +6,14 @@ import Assembly from './Assembly';
 import Initial from './Initial';
 import Final from './Final';
 import { NumberPadProvider } from '../contexts/NumberPadContext';
-import { updateReport,  } from "../actions/report"
-import { updateAssembly } from "../actions/assembly"
+//import { updateReport  } from "../actions/report"
+//import { updateAssembly } from "../actions/assembly"
+
+
+
+import { updateReport } from "../lib/reports_db"
+import { updateAssembly } from "../lib/assemblies_db"
+import { syncReports, syncAssemblies } from "../lib/sync"
 
 // ---------------------------------------------------
 // Internal Body Component (uses form context only)
@@ -16,11 +22,15 @@ function ResultsBody({ closeMe, reloadServices }) {
   const [activeTab, setActiveTab] = useState('Device');
   const [saving, setSaving] = useState(false)
   const {formData} = useReport()
+  
   const saveAll = () =>{
     return new Promise(async (resolve, reject) =>{
       setSaving(true)
       await updateReport(formData)
       await updateAssembly(formData)
+      await syncReports(); 
+      await syncAssemblies(); 
+
       setSaving(false)
       resolve()
     })

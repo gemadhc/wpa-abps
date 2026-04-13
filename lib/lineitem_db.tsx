@@ -1,4 +1,4 @@
-import { getDB }  from "./db.ts"
+import { getDB }  from "./db.tsx"
 
 export async function getLineItem(id) {
 	try{
@@ -29,8 +29,8 @@ export async function addLineItems(items, invoiceID){
 		const db = await getDB()
 		let item = {};
 		item.list = items
-		item.invoiceID = invoiceId; 
-		item.synced = false
+		item.invoiceID = invoiceID; 
+		item.synced = true
   	return db.put('lineItems', item)
 	}catch(err){
 		console.log(err)
@@ -41,7 +41,6 @@ export async function addLineItems(items, invoiceID){
 export async function removeLineItem(item){ 
 	try{
 		const db = await getDB()
-		console.log("This is the item to be added: ", item)
 		item.action = 'REMOVE'
 		item.synced = false
   		return db.put('lineItems', item)
@@ -54,7 +53,6 @@ export async function removeLineItem(item){
 export async function createLineItem(item){
 	try{
 		const db = await getDB()
-		console.log("This is the item to be added: ", item)
 		item.offline_id = crypto.randomUUID()
 		item.action = "NEW"
 		item.synced = false

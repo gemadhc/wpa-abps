@@ -20,6 +20,7 @@ export async function getDB() {
       const reportsStore = db.createObjectStore('reports', { keyPath: 'reportID'})
       const servicesStore = db.createObjectStore('services' ,{keyPath: 'stopID'})
       const stoplistStore = db.createObjectStore('stoplist', { keyPath: 'stopID' })
+      const assemblyStore = db.createObjectStore('assemblyList', { keyPath: 'assemblyID' })
 
       todoStore.createIndex('by-synced', 'synced')
       billingStore.createIndex('by-synced', 'synced')
@@ -27,6 +28,7 @@ export async function getDB() {
       lineItemsStore.createIndex('by-synced', 'synced')
       stoplistStore.createIndex('by-synced', 'synced')
       servicesStore.createIndex('by-synced', 'synced')
+      assemblyStore.createIndex('by-synced', 'synced')
       reportsStore.createIndex('by-synced', 'synced')
     },
   })

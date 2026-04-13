@@ -9,6 +9,7 @@ import Bins from "../../components/Bins"
 import ListSorted from "./ListSorted"
 import WaterLoader from "../../components/WaterLoader"
 import { requestDispatch, requestBins } from "../../actions/dispatch"
+import { createStop } from "../../lib/stop_db"
 
 export default function Home() {
   const pacificTimeZone = 'America/Los_Angeles'
@@ -22,8 +23,12 @@ export default function Home() {
   const [myDate, setMyDate] = useState(format(initialPacificDate, "yyyy-MM-dd"))
   const {session} = useSession()
 
+  useEffect(()=>{
+    list.map( (item) => createStop(item) )
+
+  }, [list])
+
   useEffect( ()=>{
-    console.log("This is the session: ", session)
   }, [session])
 
   // Function to load stops and bins for a given date

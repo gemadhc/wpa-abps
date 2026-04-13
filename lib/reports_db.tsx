@@ -1,4 +1,4 @@
-import { getDB }  from "./db.ts"
+import { getDB }  from "./db.tsx"
 
 export async function getReport(id) {
 	try{
@@ -14,9 +14,9 @@ export async function getReport(id) {
 
 export async function updateReport(updates){
 	const db = await getDB()
-	const myitem = await db.get('reports', updates.offline_id )
+	const myitem = await db.get('reports', updates.reportID )
 	if (!myitem) return
-	const updated = { ...myitem, synced: false }
+	const updated = { ...updates, synced: false }
 	await db.put('reports', updated)
 }	
 
@@ -24,8 +24,9 @@ export async function updateReport(updates){
 export async function createItem(item, reportID) {
 	try{
 		const db = await getDB()
-		item.reportID  = reportID
-  	return db.put('reports', item)	
+		item.reportID  = reportID; 
+		item.synced = true ; 
+  		return db.put('reports', item)	
 	}catch(err){
 		console.log(err)
 	}

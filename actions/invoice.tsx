@@ -134,7 +134,6 @@ export const requestQuickbooksID = async (customerID) => {
   }
 };
 
-
 export const createItem = async (invoiceID) => {
   try {
     const response = await createLineItemFetch(invoiceID);
@@ -148,15 +147,18 @@ export const createItem = async (invoiceID) => {
 };
 
 export const updateStatus = async (id, newStatus) => {
-  try {
-    const response = await updateStatusFetch(id, newStatus);
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.message || "Failed to update invoice status");
-    return data;
-  } catch (err) {
-    console.error("updateStatus error:", err);
-    throw err;
-  }
+  return new Promise( async(resolve, reject) =>{
+    try {
+      const response = await updateStatusFetch(id, newStatus);
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "Failed to update invoice status");
+      resolve(data)
+
+    } catch (err) {
+      console.error("updateStatus error:", err);
+      reject( err );
+    }
+  })
 };
 
 

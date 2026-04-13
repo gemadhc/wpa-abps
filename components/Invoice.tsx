@@ -14,12 +14,14 @@ import {
 import LineItems from './LineItems';
 import PaymentApp from './PaymentApp';
 import { updateStatus, requestQuickbooksID } from "../actions/invoice"
-import { updateInvoiceStatus } from "../lib/invoice_db.ts"
+import { updateInvoiceStatus } from "../lib/invoice_db"
 import { syncInvoices } from "../lib/sync"
+import WaterLoader from "../components/WaterLoader"
 
 
-export default function Invoice({ items = [], billing, invoice, reload, address}) {
+export default function Invoice({ items = [], billing, invoice, reload, address, reloadItems, loadingItems = true}) {
   const [isVoided, setIsVoided] = useState(false);
+  const [statusLoading, setStatusLoading] = useState(false)
   const [openPaymentDialog, setOpenPaymentDialog] = useState(false);
   const [allowPayment, setAllowPayment] = useState(navigator.onLine)
   const total = items.reduce( (sum, itm) => sum + itm.quantity * itm.unitPriceDefined, 0 )
@@ -42,8 +44,8 @@ export default function Invoice({ items = [], billing, invoice, reload, address}
 
   useEffect(()=>{
     setOpenPaymentDialog(allowPayment && openPaymentDialog)
-
   }, [allowPayment])
+
   useEffect(()=>{
     console.log("Invoice: ", invoice)
     if(invoice){
@@ -56,7 +58,6 @@ export default function Invoice({ items = [], billing, invoice, reload, address}
   useEffect(()=>{
     if(invoice.customerID){
      requestQuickbooksID(invoice.customerID).then((data, err) => {
-       console.log("Thisis the QQQQ: ", data)
        if(data.Customer[0].quickbooksID){
         setMyCustomer(data.Customer[0].quickbooksID)
        }
@@ -65,20 +66,19 @@ export default function Invoice({ items = [], billing, invoice, reload, address}
   }, [invoice])
 
   // Handlers
-  const handleToggleVoid = () => {
+  const handleToggleVoid = async() => {
+    setStatusLoading(true)
     if(invoice.status == "VOID" || invoice.status == "VOIDED"){
-      /*updateStatus(invoice.id, "Scheduled").then((data, err) =>{
-        reload()
-      })*/
-      updateInvoiceStatus(invoice, "Scheduled")
-      syncInvoices()
-    }else{/*
-      updateStatus(invoice.id, "VOID").then((data, err) =>{
-        reload()
-      })*/
-      updateInvoiceStatus(invoice, "VOID")
-      syncInvoices()
+      await updateInvoiceStatus(invoice.id, "Scheduled")
+      await syncInvoices()
+      await reload()
+    }else{
+      await updateInvoiceStatus(invoice.id, "VOID")
+      await syncInvoices()
+      await reload()
+      
     }
+    setStatusLoading(false)
   };
 
   const handleOpenPayment = () => setOpenPaymentDialog(true);
@@ -89,11 +89,11 @@ export default function Invoice({ items = [], billing, invoice, reload, address}
 
   const statusText = invoice.status;
   const statusColor = isVoided
-    ? 'bg-red-100 text-red-700'
-    : 'bg-green-100 text-green-700';
+    ? 'text-red-700'
+    : 'text-green-700';
 
   return (
-    <div className="bg-white shadow-sm rounded-2xl">
+    <div className="bg-white rounded-2xl">
       {/* Header Section */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between px-5 pb-1 gap-3 bg-gray-50 rounded">
         {/* Left: Invoice Number + Status */}
@@ -102,9 +102,16 @@ export default function Invoice({ items = [], billing, invoice, reload, address}
             #{invoice.id}
           </h2>
           <span
-            className={`text-xs font-medium px-2 py-1 rounded ${statusColor}`}
+            className={`font-bold px-2 py-1 rounded ${statusColor}`}
           >
-            {statusText}
+            {
+              statusLoading ?
+                <span className = "text-gray-800 ">Loading...</span>
+              : 
+                <> 
+                  {statusText}
+                </>
+            }
           </span>
            <Menu as="div" className="relative inline-block text-left">
           <div>
@@ -202,11 +209,23 @@ export default function Invoice({ items = [], billing, invoice, reload, address}
       {/* Line Items */}
       <div className = "px-8 md:px-15  pb-60">
          <h2 className="font-medium text-gray-700 mb-1">Work Performed</h2>
-        <LineItems 
-          items={items} 
-          invoiceID = { invoice.id }
-          reloadItems = { reload }
-        />
+
+         {
+          items.length ? 
+            <LineItems 
+              items={items} 
+              invoiceID = { invoice.id }
+              reloadItems = { reloadItems }
+              loadingItems = { loadingItems }
+            />
+          : 
+            <div className = "pt-15 "> 
+              <p className = "text-slate-500 font-bold text-center "> Loading Billing Items </p>
+              <WaterLoader />
+            </div>
+         }
+
+        
       </div>
 
       {/* Payment Dialog */}

@@ -1,5 +1,5 @@
 import { openDB, IDBPDatabase } from 'idb'
-import { getDB }  from "./db.ts"
+import { getDB }  from "./db.tsx"
 
 export interface StopOffline {
     stopID: number
@@ -29,13 +29,13 @@ export interface StopOffline {
 export async function getStops() {
   const db = await getDB()
   let list = db.getAll('stoplist')
-  console.log("This is the list:", list )
   return list
 }
 
 export async function createStop(item) {
 	try{
 		const db = await getDB()
+    item.synced = true; 
   	return db.put('stoplist', item)
 	}catch(err){
 		return 
@@ -46,8 +46,7 @@ export async function updateStop(mystop){
 	const db = await getDB()
 	const stop = await db.get('stoplist', mystop.stopID )
 	if (!stop) return
-  mystop.status = "COMPLETED"
-	const updated = { ...mystop, synced: false }
+	const updated = { ...mystop, synced: false, status: 'COMPLETED'}
 	await db.put('stoplist', updated)
 }
 
