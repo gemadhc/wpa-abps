@@ -1,33 +1,42 @@
 'use client';
 
-import { useState, useEffect} from 'react';
+import { useState, useEffect, Fragment } from 'react';
 import { Dialog, Menu, Transition } from '@headlessui/react';
-import { Fragment } from 'react';
 import {
   X,
-  DollarSign,
-  Ban,
   RotateCcw,
-  Pencil,
   MoreVertical,
+  Ban,
+  DollarSign,
 } from 'lucide-react';
+
 import LineItems from './LineItems';
 import PaymentApp from './PaymentApp';
-import { updateStatus, requestQuickbooksID } from "../actions/invoice"
-import { updateInvoiceStatus } from "../lib/invoice_db"
-import { syncInvoices } from "../lib/sync"
-import WaterLoader from "../components/WaterLoader"
+import { updateInvoiceStatus } from "../lib/invoice_db";
+import { syncInvoices } from "../lib/sync";
+import { requestQuickbooksID } from "../actions/invoice";
 
-
-export default function Invoice({ items = [], billing, invoice, reload, address, reloadItems, loadingItems = true}) {
+export default function Invoice({
+  items = [],
+  billing,
+  invoice,
+  reload,
+  address,
+  reloadItems,
+  loadingItems = true
+}) {
   const [isVoided, setIsVoided] = useState(false);
-  const [statusLoading, setStatusLoading] = useState(false)
+  const [statusLoading, setStatusLoading] = useState(false);
   const [openPaymentDialog, setOpenPaymentDialog] = useState(false);
-  const [allowPayment, setAllowPayment] = useState(navigator.onLine)
-  const total = items.reduce( (sum, itm) => sum + itm.quantity * itm.unitPriceDefined, 0 )
-  const [mycustomer, setMyCustomer] = useState(null)
+  const [allowPayment, setAllowPayment] = useState(navigator.onLine);
+  const [mycustomer, setMyCustomer] = useState(null);
 
+  const total = items.reduce(
+    (sum, itm) => sum + itm.quantity * itm.unitPriceDefined,
+    0
+  );
 
+  // ---------------- ONLINE / OFFLINE ----------------
   useEffect(() => {
     const handleOnline = () => setAllowPayment(true);
     const handleOffline = () => setAllowPayment(false);
@@ -35,183 +44,209 @@ export default function Invoice({ items = [], billing, invoice, reload, address,
     window.addEventListener("online", handleOnline);
     window.addEventListener("offline", handleOffline);
 
-    // Cleanup on unmount
     return () => {
       window.removeEventListener("online", handleOnline);
       window.removeEventListener("offline", handleOffline);
     };
-  }, []); 
+  }, []);
 
-  useEffect(()=>{
-    setOpenPaymentDialog(allowPayment && openPaymentDialog)
-  }, [allowPayment])
+  useEffect(() => {
+    setOpenPaymentDialog(allowPayment && openPaymentDialog);
+  }, [allowPayment]);
 
-  useEffect(()=>{
-    console.log("Invoice: ", invoice)
-    if(invoice){
-      setIsVoided( invoice.status == "VOID" || invoice.status == "VOIDED" )
-    }else{
-      setIsVoided(false)
+  // ---------------- STATUS ----------------
+  useEffect(() => {
+    if (invoice) {
+      setIsVoided(invoice.status === "VOID" || invoice.status === "VOIDED");
     }
-  }, [invoice])
+  }, [invoice]);
 
-  useEffect(()=>{
-    if(invoice.customerID){
-     requestQuickbooksID(invoice.customerID).then((data, err) => {
-       if(data.Customer[0].quickbooksID){
-        setMyCustomer(data.Customer[0].quickbooksID)
-       }
-     })
+  useEffect(() => {
+    if (invoice?.customerID) {
+      requestQuickbooksID(invoice.customerID).then((data) => {
+        if (data?.Customer?.[0]?.quickbooksID) {
+          setMyCustomer(data.Customer[0].quickbooksID);
+        }
+      });
     }
-  }, [invoice])
+  }, [invoice]);
 
-  // Handlers
-  const handleToggleVoid = async() => {
-    setStatusLoading(true)
-    if(invoice.status == "VOID" || invoice.status == "VOIDED"){
-      await updateInvoiceStatus(invoice.id, "Scheduled")
-      await syncInvoices()
-    }else{
-      await updateInvoiceStatus(invoice.id, "VOID")
-      await syncInvoices()
-      
+  // ---------------- ACTIONS ----------------
+  const handleToggleVoid = async () => {
+    setStatusLoading(true);
+
+    if (isVoided) {
+      await updateInvoiceStatus(invoice.id, "Scheduled");
+    } else {
+      await updateInvoiceStatus(invoice.id, "VOID");
     }
-    setStatusLoading(false)
+
+    await syncInvoices();
+    setStatusLoading(false);
   };
 
-  const handleOpenPayment = () => setOpenPaymentDialog(true);
-  const handleClosePayment = () => setOpenPaymentDialog(false);
-  const handleEditInvoice = () => {
-    console.log('Edit invoice clicked');
-  };
+  const canTakePayment =
+    mycustomer &&
+    total > 0 &&
+    invoice?.status?.toUpperCase() !== 'PAID' &&
+    !isVoided &&
+    allowPayment;
 
-  const statusText = invoice.status;
-  const statusColor = isVoided
-    ? 'text-red-700'
-    : 'text-green-700';
+  const statusStyles = {
+    PAID: "bg-green-100 text-green-700",
+    VOID: "bg-red-100 text-red-700",
+    VOIDED: "bg-red-100 text-red-700",
+    SCHEDULED: "bg-blue-100 text-blue-700",
+  };
 
   return (
     <div className="bg-white rounded-2xl">
 
-      {/* Billing Address */}
-      <div className="px-8 md:px-8 py-0 text-sm">
-        <div className="grid grid-cols-10 gap-5 border-b pb-2" >
+      {/* HEADER */}
+      <div className="px-4 py-3 border-b flex items-center justify-between">
 
-        
-        <div className = {`col-span-3`}>#{invoice.id}</div> 
-        <div
-            className={`col-span-3 `}
+        <div>
+          <p className="text-sm text-gray-500">Invoice</p>
+          <p className="font-semibold text-lg">#{invoice.id}</p>
+        </div>
+
+        <div className="flex items-center gap-2">
+
+          {/* STATUS */}
+          <span
+            className={`text-xs px-2 py-1 rounded-full font-medium ${
+              statusStyles[invoice.status?.toUpperCase()] || "bg-gray-100"
+            }`}
           >
-            {
-              statusLoading ?
-                <span className = "text-gray-800 ">Loading...</span>
-              : 
-                <> 
-                  {statusText}
-                </>
-            }
-          </div>
-          {
-            mycustomer && total != 0 && invoice?.status?.toUpperCase() != 'PAID' ?
-              <button
-                onClick={handleOpenPayment}
-                className= {`col-span-2 rounded  shadow-lg bg-green-50 flex flex-row p-2 border border-green-800 text-green-800`}
-              >
-                Payment
-              </button>
-            : 
-              <button
-                disabled
-                onClick={handleOpenPayment}
-                className= {`col-span-2 rounded  shadow-lg bg-green-50 flex flex-row p-2 border border-green-800 text-green-800 disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500`}
-              >
-                Payment
-              </button>
+            {statusLoading ? "Updating..." : invoice.status}
+          </span>
 
+          {/* ACTION MENU */}
+          <Menu as="div" className="relative">
+            <Menu.Button className="p-2 rounded-full hover:bg-gray-100">
+              <MoreVertical className="w-5 h-5 text-gray-600" />
+            </Menu.Button>
 
-          }
+            <Transition
+              as={Fragment}
+              enter="transition ease-out duration-100"
+              enterFrom="transform opacity-0 scale-95"
+              enterTo="transform opacity-100 scale-100"
+              leave="transition ease-in duration-75"
+              leaveFrom="transform opacity-100 scale-100"
+              leaveTo="transform opacity-0 scale-95"
+            >
+              <Menu.Items className="absolute right-0 mt-2 w-48 bg-white border rounded-xl shadow-lg z-50">
 
-          
+                {/* PAYMENT */}
+                <Menu.Item>
+                  {({ active }) => (
+                    <button
+                      disabled={!canTakePayment}
+                      onClick={() => setOpenPaymentDialog(true)}
+                      className={`w-full flex items-center gap-2 px-4 py-2 text-sm ${
+                        active ? 'bg-gray-100' : ''
+                      } ${!canTakePayment ? 'text-gray-400' : ''}`}
+                    >
+                      <DollarSign className="w-4 h-4" />
+                      Take Payment
+                    </button>
+                  )}
+                </Menu.Item>
 
-          <button
-            onClick={handleToggleVoid}
-            className={`col-span-2 rounded  shadow-lg bg-red-50 flex flex-row p-2 border border-red-800 text-red-800`}
-          >
-            {isVoided ? (
-              <>
-                <RotateCcw className="w-4 h-4" />
-                Unvoid Invoice
-              </>
-            ) : (
-              <>
-                Void
-              </>
-            )}
-        </button>
+                {/* VOID / UNVOID */}
+                <Menu.Item>
+                  {({ active }) => (
+                    <button
+                      onClick={handleToggleVoid}
+                      className={`w-full flex items-center gap-2 px-4 py-2 text-sm ${
+                        active ? 'bg-gray-100' : ''
+                      }`}
+                    >
+                      {isVoided ? (
+                        <>
+                          <RotateCcw className="w-4 h-4" />
+                          Unvoid Invoice
+                        </>
+                      ) : (
+                        <>
+                          <Ban className="w-4 h-4" />
+                          Void Invoice
+                        </>
+                      )}
+                    </button>
+                  )}
+                </Menu.Item>
 
+              </Menu.Items>
+            </Transition>
+          </Menu>
+        </div>
       </div>
 
-        <h2 className="font-medium text-gray-700 mb-1">Billing To </h2>
+      {/* BILLING */}
+      <div className="px-4 py-3 text-sm">
+        <h2 className="font-medium text-gray-700 mb-1">Billing To</h2>
         {billing ? (
           <p className="text-gray-600 leading-relaxed">
-            {billing.name}
-            <br />
-            {billing.street} <br />
-            {billing.city}, {billing.state} {billing.zipcode} <br />
-            {billing.phone} <br />
+            {billing.name}<br />
+            {billing.street}<br />
+            {billing.city}, {billing.state} {billing.zipcode}<br />
+            {billing.phone}<br />
             {billing.email}
           </p>
         ) : (
-          <>No billing info available</>
+          <p className="text-gray-400">No billing info</p>
         )}
       </div>
 
-      <br/>
-      {/* Line Items */}
-      <div className = "px-8 md:px-15  pb-60">
-         <h2 className="font-medium text-gray-700 mb-1">Work Performed</h2>
-         <LineItems 
-              items={items} 
-              invoiceID = { invoice.id }
-              reloadItems = { reloadItems }
-              loadingItems = { loadingItems }
-          />
+      {/* LINE ITEMS */}
+      <div className="px-4 pb-40">
+        <div className="flex justify-between items-center mb-2">
+          <h2 className="font-medium text-gray-700">Work Performed</h2>
+          <span className="font-semibold text-lg">${total.toFixed(2)}</span>
+        </div>
+
+        <LineItems
+          items={items}
+          invoiceID={invoice.id}
+          reloadItems={reloadItems}
+          loadingItems={loadingItems}
+        />
       </div>
 
-      {/* Payment Dialog */}
+      {/* PAYMENT DIALOG */}
       <Dialog
         open={openPaymentDialog}
-        onClose={handleClosePayment}
-        className="relative z-50 "
+        onClose={() => setOpenPaymentDialog(false)}
+        className="relative z-50"
       >
-        <div className="fixed inset-0 bg-black/30 " aria-hidden="true"  />
-        <div className="fixed inset-0 flex items-center justify-center  sm:p-4">
-          <Dialog.Panel className="bg-white  shadow-xl w-full sm:max-w-md p-4 sm:p-6 min-h-screen">
-            <div className="flex items-center justify-between mb-3">
-              <Dialog.Title className="text-base sm:text-lg font-semibold text-gray-800">
+        <div className="fixed inset-0 bg-black/30" />
+
+        <div className="fixed inset-0 flex items-center justify-center sm:p-4">
+          <Dialog.Panel className="bg-white w-full sm:max-w-md min-h-screen sm:min-h-0 rounded-none sm:rounded-2xl p-4">
+
+            <div className="flex justify-between items-center mb-3">
+              <Dialog.Title className="font-semibold text-lg">
                 Process Payment
               </Dialog.Title>
-              <button
-                onClick={handleClosePayment}
-                className="p-1 rounded-full hover:bg-gray-100"
-              >
+              <button onClick={() => setOpenPaymentDialog(false)}>
                 <X className="w-5 h-5 text-gray-500" />
               </button>
             </div>
 
-          
-            <PaymentApp 
-              amount = {total}
-              invoiceID = {invoice.id}
-              lineItems = {items}
-              billing = {billing} 
-              address = {address}
-              invoice = {invoice}
-              customer = {mycustomer}
-              reload = { ()=> reload() }
-              closeMe = { ()=> handleClosePayment() }
+            <PaymentApp
+              amount={total}
+              invoiceID={invoice.id}
+              lineItems={items}
+              billing={billing}
+              address={address}
+              invoice={invoice}
+              customer={mycustomer}
+              reload={() => reload()}
+              closeMe={() => setOpenPaymentDialog(false)}
             />
-            
+
           </Dialog.Panel>
         </div>
       </Dialog>
