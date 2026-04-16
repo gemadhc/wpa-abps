@@ -64,7 +64,7 @@ function ResultsBody({ closeMe, reloadServices }) {
 
       {/* Sticky Save Button */}
      
-      <div className="sticky bottom-0 left-0 right-0 bg-green-800  shoadow-xl rounded-tl-lg rounded-tr-lg  mt-2 ">
+      <div className="flex flex-row sticky bottom-0 left-0 right-0 bg-green-800  shoadow-xl rounded-tl-lg rounded-tr-lg  mt-2 ">
         <button
           disabled = { saving }
           onClick={() =>
@@ -73,7 +73,7 @@ function ResultsBody({ closeMe, reloadServices }) {
               reloadServices()
             })
           }
-          className="w-full px-4  pt-10 text-lg rounded-lg bg-green-700 text-white hover:bg-green-500 pb-20 hover:bg-green-600 disabled:bg-gray-500"
+          className="w-full px-4  pt-5 text-lg bg-green-700 text-white hover:bg-green-500  hover:bg-green-600 disabled:bg-gray-500 pb-5"
         >
           {
             saving? 
@@ -81,6 +81,17 @@ function ResultsBody({ closeMe, reloadServices }) {
             : 
               <>Save</>
           }
+        </button>
+        <button
+          disabled = { saving }
+          onClick={() =>{
+              closeMe?.();
+            }
+          }
+          className="w-full px-4  pt-2 text-lg  bg-gray-500 text-white hover:bg-green-500 pb-5 hover:bg-green-600 disabled:bg-gray-500"
+        >
+          <>Close</>
+          
         </button>
       </div>
     

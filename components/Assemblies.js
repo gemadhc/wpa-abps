@@ -223,18 +223,6 @@ export default function Assemblies({ list = [], reloadServices, stopID, addressI
         <div className="fixed inset-0 flex items-center justify-center p-0 ">
 
           <Dialog.Panel className="bg-white  w-full  h-full flex flex-col text-black">
-
-            <div className = " px-5 flex flex-row justify-between py-5">
-              <div className="font-semibold">
-               Test Results
-              </div>
-              <button
-                onClick={() => setOpenResultsDialog(false)}
-                className=" border rounded"
-              >
-                <X />
-              </button>
-            </div>
               {
 
                 loadAssembly ?

@@ -129,7 +129,7 @@ export default function Invoice({ items = [], billing, invoice, reload, address,
             leaveFrom="transform opacity-100 scale-100"
             leaveTo="transform opacity-0 scale-95"
           >
-            <Menu.Items className="absolute right-0 mt-2 w-44 origin-top-right bg-white border border-gray-100 divide-y divide-gray-100 rounded-lg shadow-lg focus:outline-none z-50">
+            <Menu.Items className="absolute right-0 mt-2 w-60 origin-top-right bg-white border border-gray-100 divide-y divide-gray-100 rounded-lg shadow-lg focus:outline-none z-50">
               <div className="py-1">
                 {/* Take Payment */}
                 {
@@ -140,7 +140,7 @@ export default function Invoice({ items = [], billing, invoice, reload, address,
                           onClick={handleOpenPayment}
                           className={`${
                             active ? 'bg-gray-50 text-green-600' : 'text-gray-700'
-                          } flex items-center w-full px-3 py-2 text-sm gap-2`}
+                          } flex items-center w-full px-3 py-8 text-sm gap-2`}
                         >
                           <DollarSign className="w-4 h-4" />
                           Take Payment
@@ -190,7 +190,7 @@ export default function Invoice({ items = [], billing, invoice, reload, address,
       </div>
 
       {/* Billing Address */}
-      <div className="px-8 md:px-15 py-10 text-sm">
+      <div className="px-8 md:px-8 py-10 text-sm">
         <h2 className="font-medium text-gray-700 mb-1">Billing To </h2>
         {billing ? (
           <p className="text-gray-600 leading-relaxed">

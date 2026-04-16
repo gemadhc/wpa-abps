@@ -1,12 +1,3 @@
-'use client'
-
-import Image from "next/image";
-import DatePicker from "../components/DatePicker"
-import {useState, useEffect} from 'react'
-import { format } from "date-fns"
-import StopCard from "../components/StopCard"
-import FormLayout from "../layouts/FormLayout"
-import FinalXVB from "../forms/FinalXVB"
 
 export default function Home() {
 
