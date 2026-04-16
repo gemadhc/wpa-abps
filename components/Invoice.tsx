@@ -71,11 +71,9 @@ export default function Invoice({ items = [], billing, invoice, reload, address,
     if(invoice.status == "VOID" || invoice.status == "VOIDED"){
       await updateInvoiceStatus(invoice.id, "Scheduled")
       await syncInvoices()
-      await reload()
     }else{
       await updateInvoiceStatus(invoice.id, "VOID")
       await syncInvoices()
-      await reload()
       
     }
     setStatusLoading(false)
@@ -94,15 +92,15 @@ export default function Invoice({ items = [], billing, invoice, reload, address,
 
   return (
     <div className="bg-white rounded-2xl">
-      {/* Header Section */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between px-5 pb-1 gap-3 bg-gray-50 rounded">
-        {/* Left: Invoice Number + Status */}
-        <div className="flex items-center justify-between gap-2 flex-wrap">
-          <h2>
-            #{invoice.id}
-          </h2>
-          <span
-            className={`font-bold px-2 py-1 rounded ${statusColor}`}
+
+      {/* Billing Address */}
+      <div className="px-8 md:px-8 py-0 text-sm">
+        <div className="grid grid-cols-10 gap-5 border-b pb-2" >
+
+        
+        <div className = {`col-span-3`}>#{invoice.id}</div> 
+        <div
+            className={`col-span-3 `}
           >
             {
               statusLoading ?
@@ -112,85 +110,47 @@ export default function Invoice({ items = [], billing, invoice, reload, address,
                   {statusText}
                 </>
             }
-          </span>
-           <Menu as="div" className="relative inline-block text-left">
-          <div>
-            <Menu.Button className="p-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors">
-              <MoreVertical className="w-5 h-5" />
-            </Menu.Button>
           </div>
+          {
+            mycustomer && total != 0 && invoice?.status?.toUpperCase() != 'PAID' ?
+              <button
+                onClick={handleOpenPayment}
+                className= {`col-span-2 rounded  shadow-lg bg-green-50 flex flex-row p-2 border border-green-800 text-green-800`}
+              >
+                Payment
+              </button>
+            : 
+              <button
+                disabled
+                onClick={handleOpenPayment}
+                className= {`col-span-2 rounded  shadow-lg bg-green-50 flex flex-row p-2 border border-green-800 text-green-800 disabled:cursor-not-allowed disabled:bg-gray-200 disabled:text-gray-500`}
+              >
+                Payment
+              </button>
 
-          <Transition
-            as={Fragment}
-            enter="transition ease-out duration-100"
-            enterFrom="transform opacity-0 scale-95"
-            enterTo="transform opacity-100 scale-100"
-            leave="transition ease-in duration-75"
-            leaveFrom="transform opacity-100 scale-100"
-            leaveTo="transform opacity-0 scale-95"
+
+          }
+
+          
+
+          <button
+            onClick={handleToggleVoid}
+            className={`col-span-2 rounded  shadow-lg bg-red-50 flex flex-row p-2 border border-red-800 text-red-800`}
           >
-            <Menu.Items className="absolute right-0 mt-2 w-60 origin-top-right bg-white border border-gray-100 divide-y divide-gray-100 rounded-lg shadow-lg focus:outline-none z-50">
-              <div className="py-1">
-                {/* Take Payment */}
-                {
-                  mycustomer  && allowPayment ? 
-                     <Menu.Item>
-                      {({ active }) => (
-                        <button
-                          onClick={handleOpenPayment}
-                          className={`${
-                            active ? 'bg-gray-50 text-green-600' : 'text-gray-700'
-                          } flex items-center w-full px-3 py-8 text-sm gap-2`}
-                        >
-                          <DollarSign className="w-4 h-4" />
-                          Take Payment
-                        </button>
-                      )}
-                    </Menu.Item>
-                  : 
-                    <> </>
-                }
-               
+            {isVoided ? (
+              <>
+                <RotateCcw className="w-4 h-4" />
+                Unvoid Invoice
+              </>
+            ) : (
+              <>
+                Void
+              </>
+            )}
+        </button>
 
-                {/* Void / Unvoid */}
-                <Menu.Item>
-                  {({ active }) => (
-                    <button
-                      onClick={handleToggleVoid}
-                      className={`${
-                        active
-                          ? isVoided
-                            ? 'bg-gray-50 text-green-600'
-                            : 'bg-gray-50 text-red-600'
-                          : 'text-gray-700'
-                      } flex items-center w-full px-3 py-2 text-sm gap-2`}
-                    >
-                      {isVoided ? (
-                        <>
-                          <RotateCcw className="w-4 h-4" />
-                          Unvoid Invoice
-                        </>
-                      ) : (
-                        <>
-                          <Ban className="w-4 h-4" />
-                          Void Invoice
-                        </>
-                      )}
-                    </button>
-                  )}
-                </Menu.Item>
-              </div>
-            </Menu.Items>
-          </Transition>
-        </Menu>
-        </div>
-
-        {/* Right: Ellipsis Menu */}
-       
       </div>
 
-      {/* Billing Address */}
-      <div className="px-8 md:px-8 py-10 text-sm">
         <h2 className="font-medium text-gray-700 mb-1">Billing To </h2>
         {billing ? (
           <p className="text-gray-600 leading-relaxed">
@@ -206,26 +166,16 @@ export default function Invoice({ items = [], billing, invoice, reload, address,
         )}
       </div>
 
+      <br/>
       {/* Line Items */}
       <div className = "px-8 md:px-15  pb-60">
          <h2 className="font-medium text-gray-700 mb-1">Work Performed</h2>
-
-         {
-          items.length ? 
-            <LineItems 
+         <LineItems 
               items={items} 
               invoiceID = { invoice.id }
               reloadItems = { reloadItems }
               loadingItems = { loadingItems }
-            />
-          : 
-            <div className = "pt-15 "> 
-              <p className = "text-slate-500 font-bold text-center "> Loading Billing Items </p>
-              <WaterLoader />
-            </div>
-         }
-
-        
+          />
       </div>
 
       {/* Payment Dialog */}

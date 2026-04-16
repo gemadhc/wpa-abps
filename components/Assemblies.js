@@ -118,7 +118,7 @@ export default function Assemblies({ list = [], reloadServices, stopID, addressI
           key={ind}
           onClick={() => handleRowClick(assembly)}
           className={`${assembly.state == 'COMPLETED'
-              ? 'bg-green-200 border border-green-500'
+              ? 'bg-green-50 border border-green-500'
               : 'bg-slate-50 border border-slate-100'
             } rounded-xl shadow-sm p-4 transition`}
         >
@@ -233,7 +233,10 @@ export default function Assemblies({ list = [], reloadServices, stopID, addressI
                       />
                     </ReportProvider>
                   ) : (
-                    <>Loading...</>
+                    <div className="pt-20 text-center">
+                      <p className="text-gray-500 font-bold">Loading Results...</p>
+                      <WaterLoader />
+                    </div>
                   )}
                 </div>
             }

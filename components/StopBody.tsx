@@ -1,9 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { Dialog } from '@headlessui/react';
-import { X } from 'lucide-react';
-import { CheckCircle2 } from 'lucide-react';
-
+import { X, CheckCircle2 } from 'lucide-react';
 
 import Details from './Details';
 import Assemblies from './Assemblies';
@@ -21,9 +19,9 @@ import { updateStop } from "../lib/stop_db";
 import { getBilling, createItem } from "../lib/billing_db";
 import { createItem as createInvoice, getInvoice } from "../lib/invoice_db";
 import { createItem as createService, getServices } from "../lib/services_db";
-import { createItem as createAssemblyItem, getAssembly as cacheAssembly } from "../lib/assemblies_db";
+import { createItem as createAssemblyItem } from "../lib/assemblies_db";
 import { getLineItems, addLineItems } from "../lib/lineitem_db";
-import { createItem as createReport, getReport as cacheReport } from "../lib/reports_db";
+import { createItem as createReport } from "../lib/reports_db";
 
 export default function StopBody({ item, stopID, reloadList }) {
   const [activeTab, setActiveTab] = useState('Assemblies');
@@ -138,10 +136,7 @@ export default function StopBody({ item, stopID, reloadList }) {
   };
 
   const tabs = [
-    {
-      name: 'Details',
-      content: <Details item={item} />,
-    },
+    { name: 'Details', content: <Details item={item} /> },
     {
       name: 'Assemblies',
       content: (
@@ -178,42 +173,52 @@ export default function StopBody({ item, stopID, reloadList }) {
   }
 
   return (
-    <div 
-     
-      className="max-w-3xl mx-auto text-black">
-      {/* Header */}
-      <div className="mb-4 grid grid-cols-10 p-5">
-        <div className="col-span-7">
-          <h1 className="text-xl font-bold">{item.location_name}</h1>
-          <p className="text-sm text-gray-500">
-            {item.street} <br/> {item.city}, {item.state}, {item.zipcode}
-          </p>
+    <div className="max-w-3xl mx-auto text-black">
+
+      {/* ✅ COMPLETED BANNER */}
+      <div
+        className={`overflow-hidden transition-all duration-500 ${
+          completed ? "max-h-20 opacity-100 mb-3" : "max-h-0 opacity-0"
+        }`}
+      >
+        <div className="bg-green-800 text-white  p-3 flex items-center px-50 gap-2 shadow-md">
+          <CheckCircle2 className="w-5 h-5" />
+          <span className="font-semibold">Stop Completed</span>
         </div>
-         <button
-            onClick={() => setOpenConfirmDialog(true)}
-            disabled={completed}
-            className=" col-span-3 shadow-xl
-              bg-green-800 text-white border border-green-500
-               py-4 px-4 rounded disabled:bg-white
-                disabled:cursor-not-allowed disabled:text-green-700 disbled:font-bold"
-          >
-            {completed ? <div className="flex flex-col justify-center"> 
-                <div>Done</div> 
-                <CheckCircle2 />
-                </div> : 'Complete Stop'}
-          </button>
       </div>
 
-      {/* Tabs */}
-      <div className="flex mt-5 mb-3 bg-green-100">
+      {/* HEADER */}
+      <div className="flex items-start justify-between gap-3 p-4">
+
+        {/* ADDRESS */}
+        <div>
+          <h1 className="text-xl font-bold">{item.location_name}</h1>
+          <p className="text-sm text-gray-500">
+            {item.street} <br /> {item.city}, {item.state}, {item.zipcode}
+          </p>
+        </div>
+
+        {/* COMPLETE BUTTON (only if not completed) */}
+        {!completed && (
+          <button
+            onClick={() => setOpenConfirmDialog(true)}
+            className="shrink-0 shadow-lg bg-green-700 text-white border border-green-500 px-4 py-3 rounded-lg active:scale-95 transition"
+          >
+            Complete Stop
+          </button>
+        )}
+      </div>
+
+      {/* TABS */}
+      <div className="flex mt-2 mb-3 bg-green-100 rounded-lg overflow-hidden">
         {tabs.map((tab) => (
           <button
             key={tab.name}
             onClick={() => setActiveTab(tab.name)}
-            className={`px-3 py-2 w-full ${
+            className={`px-3 py-2 w-full text-sm ${
               activeTab === tab.name
-                ? 'bg-pink-100 text-slate-900 border border-pink-500'
-                : 'bg-gray-100'
+                ? 'bg-white text-black font-semibold'
+                : 'bg-slate-100 text-gray-600'
             }`}
           >
             {tab.name}
@@ -221,71 +226,60 @@ export default function StopBody({ item, stopID, reloadList }) {
         ))}
       </div>
 
-      {/* Content */}
-      <div className="bg-white p-4 rounded shadow min-h-screen">
+      {/* CONTENT */}
+      <div className="bg-white p-4 rounded-xl shadow min-h-screen">
         {tabs.find((t) => t.name === activeTab)?.content}
       </div>
 
-      {/* Complete Button */}
-     
-
-      {/* Dialog */}
-       <Dialog
+      {/* CONFIRM DIALOG */}
+      <Dialog
         open={openConfirmDialog}
         onClose={() => setOpenConfirmDialog(false)}
         className="relative z-50"
       >
-        <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
+        <div className="fixed inset-0 bg-black/30" />
         <div className="fixed inset-0 flex items-center justify-center p-4">
           <Dialog.Panel className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
+
             <div className="flex items-center justify-between mb-3">
-              <Dialog.Title className="text-lg font-semibold text-gray-800">
+              <Dialog.Title className="text-lg font-semibold">
                 Confirm Stop Completion
               </Dialog.Title>
-              <button
-                onClick={() => setOpenConfirmDialog(false)}
-                className="p-1 rounded-full hover:bg-gray-100"
-              >
+              <button onClick={() => setOpenConfirmDialog(false)}>
                 <X className="w-5 h-5 text-gray-500" />
               </button>
-          </div>
+            </div>
 
             <div className="flex items-start gap-2 mb-4">
               <input
                 type="checkbox"
                 checked={confirmed}
                 onChange={() => setConfirmed(!confirmed)}
-                className="mt-1 w-4 h-4 accent-blue-600"
+                className="mt-1 w-4 h-4"
               />
-              <label className="text-gray-700 text-sm">
+              <label className="text-sm text-gray-700">
                 I reviewed the invoice and it reflects the services performed.
               </label>
-        </div>
+            </div>
 
             <div className="flex justify-end gap-3">
               <button
                 onClick={() => setOpenConfirmDialog(false)}
-                className="px-4 py-2 text-sm text-gray-800 border border-gray-300 bg-gray-100 hover:bg-gray-200 rounded-lg"
+                className="px-4 py-2 text-sm bg-gray-100 border rounded-lg"
               >
                 Cancel
               </button>
               <button
-                onClick={ handleConfirmCompletion }
-                disabled = { !confirmed }
-                className="px-4 py-2 text-sm bg-slate-600 text-white hover:bg-slate-700 rounded-lg
-                 disabled:bg-gray-500 disabled:cursor-not-allowed"
+                onClick={handleConfirmCompletion}
+                disabled={!confirmed}
+                className="px-4 py-2 text-sm bg-green-600 text-white rounded-lg disabled:bg-gray-400"
               >
-                {
-                  completing ?
-                    <> Completing ... </>
-                  : 
-                    <> Complete Stop </>
-                }
-                
+                {completing ? "Completing..." : "Complete Stop"}
               </button>
-        </div>
+            </div>
+
           </Dialog.Panel>
-      </div>
+        </div>
       </Dialog>
     </div>
   );

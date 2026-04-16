@@ -1,6 +1,7 @@
 'use client'
 
 import React, { forwardRef } from "react";
+import {DateContext, useDate} from "@/contexts/DateContext"
 
 export type DateValue = string | null; // ISO date string (YYYY-MM-DD)
 export interface DatePickerProps {
@@ -26,6 +27,7 @@ export interface DatePickerProps {
  */
 const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
   (
+
     {
       id,
       name,
@@ -51,9 +53,11 @@ const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
       }
       
     };
+      
+    
 
     return (
-      <div className={`inline-flex flex-col`}>
+      <div className={`inline-flex flex-col w-full`}>
         <div className="relative inline-flex items-center w-full">
           <input
             ref={ref}
@@ -68,7 +72,7 @@ const DatePicker = forwardRef<HTMLInputElement, DatePickerProps>(
             max={max}
             disabled={disabled}
             required={required}
-            className={`appearance-none px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-indigo-400 placeholder-black text-sm ${
+            className={`w-full appearance-none px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-indigo-400 placeholder-black text-sm ${
               disabled ? "bg-gray-100 text-white" : "bg-white"
             }`}
           />

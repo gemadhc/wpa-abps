@@ -2,6 +2,8 @@ import './globals.css';
 import { SessionProvider, useSession } from '../helpers/session';
 import OnlineChecker from "../components/OnlineChecker";
 import Footer from "../components/Footer"
+import {DateProvider, useDate} from "@/contexts/DateContext"
+
 
 function LayoutContent({ children }) {
   return (
@@ -40,7 +42,9 @@ export default function RootLayout({ children }) {
 
       <body className="flex flex-col min-h-screen bg-white text-gray-800 overflow-hidden">
         <SessionProvider>
-          <LayoutContent>{children}</LayoutContent>
+          <DateProvider>
+           <LayoutContent>{children}</LayoutContent>
+          </DateProvider>
         </SessionProvider>
       </body>
     </html>

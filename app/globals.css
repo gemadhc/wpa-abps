@@ -160,7 +160,7 @@ ul{
 
 ::view-transition-old(root),
 ::view-transition-new(root) {
-  animation-duration: 2500ms;
+  animation-duration: 250ms;
   animation-timing-function: ease-in-out;
 }
 
