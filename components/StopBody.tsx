@@ -112,7 +112,7 @@ export default function StopBody({ item, stopID, reloadList }) {
 
     init();
 
-    if (item?.status?.toUpperCase() === "COMPLETED") {
+    if (item?.status?.toUpperCase() == "COMPLETED") {
       setCompleted(true);
     }
   }, []);
@@ -175,7 +175,7 @@ export default function StopBody({ item, stopID, reloadList }) {
       {/* ✅ COMPLETED BANNER */}
       <div
         className={`transition-all duration-500 overflow-hidden ${
-          completed ? "max-h-16 opacity-100" : "max-h-0 opacity-0"
+          completed ? "min-h-16 opacity-100" : "max-h-0 opacity-0"
         }`}
       >
         <div className="bg-green-700 text-white flex items-center justify-center gap-2 py-2 shadow">
@@ -185,7 +185,7 @@ export default function StopBody({ item, stopID, reloadList }) {
       </div>
 
       {/* 🔒 STICKY HEADER */}
-      <div className="sticky top-0 z-20 bg-white border-b px-4 py-3 flex items-start justify-between">
+      <div className="sticky top- z-20 bg-white border-b px-4 py-3 flex items-start justify-between">
 
         {/* ADDRESS */}
         <div>
