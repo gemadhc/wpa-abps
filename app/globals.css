@@ -29,8 +29,8 @@
 
 .companyName{
   font-family: 'goudyheapregular';
-  font-size: 1em;
-  letter-spacing:3;
+  font-size: 0.8em;
+  letter-spacing:1;
 }
 
 .myfooter{
@@ -155,6 +155,21 @@ ul{
 
 .animate-bubble {
   animation: bubble 1.2s ease-in-out infinite;
+}
+
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 2500ms;
+  animation-timing-function: ease-in-out;
+}
+
+/* Optional: fade */
+::view-transition-old(root) {
+  opacity: 1;
+}
+::view-transition-new(root) {
+  opacity: 1;
 }
 
 

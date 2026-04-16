@@ -1,6 +1,7 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { requestReport } from "../actions/report";
+import { useRouter } from 'next/navigation';
 import { requestAssembly, createAssembly } from "../actions/assembly";
 import { Dialog } from '@headlessui/react';
 import { CheckCircle2, FileText, X, PlusCircle } from 'lucide-react';
@@ -10,8 +11,7 @@ import WaterLoader from "../components/WaterLoader"
 import React from 'react';
 import { ReportProvider } from "../contexts/ReportContext";
 
-
-import { getReport,  createItem as createReport } from "../lib/reports_db"
+import { getReport, createItem as createReport } from "../lib/reports_db"
 import { getAssembly, createItem as createAssemblyItem } from "../lib/assemblies_db"
 
 export default function Assemblies({ list = [], reloadServices, stopID, addressID }) {
@@ -22,55 +22,45 @@ export default function Assemblies({ list = [], reloadServices, stopID, addressI
   const [reason, setReason] = useState('');
   const [initialReport, setInitialReport] = useState(null);
   const [initialDevice, setInitialDevice] = useState(null);
-  const [loadAssembly, setLoadAssembly ] = useState(false); 
-  const [ saving, setSaving] = useState(true)
+  const [loadAssembly, setLoadAssembly] = useState(false);
+  const [saving, setSaving] = useState(true)
+  const router = useRouter();
 
+  // ✅ SORT LIST: non-COMPLETED first, COMPLETED last
+  const sortedList = useMemo(() => {
+    return [...list].sort((a, b) => {
+      if (a.state === 'COMPLETED' && b.state !== 'COMPLETED') return 1;
+      if (a.state !== 'COMPLETED' && b.state === 'COMPLETED') return -1;
+      return 0;
+    });
+  }, [list]);
 
   const loadReport = async (assembly) => {
     let cached = await getReport(assembly.testReportID)
-    if(cached) return cached; 
-    if (!navigator.onLine) {
-        return
-    }
-    requestReport(serviceItem.testReportID).then((report) =>{
-        let obj = {...report}
-        createReport( obj, serviceItem.testReportID )
-        return report
-    }) 
+    if (cached) return cached;
+    if (!navigator.onLine) return;
 
+    requestReport(assembly.testReportID).then((report) => {
+      let obj = { ...report }
+      createReport(obj, assembly.testReportID)
+      return report
+    })
   }
 
+  const loadDevice = async (assembly) => {
+    let cached = await getAssembly(assembly.assemblyID)
+    if (cached) return cached;
+    if (!navigator.onLine) return;
 
-  const loadDevice = async (assembly) =>{
-    let cached = await getAssembly( assembly.assemblyID )
-    if(cached) return cached; 
-    if (!navigator.onLine) {
-        return
-    }
-    requestAssembly(serviceItem.assemblyID).then((device) =>{
-        let obj = {...device}
-        createAssemblyItem( obj, serviceItem.assemblyID )
-        return device
-    }) 
+    requestAssembly(assembly.assemblyID).then((device) => {
+      let obj = { ...device }
+      createAssemblyItem(obj, assembly.assemblyID)
+      return device
+    })
   }
-
 
   const handleRowClick = (assembly) => {
-    setSelectedAssembly(assembly);
-    setOpenResultsDialog(true);
-    setLoadAssembly(true)
-
-    Promise.all([
-      loadReport(assembly),
-      loadDevice(assembly)
-    ]).then(([report, device]) => {
-      setInitialReport(report);
-      setInitialDevice(device);
-      setTimeout( () =>{
-        setLoadAssembly(false)
-      }, 2000)
-      
-    });
+    router.push(`/report/${assembly.testReportID}/${assembly.assemblyID}`);
   };
 
   const handleToggleReady = (assembly) => {
@@ -121,13 +111,16 @@ export default function Assemblies({ list = [], reloadServices, stopID, addressI
 
   return (
     <div className="space-y-3 p-0 no-scrollbar">
-      
+
       {/* CARDS */}
-      {list.map((assembly, ind) => (
+      {sortedList.map((assembly, ind) => (
         <div
           key={ind}
           onClick={() => handleRowClick(assembly)}
-          className="bg-slate-50 rounded-xxl shadow-sm p-4 transition"
+          className={`${assembly.state == 'COMPLETED'
+              ? 'bg-green-200 border border-green-500'
+              : 'bg-slate-50 border border-slate-100'
+            } rounded-xl shadow-sm p-4 transition`}
         >
 
           {/* HEADER */}
@@ -137,26 +130,26 @@ export default function Assemblies({ list = [], reloadServices, stopID, addressI
                 SN# {assembly.serial_number || `Assembly ${ind + 1}`}
               </p>
               <p className="text-sm text-gray-500">
-                {assembly?.location?.toLowerCase() || '' } 
+                {assembly?.location?.toLowerCase() || ''}
               </p>
             </div>
 
             {/* READY BUTTON */}
-            <div className = "flex flex-col">
+            <div className="flex flex-col">
               <input
                 type="checkbox"
                 checked={assembly.ready ?? true}
-                onChange={(e) => handleToggleReady(assembly, e)}
+                onChange={() => handleToggleReady(assembly)}
                 onClick={(e) => e.stopPropagation()}
                 className="w-4 h-4 rounded-md border-gray-300 text-green-600 focus:ring-green-500 ml-2"
               />
-              <label className ="italic"> Ready </label>
+              <label className="italic"> Ready </label>
             </div>
           </div>
 
           {/* SERVICE INFO */}
           <div className="text-sm text-gray-500">
-            <p>{assembly.serviceType.toUpperCase() || '—'}</p>
+            <p>{assembly.serviceType?.toUpperCase() || '—'}</p>
             <p className="text-gray-500">{assembly.state}</p>
           </div>
 
@@ -222,29 +215,28 @@ export default function Assemblies({ list = [], reloadServices, stopID, addressI
       <Dialog open={openResultsDialog} onClose={() => setOpenResultsDialog(false)} className="relative z-50 ">
         <div className="fixed inset-0 flex items-center justify-center p-0 ">
 
-          <Dialog.Panel className="bg-white  w-full  h-full flex flex-col text-black">
-              {
-
-                loadAssembly ?
-                  <div className = "pt-15 "> 
-                    <p className = "text-slate-500 font-bold text-center "> Loading Results </p>
-                    <WaterLoader />
-                  </div>
-                : 
-                  <div className="flex-1 overflow-y-auto ">
-                    {initialReport && initialDevice ? (
-                      <ReportProvider initialReport={initialReport} initialDevice={initialDevice}>
-                        <Results
-                          closeMe={() => setOpenResultsDialog(false)}
-                          reloadServices={() => reloadServices()}
-                          saving = { (bool) => setSaving(bool)}
-                        />
-                      </ReportProvider>
-                    ) : (
-                      <>Loading...</>
-                    )}
-                  </div>
-              }
+          <Dialog.Panel className="bg-white w-full h-full flex flex-col text-black">
+            {
+              loadAssembly ?
+                <div className="pt-15">
+                  <p className="text-slate-500 font-bold text-center"> Loading Results </p>
+                  <WaterLoader />
+                </div>
+                :
+                <div className="flex-1 overflow-y-auto ">
+                  {initialReport && initialDevice ? (
+                    <ReportProvider initialReport={initialReport} initialDevice={initialDevice}>
+                      <Results
+                        closeMe={() => setOpenResultsDialog(false)}
+                        reloadServices={() => reloadServices()}
+                        saving={(bool) => setSaving(bool)}
+                      />
+                    </ReportProvider>
+                  ) : (
+                    <>Loading...</>
+                  )}
+                </div>
+            }
           </Dialog.Panel>
         </div>
       </Dialog>

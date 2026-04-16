@@ -58,14 +58,15 @@ export default function NumberPad() {
 
   return (
     <div >
-      <div className="grid grid-cols-3 gap-1 w-full">
+      <div className="grid grid-cols-3 gap-0 w-full">
 
         {buttons.map((btn) => (
           <button
             key={btn}
             type="button"
             onClick={() => handleClick(btn)}
-            className="p-2 text-xl font-semibold rounded border border-sky-700 bg-slate-100 hover:bg-slate-200 transition active:scale-95"
+            className={`p-2 text-xl font-semibold rounded border 
+              border-slate-700 bg-white hover:bg-slate-200 transition active:scale-95`}
           >
             {btn}
           </button>

@@ -26,7 +26,7 @@ import { getLineItems, addLineItems } from "../lib/lineitem_db";
 import { createItem as createReport, getReport as cacheReport } from "../lib/reports_db";
 
 export default function StopBody({ item, stopID, reloadList }) {
-  const [activeTab, setActiveTab] = useState('Details');
+  const [activeTab, setActiveTab] = useState('Assemblies');
   const [completed, setCompleted] = useState(false);
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
   const [confirmed, setConfirmed] = useState(false);
@@ -178,7 +178,9 @@ export default function StopBody({ item, stopID, reloadList }) {
   }
 
   return (
-    <div className="max-w-3xl mx-auto text-black">
+    <div 
+     
+      className="max-w-3xl mx-auto text-black">
       {/* Header */}
       <div className="mb-4 grid grid-cols-10 p-5">
         <div className="col-span-7">

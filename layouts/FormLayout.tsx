@@ -30,18 +30,18 @@ export default function Form({ fields, title, hasTitle = false, totalRows = 2 })
     <div className="flex flex-col gap-4 w-full text-base">
       {hasTitle && title && <h3 className="text-left">{title}</h3>}
 
-      <div className={`grid grid-cols-${totalRows} gap-4`}>
+      <div className={`grid grid-cols-${totalRows} gap-1`}>
         {fields.map((field) => {
           const isFull = field.full === true ? `col-span-${totalRows}` : 'col-span-1';
 
           if (field.type === 'checkbox') {
             return (
-              <div key={field.name} className={`${isFull} flex items-center gap-2`}>
+              <div key={field.name} className={`${isFull} flex items-center gap-2 pt-2`}>
                 <input
                   type="checkbox"
                   checked={!!formData?.[field.name]}
                   onChange={(e) => updateField(field.name, e.target.checked)}
-                  className="w-4 h-4 accent-blue-600"
+                  className="w-4 h-5 accent-pink-300"
                 />
                 <span>{field.label}</span>
               </div>
@@ -58,7 +58,7 @@ export default function Form({ fields, title, hasTitle = false, totalRows = 2 })
                     name={field.name}
                     checked={formData?.[field.name] === true || formData?.[field.name] === 1 }
                     onChange={() => updateField(field.name, true)}
-                    className="w-4 h-4 accent-blue-600"
+                    className="w-5 h-5 accent-pink-300"
                   />
                   On
                 </label>
@@ -68,7 +68,7 @@ export default function Form({ fields, title, hasTitle = false, totalRows = 2 })
                     name={field.name}
                     checked={formData?.[field.name] === false || formData?.[field.name] === 0}
                     onChange={() => updateField(field.name, false)}
-                    className="w-4 h-4 accent-blue-600"
+                    className="w-5 h-5 accent-pink-300"
                   />
                   Off
                 </label>
@@ -91,8 +91,9 @@ export default function Form({ fields, title, hasTitle = false, totalRows = 2 })
           if (field.type === 'textarea') {
             return (
               <div key={field.name} className={`${isFull} relative`}>
-                <textarea {...sharedProps} className={`${inputBase} min-h-[140px] min-w-[300px]`} />
-                <label className="absolute left-5 top-1 text-base text-gray-500 transition-all peer-placeholder-shown:top-5 peer-placeholder-shown:text-base">
+                <textarea {...sharedProps} className={`${inputBase} min-h-[140px] min-w-[300px] bg-white rounded-xl`} />
+                <label className="absolute left-5 top-1 text-base text-gray-500 transition-all bg-white
+                peer-placeholder-shown:top-5 peer-placeholder-shown:text-base ">
                   {field.label}
                 </label>
               </div>
@@ -102,7 +103,7 @@ export default function Form({ fields, title, hasTitle = false, totalRows = 2 })
           if (field.type === 'select') {
             return (
               <div key={field.name} className={`${isFull} relative `}>
-                <select {...sharedProps} className={`${inputBase} pr-10 h-[80px]`}>
+                <select {...sharedProps} className={`${inputBase} pr-10 h-[80px] bg-white`}>
                   <option value="">Select</option>
                   {field.options?.map((opt) => (
                     <option key={opt.value} value={opt.value}>
@@ -119,7 +120,7 @@ export default function Form({ fields, title, hasTitle = false, totalRows = 2 })
           }
 
           return (
-            <div key={field.name} className={`${isFull} relative`}>
+            <div key={field.name} className={`${isFull} relative bg-white`}>
               <input {...sharedProps} type={field.type || 'text'} />
               <label className="absolute left-2 top-1 text-gray-500 text-xs transition-all 
             peer-placeholder-shown:top-5 

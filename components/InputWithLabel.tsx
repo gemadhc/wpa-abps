@@ -90,7 +90,7 @@ export default function InputWithLabel({
     <div className="flex flex-row">
       <div className="relative w-full">
         <input
-          className="peer w-full border border-gray-300 rounded-bl-lg pt-5 pb-1 pl-2 pr-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-400"
+          className="peer bg-white w-full border border-gray-300 rounded-bl-lg pt-5 pb-1 pl-2 pr-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-400"
           key={``}
           id={labelName}
           name={labelName}

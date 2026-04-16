@@ -4,6 +4,7 @@ import StopBody from '@/components/StopBody';
 import { getStops } from '@/lib/stop_db';
 import { useState, useEffect } from 'react'
 
+import { ViewTransition } from 'react'
 
 export default  function ClientComponent({ stopID }) {
 	const [stop, setStop] = useState(null)
@@ -23,7 +24,8 @@ export default  function ClientComponent({ stopID }) {
 
 
   return (
-  	<div>
+  	<div  style={{ viewTransitionName: `stop-${stopID}` }}>
+  		<ViewTransition>
   		{
   			stop ? 
   				<StopBody
@@ -35,7 +37,7 @@ export default  function ClientComponent({ stopID }) {
 					Loading...
 				</div>
   		}
-	    
+	    </ViewTransition>
     </div>
   );
 }

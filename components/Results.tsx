@@ -6,6 +6,10 @@ import Assembly from './Assembly';
 import Initial from './Initial';
 import Final from './Final';
 import { NumberPadProvider } from '../contexts/NumberPadContext';
+import { useRouter } from 'next/navigation';
+
+import { ArrowBigLeft, SaveAll } from 'lucide-react';
+
 //import { updateReport  } from "../actions/report"
 //import { updateAssembly } from "../actions/assembly"
 
@@ -22,6 +26,7 @@ function ResultsBody({ closeMe, reloadServices }) {
   const [activeTab, setActiveTab] = useState('Device');
   const [saving, setSaving] = useState(false)
   const {formData} = useReport()
+  const router = useRouter();
   
   const saveAll = () =>{
     return new Promise(async (resolve, reject) =>{
@@ -37,14 +42,43 @@ function ResultsBody({ closeMe, reloadServices }) {
   }
 
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full overflow-y-clip">
+
+       <div className="flex flex-row gap-10 sticky bottom-0 left-0 right-0 bg-white  shoadow-xl rounded-tl-lg rounded-tr-lg mb-5 ">
+       <button
+          disabled={saving}
+          onClick={() => router.back()}
+          className="w-full flex items-center justify-center px-4 py-2 bg-gray-500 text-white rounded-xl hover:bg-gray-600 disabled:bg-gray-400 transition"
+        >
+          <ArrowBigLeft className="w-6 h-6" />
+        </button>
+
+        <button
+          disabled={saving}
+          onClick={() =>
+            saveAll().then(() => {
+              router.back();
+            })
+          }
+          className="w-full flex items-center justify-center px-4 py-2 bg-green-700 text-white rounded-xl 
+                     hover:bg-green-600 disabled:bg-gray-400 transition"
+        >
+          {saving ? (
+            <span className="text-base font-medium">Saving...</span>
+          ) : (
+            <SaveAll className="w-6 h-6" />
+          )}
+        </button>
+      </div>
+
+
       {/* Tabs */}
       <div className="flex flex-row gap-0 mb-3 pb-1 border-b border-gray-200">
         {['Device', 'Initial', 'Repairs'].map((tabName) => (
           <button
             key={tabName}
             onClick={() => setActiveTab(tabName)}
-            className={`px-3 py-2 w-full text-lg font-medium transition ${
+            className={`px-3 py-1 w-full text-sm font-bold transition ${
               activeTab === tabName
                 ? 'bg-slate-300 text-slate-700'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -56,7 +90,7 @@ function ResultsBody({ closeMe, reloadServices }) {
       </div>
 
       {/* Scrollable tab content */}
-      <div className="flex-1 overflow-y-auto px-10 no-scrollbar">
+      <div className="flex-1 overflow-y-auto px-2 no-scrollbar bg-slate-100">
         {activeTab === 'Device' && <Assembly />}
         {activeTab === 'Initial' && <Initial />}
         {activeTab === 'Repairs' && <Final /> }
@@ -64,36 +98,7 @@ function ResultsBody({ closeMe, reloadServices }) {
 
       {/* Sticky Save Button */}
      
-      <div className="flex flex-row sticky bottom-0 left-0 right-0 bg-green-800  shoadow-xl rounded-tl-lg rounded-tr-lg  mt-2 ">
-        <button
-          disabled = { saving }
-          onClick={() =>
-            saveAll().then(() => {
-              closeMe?.();
-              reloadServices()
-            })
-          }
-          className="w-full px-4  pt-5 text-lg bg-green-700 text-white hover:bg-green-500  hover:bg-green-600 disabled:bg-gray-500 pb-5"
-        >
-          {
-            saving? 
-              <>Saving...</>
-            : 
-              <>Save</>
-          }
-        </button>
-        <button
-          disabled = { saving }
-          onClick={() =>{
-              closeMe?.();
-            }
-          }
-          className="w-full px-4  pt-2 text-lg  bg-gray-500 text-white hover:bg-green-500 pb-5 hover:bg-green-600 disabled:bg-gray-500"
-        >
-          <>Close</>
-          
-        </button>
-      </div>
+     
     
     </div>
   );
@@ -115,7 +120,7 @@ function ResultsWithContexts({ closeMe, reloadServices}) {
 // ---------------------------------------------------
 // Main Export: Only ReportProvider receives props
 // ---------------------------------------------------
-export default function Results({ report, device, closeMe, reloadServices }) {
+export default function Results({ report, device=null, closeMe, reloadServices }) {
   return (
     <ResultsWithContexts closeMe={closeMe}  reloadServices = {reloadServices} />
   );

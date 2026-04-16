@@ -56,6 +56,8 @@ export default function Initial() {
       <div className="col-span-10">
         <System  />
       </div>
+      
+      
 
       <div className="col-span-10">
         <Remarks />

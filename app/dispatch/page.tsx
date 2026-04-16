@@ -7,6 +7,7 @@ import { useSession } from "../../helpers/session";
 import DatePicker from "../../components/DatePicker"
 import Bins from "../../components/Bins"
 import ListSorted from "./ListSorted"
+import { ViewTransition } from 'react'
 
 import { requestDispatch, requestBins } from "../../actions/dispatch"
 
@@ -47,6 +48,7 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-white text-gray-900 flex flex-col">
+    <ViewTransition >
       {/* HEADER SECTION */}
       <div className="flex flex-row items-center justify-evenly py-2 border-b border-gray-200 bg-gray-50 sticky top-0 z-10">
         <DatePicker value={myDate} onSelected={handleDateChange}
@@ -77,6 +79,7 @@ export default function Home() {
         }
         
       </div>
+    </ViewTransition>
     </div>
   )
 }

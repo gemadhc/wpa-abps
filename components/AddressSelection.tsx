@@ -35,7 +35,7 @@ export default function AddressSelection({addresses = [], reload}) {
   }
 
   return (
-    <div className="p-6 bg-white rounded-lg shadow-sm border border-gray-200  ">
+    <div className="">
       {/* Current Address */}
       <div className="text-gray-700 mb-3">
         <h2 className="text-sm font-semibold text-gray-800">Current Destination Address</h2>
@@ -68,8 +68,8 @@ export default function AddressSelection({addresses = [], reload}) {
 
         {/* Dialog panel */}
 
-        <div className="fixed inset-0 flex items-center justify-center p-4 pt-50 overflow-y-scroll">
-          <Dialog.Panel className="bg-white rounded-xl shadow-lg max-w-sm w-full p-4">
+        <div className="fixed inset-0 flex items-center justify-center p-4 pt-0 overflow-y-scroll">
+          <Dialog.Panel className="bg-white rounded-xl shadow-lg max-w-sm w-full p-4 h-150 overflow-y-scroll">
             {/* Header */}
             <div className="flex justify-between items-center mb-3 border-b pb-2">
               <Dialog.Title className="text-base font-semibold text-gray-800">
