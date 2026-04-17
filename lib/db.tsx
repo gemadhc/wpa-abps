@@ -36,6 +36,14 @@ export async function getDB() {
 }
 
 
+export async function monitorMemory(){
+  const quota = await navigator.storage.estimate();
+  const usedMB = (quota.usage / 1024 / 1024).toFixed(2);
+  const limitMB = (quota.quota / 1024 / 1024).toFixed(2);
+  const percent = usedMB / limitMB;
+  console.log(`Used: ${usedMB} MB / Total Limit: ${limitMB} MB, ${percent *100}%`); 
+}
+
 export async function addPop(label) {
   const db = await getDB()
   const myitem: Item = {

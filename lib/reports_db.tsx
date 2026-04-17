@@ -33,12 +33,21 @@ export async function createItem(item, reportID) {
 }
 
 /*read documentation to clean list */
-export const clearReports = () =>{
-	try{
+export async function deleteAllReports(){
+  return new Promise( async(resolve, reject) =>{
+    try{
+      const db = await getDB()
+      const list = await db.getAll('reports')  
+      list.map( async(item) =>{
+        await db.delete('reports', item.id)
+        resolve() 
+      })
 
-	}catch(err){
-		console.log(err)
-	}
+    }catch(err){
+      console.log("This is the error: ", err)
+    }
+    
+  })
 }
 
 export const getUnsyncedReports = async () => {

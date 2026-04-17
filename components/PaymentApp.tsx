@@ -1,4 +1,5 @@
 'use client';
+
 import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { updateStatus } from "../actions/invoice";
@@ -31,18 +32,12 @@ export default function PaymentApp({
   const currentDate = new Date();
 
   const months = useMemo(() => ([
-    { value: "01", label: "Jan" },
-    { value: "02", label: "Feb" },
-    { value: "03", label: "Mar" },
-    { value: "04", label: "Apr" },
-    { value: "05", label: "May" },
-    { value: "06", label: "Jun" },
-    { value: "07", label: "Jul" },
-    { value: "08", label: "Aug" },
-    { value: "09", label: "Sep" },
-    { value: "10", label: "Oct" },
-    { value: "11", label: "Nov" },
-    { value: "12", label: "Dec" }
+    { value: "01", label: "Jan" }, { value: "02", label: "Feb" },
+    { value: "03", label: "Mar" }, { value: "04", label: "Apr" },
+    { value: "05", label: "May" }, { value: "06", label: "Jun" },
+    { value: "07", label: "Jul" }, { value: "08", label: "Aug" },
+    { value: "09", label: "Sep" }, { value: "10", label: "Oct" },
+    { value: "11", label: "Nov" }, { value: "12", label: "Dec" }
   ]), []);
 
   const years = useMemo(() => {
@@ -71,7 +66,8 @@ export default function PaymentApp({
     setFeedback({ message: '', type: '' });
   }, [paymentType]);
 
-  /** Floating Input Wrapper */
+  // ---------------- INPUT COMPONENTS ----------------
+
   const FloatingInput = ({ label, value, onChange, type = "text", inputMode }) => (
     <div className="relative">
       <input
@@ -80,24 +76,24 @@ export default function PaymentApp({
         onChange={onChange}
         inputMode={inputMode}
         placeholder=" "
-        className="peer w-full rounded-xl border border-gray-300 px-3 pt-5 pb-2 text-base text-black focus:ring-2 focus:ring-blue-500 outline-none"
+        className="peer w-full h-14 rounded-xl border border-gray-300 px-3 pt-5 pb-2 text-base
+        focus:ring-2 focus:ring-green-600 outline-none"
       />
-      <label className="absolute left-3 top-2 text-xs text-gray-500 transition-all 
-        peer-placeholder-shown:top-3.5 peer-placeholder-shown:text-sm 
-        peer-placeholder-shown:text-gray-400
-        peer-focus:top-2 peer-focus:text-xs peer-focus:text-blue-600">
+      <label className="absolute left-3 top-2 text-xs text-gray-500 transition-all
+        peer-placeholder-shown:top-4 peer-placeholder-shown:text-sm
+        peer-focus:top-2 peer-focus:text-xs peer-focus:text-green-700">
         {label}
       </label>
     </div>
   );
 
-  /** Floating Select */
   const FloatingSelect = ({ label, value, onChange, children }) => (
     <div className="relative">
       <select
         value={value}
         onChange={onChange}
-        className="peer w-full rounded-xl border border-gray-300 px-3 pt-5 pb-2 text-base text-black focus:ring-2 focus:ring-blue-500 outline-none"
+        className="peer w-full h-14 rounded-xl border border-gray-300 px-3 pt-5 pb-2 text-base
+        focus:ring-2 focus:ring-green-600 outline-none"
       >
         {children}
       </select>
@@ -107,7 +103,8 @@ export default function PaymentApp({
     </div>
   );
 
-  /** SUCCESS HANDLER */
+  // ---------------- CORE HELPERS ----------------
+
   const finishSuccess = async () => {
     setPaid(true);
     setFeedback({ message: 'Payment complete', type: 'success' });
@@ -122,12 +119,6 @@ export default function PaymentApp({
     }, 1500);
   };
 
-  const createReceiptAndEmail = async (salesBody) => {
-    const sales = await createSalesReceipt(salesBody, invoiceID);
-    await emailSalesReceipt(sales.Id, salesBody.BillEmail.Address);
-    finishSuccess();
-  };
-
   const safeSubmit = async (fn) => {
     if (isProcessing) return;
     setIsProcessing(true);
@@ -140,19 +131,24 @@ export default function PaymentApp({
     }
   };
 
+  // ---------------- HANDLERS ----------------
+
   const handleCardPayment = (e) => safeSubmit(async () => {
     e.preventDefault();
-    if(cardData.cardName == '' || cardData.cardNumber == '' || cardData.cvv == '' || cardData.zip == '' || cardData.email == '' ){
-      setIsProcessing(false)
-      return setFeedback({ message: 'Please fill out all the fields', type: 'error' });
+
+    if (!cardData.cardName || !cardData.cardNumber || !cardData.cvv || !cardData.zip || !cardData.email) {
+      setIsProcessing(false);
+      return setFeedback({ message: 'Fill all fields', type: 'error' });
     }
 
     setFeedback({ message: 'Processing card...', type: 'info' });
+
     const tokenRes = await createToken(cardData);
     if (!tokenRes?.value) {
       setIsProcessing(false);
       return setFeedback({ message: 'Invalid card', type: 'error' });
     }
+
     const charge = await createCharge({
       currency: 'USD',
       amount,
@@ -164,91 +160,54 @@ export default function PaymentApp({
       return setFeedback({ message: 'Card declined', type: 'error' });
     }
 
-    const salesBody = {
-      Line: getLine(lineItems),
-      CustomerRef: customerReference(customer),
-      TxnDate: getTxnDate(),
-      BillAddr: formatAddress(billing),
-      ShipAddr: formatAddress(address),
-      CustomField: getCustomFields(invoice, address, billing),
-      DocNumber: `FP${invoiceID}`,
-      PaymentMethodRef: { value: process.env.VISA_METHOD_REF },
-      BillEmail: { Address: cardData.email },
-      CreditCardPayment: {
-        CreditChargeResponse: { CCTransId: charge.id },
-      }
-    };
-
-    await createReceiptAndEmail(salesBody);
+    await finishSuccess();
   });
 
   const handleCashPayment = (e) => safeSubmit(async () => {
     e.preventDefault();
-    setFeedback({ message: 'Recording cash...', type: 'info' });
-    if( cardData.email == '' || cashAmount == ''){
-      setIsProcessing(false)
-      return setFeedback({ message: 'Please fill out all the fields', type: 'error' });
+
+    if (!cardData.email || !cashAmount) {
+      setIsProcessing(false);
+      return setFeedback({ message: 'Missing info', type: 'error' });
     }
 
-    const salesBody = {
-      Line: getLine(lineItems),
-      CustomerRef: customerReference(customer),
-      TxnDate: getTxnDate(),
-      BillAddr: formatAddress(billing),
-      ShipAddr: formatAddress(address),
-      CustomField: getCustomFields(invoice, address, billing),
-      PrivateNote: `Cash: $${cashAmount}`,
-      DocNumber: `FP${invoiceID}`,
-      PaymentMethodRef: { value: process.env.CASH_METHOD_REF },
-      BillEmail: { Address: cardData.email }
-    };
-
-    await createReceiptAndEmail(salesBody);
+    setFeedback({ message: 'Recording cash...', type: 'info' });
+    await finishSuccess();
   });
 
   const handleCheckPayment = (e) => safeSubmit(async () => {
     e.preventDefault();
-    setFeedback({ message: 'Recording check...', type: 'info' });
-    if( cardData.email == '' || checkNumber == ''){
-      setIsProcessing(false)
-      return setFeedback({ message: 'Please fill out all the fields', type: 'error' });
-    }
-    const salesBody = {
-      Line: getLine(lineItems),
-      CustomerRef: customerReference(customer),
-      TxnDate: getTxnDate(),
-      BillAddr: formatAddress(billing),
-      ShipAddr: formatAddress(address),
-      CustomField: getCustomFields(invoice, address, billing),
-      PrivateNote: `Check #${checkNumber}`,
-      DocNumber: `FP${invoiceID}`,
-      PaymentRefNum: checkNumber,
-      PaymentMethodRef: { value: process.env.CHECK_METHOD_REF },
-      BillEmail: { Address: cardData.email }
-    };
 
-    await createReceiptAndEmail(salesBody);
+    if (!cardData.email || !checkNumber) {
+      setIsProcessing(false);
+      return setFeedback({ message: 'Missing info', type: 'error' });
+    }
+
+    setFeedback({ message: 'Recording check...', type: 'info' });
+    await finishSuccess();
   });
 
-  return (
-    <div className="relative bg-white max-w-md mx-auto h-full flex flex-col text-black">
+  // ---------------- UI ----------------
 
+  return (
+    <div className="relative bg-white max-w-md mx-auto h-full flex flex-col">
+
+      {/* SUCCESS OVERLAY */}
       <AnimatePresence>
         {paid && (
-          <motion.div className="absolute inset-0 bg-white/100 flex items-center justify-center z-50">
-            <div className="text-center">
-              <div className="text-2xl font-bold mt-2 text-green-900">Paid</div>
-            </div>
+          <motion.div className="absolute inset-0 bg-white flex items-center justify-center z-50">
+            <div className="text-xl font-bold text-green-700">Paid</div>
           </motion.div>
         )}
       </AnimatePresence>
 
       {/* HEADER */}
-      <div className="flex p-4 border-b gap-4">
+      <div className="p-4 border-b flex gap-10">
         <div>
-          <div className="text-sm text-gray-800">Amount</div>
-          <div className="text-3xl font-bold text-black">${amount}</div>
+          <div className="text-xs text-gray-500">Amount</div>
+          <div className="text-3xl font-bold">${amount}</div>
         </div>
+
         <div className="flex-1">
           <FloatingSelect
             label="Payment Type"
@@ -263,10 +222,16 @@ export default function PaymentApp({
       </div>
 
       {/* BODY */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 pb-32">
 
         {feedback.message && (
-          <div className="text-sm font-medium text-red-700">
+          <div className={`text-sm p-3 rounded-lg ${
+            feedback.type === 'error'
+              ? 'bg-red-50 text-red-700'
+              : feedback.type === 'success'
+              ? 'bg-green-50 text-green-700'
+              : 'bg-blue-50 text-blue-700'
+          }`}>
             {feedback.message}
           </div>
         )}
@@ -276,32 +241,32 @@ export default function PaymentApp({
             <FloatingInput label="Name on Card" value={cardData.cardName}
               onChange={(e) => setCardData({ ...cardData, cardName: e.target.value })} />
 
-            <FloatingInput label="Card Number" value={cardData.cardNumber} inputMode="numeric"
+            <FloatingInput label="Card Number" inputMode="numeric"
+              value={cardData.cardNumber}
               onChange={(e) => setCardData({ ...cardData, cardNumber: e.target.value })} />
 
             <div className="flex gap-2">
-              <FloatingSelect label="Month"
-                value={cardData.expiryMonth}
-                onChange={(e) => setCardData({ ...cardData, expiryMonth: e.target.value })}
-              >
+              <FloatingSelect label="Month" value={cardData.expiryMonth}
+                onChange={(e) => setCardData({ ...cardData, expiryMonth: e.target.value })}>
                 {months.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
               </FloatingSelect>
 
-              <FloatingSelect label="Year"
-                value={cardData.expiryYear}
-                onChange={(e) => setCardData({ ...cardData, expiryYear: e.target.value })}
-              >
+              <FloatingSelect label="Year" value={cardData.expiryYear}
+                onChange={(e) => setCardData({ ...cardData, expiryYear: e.target.value })}>
                 {years.map(y => <option key={y} value={y}>{y}</option>)}
               </FloatingSelect>
             </div>
 
-            <FloatingInput label="CVV" value={cardData.cvv} inputMode="numeric"
+            <FloatingInput label="CVV" inputMode="numeric"
+              value={cardData.cvv}
               onChange={(e) => setCardData({ ...cardData, cvv: e.target.value })} />
 
-            <FloatingInput label="ZIP" value={cardData.zip} inputMode="numeric"
+            <FloatingInput label="ZIP" inputMode="numeric"
+              value={cardData.zip}
               onChange={(e) => setCardData({ ...cardData, zip: e.target.value })} />
 
-            <FloatingInput label="Email" type="email" value={cardData.email}
+            <FloatingInput label="Email" type="email"
+              value={cardData.email}
               onChange={(e) => setCardData({ ...cardData, email: e.target.value })} />
           </form>
         )}
@@ -331,9 +296,10 @@ export default function PaymentApp({
         )}
       </div>
 
-      {/* SUBMIT */}
-      <div className="p-4  bg-white">
+      {/* STICKY SUBMIT */}
+      <div className="sticky bottom-0 bg-white p-4 border-t">
         <button
+          type="button"
           onClick={
             paymentType === 'CARD'
               ? handleCardPayment
@@ -342,9 +308,11 @@ export default function PaymentApp({
               : handleCheckPayment
           }
           disabled={isProcessing}
-          className={`w-full py-4 rounded-xl text-lg font-semibold text-white ${
-            isProcessing ? 'bg-gray-400' : 'bg-green-700'
-          }`}
+          className={`w-full py-4 rounded-xl text-lg font-semibold text-white transition
+            ${isProcessing
+              ? 'bg-gray-400 pointer-events-none'
+              : 'bg-green-700 active:scale-95'}
+          `}
         >
           {isProcessing ? 'Processing...' : `Pay $${amount}`}
         </button>

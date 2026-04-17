@@ -24,6 +24,17 @@ export async function getLineItems(invoiceID) {
  
 }
 
+export async function deleteAllLineItems(){
+  return new Promise( async(resolve, reject) =>{
+    const db = await getDB()
+    const list = await db.getAll('lineItems')  
+    list.map( async(item) =>{
+      await db.delete('reports', item.invoiceID)
+      resolve() 
+    })
+  })
+}
+
 export async function addLineItems(items, invoiceID){
 	try{
 		const db = await getDB()

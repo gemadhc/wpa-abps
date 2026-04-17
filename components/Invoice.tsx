@@ -223,15 +223,14 @@ export default function Invoice({
       >
         <div className="fixed inset-0 bg-black/30" />
 
-        <div className="fixed inset-0 flex items-center justify-center sm:p-4">
-          <Dialog.Panel className="bg-white w-full sm:max-w-md min-h-screen sm:min-h-0 rounded-none sm:rounded-2xl p-4">
-
-            <div className="flex justify-between items-center mb-3">
+        <div className="fixed inset-0 flex items-center justify-center sm:p-4 text-black">
+          <Dialog.Panel className="bg-white w-full sm:max-w-md min-h-screen sm:min-h-0 rounded-none sm:rounded-2xl ">
+            <div className="flex justify-between items-center mb-3 h-20 w-full px-5 shadow">
               <Dialog.Title className="font-semibold text-lg">
                 Process Payment
               </Dialog.Title>
               <button onClick={() => setOpenPaymentDialog(false)}>
-                <X className="w-5 h-5 text-gray-500" />
+                <X className="w-10 h-10 text-gray-500 border rounded-xl " />
               </button>
             </div>
 

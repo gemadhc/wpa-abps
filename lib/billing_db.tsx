@@ -22,3 +22,15 @@ export async function createItem(item) {
 	}
 }
 
+
+export async function deleteAllBilling(){
+  return new Promise( async(resolve, reject) =>{
+    const db = await getDB()
+    const list = await db.getAll('billing_details')  
+    list.map( async(item) =>{
+      await db.delete('billing_details', item.invoiceID)
+      resolve() 
+    })
+  })
+}
+

@@ -9,7 +9,28 @@ export async function getServices(id) {
 		console.log("err", err)
 		return err
 	}
- 
+}
+
+export async function getAllServices(){
+	try{
+		const db = await getDB()
+  		let items = await db.getAll('services')
+  		return items
+	}catch(err){
+		console.log("err", err)
+		return err
+	}
+}
+
+export async function deleteAllServices(){
+  return new Promise( async(resolve, reject) =>{
+    const db = await getDB()
+    const list = await db.getAll('services')  
+    list.map( async(item) =>{
+      await db.delete('services', item.stopID)
+      resolve() 
+    })
+  })
 }
 
 

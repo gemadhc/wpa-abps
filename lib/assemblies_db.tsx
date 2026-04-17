@@ -34,12 +34,15 @@ export async function createItem(item, assemblyID) {
 }
 
 /*read documentation to clean list */
-export const clearAssemblies = () =>{
-	try{
-
-	}catch(err){
-		console.log(err)
-	}
+export async function deleteAllAssemblies(){
+  return new Promise( async(resolve, reject) =>{
+    const db = await getDB()
+    const list = await db.getAll('assemblyList')  
+    list.map( async(item) =>{
+      await db.delete('assemblyList', item.id)
+      resolve() 
+    })
+  })
 }
 
 export const getUnsyncedAssemblies = async () => {

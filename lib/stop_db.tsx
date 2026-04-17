@@ -50,6 +50,17 @@ export async function updateStop(mystop){
 	await db.put('stoplist', updated)
 }
 
+export async function deleteAllStops(){
+  return new Promise( async(resolve, reject) =>{
+    const db = await getDB()
+    const stoplist = await db.getAll('stoplist')  
+    stoplist.map( async(item) =>{
+      await db.delete('stoplist', item.stopID)
+      resolve() 
+    })
+  })
+}
+
 export const getUnsyncedStops = async () => {
   const db = await getDB()
   const allItems = await db.getAll('stoplist')

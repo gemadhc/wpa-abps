@@ -12,6 +12,19 @@ export async function getBilling(id) {
  
 }
 
+
+
+export async function deleteAllInvoices(){
+  return new Promise( async(resolve, reject) =>{
+    const db = await getDB()
+    const list = await db.getAll('invoices')  
+    list.map( async(item) =>{
+      await db.delete('invoices', item.id)
+      resolve() 
+    })
+  })
+}
+
 export async function updateInvoiceStatus(invoice, newstatus) {
 	const db = await getDB()
 	const myinvoice = await db.get('invoices', invoice )
