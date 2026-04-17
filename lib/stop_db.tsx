@@ -52,12 +52,19 @@ export async function updateStop(mystop){
 
 export async function deleteAllStops(){
   return new Promise( async(resolve, reject) =>{
-    const db = await getDB()
-    const stoplist = await db.getAll('stoplist')  
-    stoplist.map( async(item) =>{
-      await db.delete('stoplist', item.stopID)
+    try{
+      const db = await getDB()
+      const stoplist = await db.getAll('stoplist')  
+      stoplist.map( async(item) =>{
+        await db.delete('stoplist', item.stopID)
+        
+      })
       resolve() 
-    })
+    }catch(err){
+      console.log("Error: ", err)
+      resolve() 
+    }
+    
   })
 }
 
