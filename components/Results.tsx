@@ -35,7 +35,6 @@ function ResultsBody({ closeMe, reloadServices }) {
       await updateAssembly(formData)
       await syncReports(); 
       await syncAssemblies(); 
-
       setSaving(false)
       resolve()
     })
@@ -57,7 +56,7 @@ function ResultsBody({ closeMe, reloadServices }) {
           disabled={saving}
           onClick={() =>
             saveAll().then(() => {
-              router.back();
+              
             })
           }
           className="w-full flex items-center justify-center px-4 py-2 bg-green-700 text-white rounded-xl 

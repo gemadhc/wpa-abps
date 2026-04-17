@@ -11,15 +11,12 @@ export default  function ClientComponent({ stopID }) {
 	
 	const getter = async ()=>{
 		let stops = await getStops();
-		console.log("These are the stops: ", stops, " for ", stopID)
   	    let item = stops.find((s) => s.stopID == stopID);
-  	    console.log("stop item: ", item)
 		setStop(item)
 	}
+	
 	useEffect(()=>{
-		console.log("StopID: ", stopID)
 		getter()
-
 	}, [])
 
 

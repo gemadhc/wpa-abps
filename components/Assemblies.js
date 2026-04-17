@@ -35,29 +35,6 @@ export default function Assemblies({ list = [], reloadServices, stopID, addressI
     });
   }, [list]);
 
-  const loadReport = async (assembly) => {
-    let cached = await getReport(assembly.testReportID)
-    if (cached) return cached;
-    if (!navigator.onLine) return;
-
-    requestReport(assembly.testReportID).then((report) => {
-      let obj = { ...report }
-      createReport(obj, assembly.testReportID)
-      return report
-    })
-  }
-
-  const loadDevice = async (assembly) => {
-    let cached = await getAssembly(assembly.assemblyID)
-    if (cached) return cached;
-    if (!navigator.onLine) return;
-
-    requestAssembly(assembly.assemblyID).then((device) => {
-      let obj = { ...device }
-      createAssemblyItem(obj, assembly.assemblyID)
-      return device
-    })
-  }
 
   const handleRowClick = (assembly) => {
     router.push(`/report/${assembly.testReportID}/${assembly.assemblyID}`);

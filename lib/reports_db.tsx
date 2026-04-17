@@ -3,7 +3,7 @@ import { getDB }  from "./db.tsx"
 export async function getReport(id) {
 	try{
 		const db = await getDB()
-  		let item = db.get('reports', id)
+  		let item = await db.get('reports', id)
   		return item
 	}catch(err){
 		console.log("err", err)
@@ -14,6 +14,7 @@ export async function getReport(id) {
 
 export async function updateReport(updates){
 	const db = await getDB()
+  console.log("These are the updates: ", updates, updates.reportID )
 	const myitem = await db.get('reports', updates.reportID )
 	if (!myitem) return
 	const updated = { ...updates, synced: false }
@@ -26,7 +27,7 @@ export async function createItem(item, reportID) {
 		const db = await getDB()
 		item.reportID  = reportID; 
 		item.synced = true ; 
-  		return db.put('reports', item)	
+  		return await db.put('reports', item)	
 	}catch(err){
 		console.log(err)
 	}

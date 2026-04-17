@@ -4,6 +4,7 @@ import StopBody from '@/components/StopBody';
 import { getStops } from '@/lib/stop_db';
 import { useState, useEffect } from 'react'
 import Results from "@/components/Results"
+import WaterLoader from "@/components/WaterLoader"
 
 import { requestAssembly, createAssembly } from "@/actions/assembly";
 import { requestReport } from "@/actions/report";
@@ -18,45 +19,49 @@ export default  function ClientComponent({ reportID, deviceID }) {
 	const [initialDevice, setInitialDevice] = useState(null); 
 
   const loadReport = async () => {
-    let cached = await getReport(reportID)
-    if(cached) return cached; 
-    if (!navigator.onLine) {
-        return
+    const cached = await getReport(reportID);
+    if (cached) {
+      return cached;
     }
-    requestReport(reportID).then((report) =>{
-        let obj = {...report}
-        createReport( obj, reportID)
-        return report
-    }) 
 
-  }
+    if (!navigator.onLine) return null;
 
-  const loadDevice = async () =>{
-    let cached = await getAssembly( deviceID )
-    if(cached) return cached; 
-    if (!navigator.onLine) {
-        return
-    }
-    requestAssembly(deviceID).then((device) =>{
-        let obj = {...device}
-        createAssemblyItem( obj, deviceID)
-        return device
-    }) 
-  }
+    const report = await requestReport(reportID);
+    createReport({ ...report }, reportID);
+    return report;
+  };
+
+  const loadDevice = async () => {
+    const cached = await getAssembly(deviceID);
+    console.log("This is the cached assembly: ", cached, deviceID)
+    if (cached) return cached;
+
+    if (!navigator.onLine) return null;
+
+    const device = await requestAssembly(deviceID);
+    createAssemblyItem({ ...device }, deviceID);
+    return device;
+    
+  };
 
 	const getter = async ()=>{
-
     Promise.all([
       loadReport(),
       loadDevice()
-    ]).then(([report, device]) => {
+    ]).then( ( [report, device] ) => {
+      console.log("report, device", report, device)
       setInitialReport(report);
       setInitialDevice(device);
     })
   }
 
 	useEffect(()=>{
-		getter()
+
+    console.log("Current Initials: ", initialReport, initialDevice, reportID, deviceID)
+    if( reportID && deviceID ){
+      getter()
+    }
+
 	}, [])
 
   return (
@@ -71,7 +76,10 @@ export default  function ClientComponent({ reportID, deviceID }) {
             />
           </ReportProvider>
         : 
-          <>Loading...</>
+          <div className="pt-50 text-center">
+            <h2>Loading Report</h2>
+            <WaterLoader />
+          </div>
       }
   		
     </div>

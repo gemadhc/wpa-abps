@@ -19,8 +19,8 @@ export function ReportProvider({ initialReport, initialDevice, children}: { chil
   useEffect(()=>{
     initialReport.reportID = initialReport.id;
     initialDevice.assemblyID = initialDevice.id; 
-    console.log("Set these values: ", initialDevice.assemblyID, initialReport.reportID)
     loadReport(initialReport, initialDevice)
+    
   }, [])
 
   const [formData, setFormData] = useState<Record<string, any>>({});

@@ -3,7 +3,8 @@ import { getDB }  from "./db.tsx"
 export async function getAssembly(id) {
 	try{
 		const db = await getDB()
-  		let item = db.get('assemblyList', id)
+  		let item = await db.get('assemblyList', id)
+      console.log("This is the assemblyitem!!!!!!: ", item)
   		return item
 	}catch(err){
 		console.log("err", err)
@@ -26,7 +27,7 @@ export async function createItem(item, assemblyID) {
 		const db = await getDB()
 		item.assemblyID  = assemblyID
 		item.synced = true; 
-  		return db.put('assemblyList', item)	
+  		return await db.put('assemblyList', item)	
 
 	}catch(err){
 		console.log(err)
