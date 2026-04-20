@@ -20,8 +20,8 @@ export async function deleteAllInvoices(){
     const list = await db.getAll('invoices')  
     list.map( async(item) =>{
       await db.delete('invoices', item.id)
-      resolve() 
     })
+    resolve() 
   })
 }
 

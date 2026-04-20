@@ -14,20 +14,20 @@ export async function getReport(id) {
 
 export async function updateReport(updates){
 	const db = await getDB()
-  console.log("These are the updates: ", updates, updates.reportID )
 	const myitem = await db.get('reports', updates.reportID )
 	if (!myitem) return
 	const updated = { ...updates, synced: false }
 	await db.put('reports', updated)
+  return; 
 }	
 
 
 export async function createItem(item, reportID) {
 	try{
 		const db = await getDB()
-		item.reportID  = reportID; 
+		item.reportID  = Number( reportID) ; 
 		item.synced = true ; 
-  		return await db.put('reports', item)	
+  	return await db.put('reports', item)	
 	}catch(err){
 		console.log(err)
 	}
@@ -40,9 +40,10 @@ export async function deleteAllReports(){
       const db = await getDB()
       const list = await db.getAll('reports')  
       list.map( async(item) =>{
-        await db.delete('reports', item.id)
-        resolve() 
+        await db.delete('reports', item.id )
+        
       })
+      resolve() 
 
     }catch(err){
       console.log("This is the error: ", err)

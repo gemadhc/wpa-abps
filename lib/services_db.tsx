@@ -15,7 +15,12 @@ export async function getAllServices(){
 	try{
 		const db = await getDB()
   		let items = await db.getAll('services')
-  		return items
+  		if(items.length == 0 ){
+  			return null
+  		}else{
+  			return items
+  		}
+  		
 	}catch(err){
 		console.log("err", err)
 		return err
@@ -28,8 +33,8 @@ export async function deleteAllServices(){
     const list = await db.getAll('services')  
     list.map( async(item) =>{
       await db.delete('services', item.stopID)
-      resolve() 
     })
+    resolve() 
   })
 }
 
@@ -41,6 +46,7 @@ export async function updateService(updates){
 	const updated = { ...updates, synced: false }
 	await db.put('services', updated)
 }	
+
 
 
 export async function createItem(list, stopID) {

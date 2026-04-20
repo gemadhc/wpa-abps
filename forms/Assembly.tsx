@@ -1,7 +1,7 @@
 'use client';
 import FormLayout from "../layouts/FormLayout";
 import { useReport } from "../contexts/ReportContext";
-import {useEffect} from 'react'
+import { useEffect } from 'react'
 
 export default function Assembly() {
   const fields = [

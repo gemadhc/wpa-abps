@@ -19,25 +19,22 @@ export default  function ClientComponent({ reportID, deviceID }) {
 	const [initialDevice, setInitialDevice] = useState(null); 
 
   const loadReport = async () => {
+
     const cached = await getReport(reportID);
     if (cached) {
       return cached;
     }
-
     if (!navigator.onLine) return null;
-
     const report = await requestReport(reportID);
     createReport({ ...report }, reportID);
     return report;
   };
 
   const loadDevice = async () => {
+
     const cached = await getAssembly(deviceID);
-    console.log("This is the cached assembly: ", cached, deviceID)
     if (cached) return cached;
-
     if (!navigator.onLine) return null;
-
     const device = await requestAssembly(deviceID);
     createAssemblyItem({ ...device }, deviceID);
     return device;
@@ -49,19 +46,16 @@ export default  function ClientComponent({ reportID, deviceID }) {
       loadReport(),
       loadDevice()
     ]).then( ( [report, device] ) => {
-      console.log("report, device", report, device)
       setInitialReport(report);
       setInitialDevice(device);
     })
   }
 
 	useEffect(()=>{
-
-    console.log("Current Initials: ", initialReport, initialDevice, reportID, deviceID)
     if( reportID && deviceID ){
       getter()
     }
-
+    
 	}, [])
 
   return (

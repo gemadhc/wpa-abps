@@ -30,7 +30,6 @@ export default function Footer(){
 
 
 	useEffect(()=>{
-		console.log("This is the pathname: ", pathname, pathname.includes('/offline'))
 		if( pathname.includes('/offline') || pathname.includes('/stop') || pathname.includes('/more') ){
 			setShow(true)
 		}else{

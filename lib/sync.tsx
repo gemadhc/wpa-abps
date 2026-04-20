@@ -136,6 +136,7 @@ export async function syncAssemblies(){
   if (unsyncedItems.length === 0) {
     return
   }
+  console.log("unsynced assemblies: ", unsyncedItems)
   for (const item of unsyncedItems) {
     try {
       await updateAssembly(item)
@@ -158,5 +159,6 @@ if (typeof window !== 'undefined') {
     syncLineItems();
     syncServices(); 
     syncReports(); 
+    syncAssemblies()
   })
 }

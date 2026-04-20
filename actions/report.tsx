@@ -129,9 +129,11 @@ export const requestReport = async (id) => {
 
 export const updateReport = async (obj) => {
   try {
+    console.log("updating report: ", obj)
     const res = await updateFetch(obj);
     const data = await res.json();
     if (!res.ok) throw new Error(data.message || 'Failed to update report');
+    console.log("report updated: ", data)
     return data;
   } catch (err) {
     console.error('updateReport error:', err);

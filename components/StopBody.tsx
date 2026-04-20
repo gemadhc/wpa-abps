@@ -20,9 +20,9 @@ import { updateStop } from "../lib/stop_db";
 import { getBilling, createItem } from "../lib/billing_db";
 import { createItem as createInvoice, getInvoice } from "../lib/invoice_db";
 import { createItem as createService, getServices } from "../lib/services_db";
-import { createItem as createAssemblyItem } from "../lib/assemblies_db";
+import { createItem as createAssemblyItem, getAssembly } from "../lib/assemblies_db";
 import { getLineItems, addLineItems } from "../lib/lineitem_db";
-import { createItem as createReport } from "../lib/reports_db";
+import { createItem as createReport, getReport } from "../lib/reports_db";
 
 export default function StopBody({ item, stopID, reloadList }) {
   const [activeTab, setActiveTab] = useState('Assemblies');
@@ -43,58 +43,88 @@ export default function StopBody({ item, stopID, reloadList }) {
   const loadBilling = async () => {
     let cached = await getBilling(item.invoiceID);
     setMyBilling(cached);
-
-    requestBilling(item.invoiceID).then((dt) => {
-      dt.invoiceID = item.invoiceID;
-      setMyBilling(dt);
-      createItem(dt);
-    });
+    if (cached) return cached;
+    if (!navigator.onLine) return;
+    let bill = await requestBilling(item.invoiceID)
+    bill.invoiceID =  item.invoiceID
+    setMyBilling(bill);
+    createItem(bill);
+    return bill; 
   };
 
-  const loadInvoice = async () => {
-    let cached = await getInvoice(item.invoiceID);
-    setMyInvoice(cached);
+ const loadInvoice = async () => {
+  const cached = await getInvoice(item.invoiceID);
+  setMyInvoice(cached);
 
-    requestInvoice(item.invoiceID).then((data) => {
-      setMyInvoice(data);
-      createInvoice(data);
-    });
-  };
+  if (cached) return cached;
+  if (!navigator.onLine) return;
 
-  const loadServices = async () => {
-    let cached = await getServices(item.stopID);
-    setServices(cached?.list || []);
+  const data = await requestInvoice(item.invoiceID);
+  setMyInvoice(data);
+  createInvoice(data);
 
-    requestServices(item.stopID).then((data) => {
-      setServices(data);
-      createService(data, item.stopID);
-    });
-  };
+  return data;
+};
 
-  const loadItems = async () => {
-    setLoadingItems(true);
+const loadServices = async () => {
+  const cached = await getServices(item.stopID);
+  setServices(cached?.list || []);
 
-    let cached = await getLineItems(item.invoiceID);
-    setMyLines(cached?.list || []);
+  if (cached) return cached;
+  if (!navigator.onLine) return;
 
-    requestItems(item.invoiceID).then((data) => {
-      setMyLines(data);
-      addLineItems(data, item.invoiceID);
-    });
+  const data = await requestServices(item.stopID);
+  setServices(data);
+  createService(data, item.stopID);
 
+  return data;
+};
+
+const loadItems = async () => {
+  setLoadingItems(true);
+
+  const cached = await getLineItems(item.invoiceID);
+  setMyLines(cached?.list || []);
+  if (cached) {
     setLoadingItems(false);
-  };
+    return cached;
+  }
+  if (!navigator.onLine) {
+    setLoadingItems(false);
+    return;
+  }
+  const data = await requestItems(item.invoiceID);
+  setMyLines(data);
+  addLineItems(data, item.invoiceID);
+  setLoadingItems(false);
+  return data;
+};
+
+const loadReport = async (reportID) => {
+  const cached = await getReport(reportID);
+  if (cached) return cached;
+  if (!navigator.onLine) return;
+  const report = await requestReport(reportID);
+  const obj = { ...report };
+  createReport(obj, reportID);
+  return report;
+};
+
+const loadDevice = async (assemblyID) => {
+  const cached = await getAssembly(assemblyID);
+  if (cached) return cached;
+  if (!navigator.onLine) return;
+  const device = await requestAssembly(assemblyID);
+  const obj = { ...device };
+  createAssemblyItem(obj, assemblyID);
+  return device;
+};
 
   // ---------------- BACKGROUND CACHE ----------------
   useEffect(() => {
     services.forEach((serv) => {
-      requestReport(serv.testReportID).then((report) => {
-        createReport({ ...report }, serv.testReportID);
-      });
-
-      requestAssembly(serv.assemblyID).then((assembly) => {
-        createAssemblyItem({ ...assembly }, serv.assemblyID);
-      });
+      loadReport(serv.testReportID); 
+      loadDevice(serv.assemblyID);
     });
   }, [services]);
 

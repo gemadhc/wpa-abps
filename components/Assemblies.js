@@ -207,6 +207,7 @@ export default function Assemblies({ list = [], reloadServices, stopID, addressI
                         closeMe={() => setOpenResultsDialog(false)}
                         reloadServices={() => reloadServices()}
                         saving={(bool) => setSaving(bool)}
+                        stopID= { stopID }
                       />
                     </ReportProvider>
                   ) : (

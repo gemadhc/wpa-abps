@@ -29,9 +29,10 @@ export async function deleteAllLineItems(){
     const db = await getDB()
     const list = await db.getAll('lineItems')  
     list.map( async(item) =>{
-      await db.delete('reports', item.invoiceID)
-      resolve() 
+      await db.delete('lineItems',  item.invoiceID )
+      
     })
+    resolve() 
   })
 }
 

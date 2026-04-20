@@ -17,12 +17,13 @@ import { ArrowBigLeft, SaveAll } from 'lucide-react';
 
 import { updateReport } from "../lib/reports_db"
 import { updateAssembly } from "../lib/assemblies_db"
+import { updateService } from "../lib/services_db"
 import { syncReports, syncAssemblies } from "../lib/sync"
 
 // ---------------------------------------------------
 // Internal Body Component (uses form context only)
 // ---------------------------------------------------
-function ResultsBody({ closeMe, reloadServices }) {
+function ResultsBody({ closeMe, reloadServices, stopID }) {
   const [activeTab, setActiveTab] = useState('Device');
   const [saving, setSaving] = useState(false)
   const {formData} = useReport()
@@ -30,7 +31,9 @@ function ResultsBody({ closeMe, reloadServices }) {
   
   const saveAll = () =>{
     return new Promise(async (resolve, reject) =>{
+      console.log("These are the params: ", stopID)
       setSaving(true)
+      formData.serviceType = formData.state
       await updateReport(formData)
       await updateAssembly(formData)
       await syncReports(); 
@@ -56,7 +59,7 @@ function ResultsBody({ closeMe, reloadServices }) {
           disabled={saving}
           onClick={() =>
             saveAll().then(() => {
-              
+              router.back()
             })
           }
           className="w-full flex items-center justify-center px-4 py-2 bg-green-700 text-white rounded-xl 
@@ -119,8 +122,8 @@ function ResultsWithContexts({ closeMe, reloadServices}) {
 // ---------------------------------------------------
 // Main Export: Only ReportProvider receives props
 // ---------------------------------------------------
-export default function Results({ report, device=null, closeMe, reloadServices }) {
+export default function Results({ report, device=null, closeMe, reloadServices, stopID }) {
   return (
-    <ResultsWithContexts closeMe={closeMe}  reloadServices = {reloadServices} />
+    <ResultsWithContexts closeMe={closeMe}  reloadServices = {reloadServices} stopID = {stopID} />
   );
 }

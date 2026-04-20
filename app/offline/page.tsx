@@ -39,89 +39,112 @@ export default function Home() {
   const [completed, setCompleted] = useState(0)
   const [loading, setLoading] = useState(false)
   const { date, setDate, resetToToday } = useDate();
+  const [servicesLoaded, setServicesLoaded] = useState(false)
 
   // Initialize with Pacific time date
   const initialPacificDate = toZonedTime(new Date(), pacificTimeZone)
   const [myDate, setMyDate] = useState( date )
   const {session} = useSession()
 
-  const loadBilling = async (invoiceID) => {
-    let cached = await getBilling(invoiceID);
-    requestBilling(invoiceID).then((dt) => {
-      dt.invoiceID = invoiceID;
-      createItem(dt);
-    });
-  };
+const loadBilling = async (invoiceID) => {
+  const cached = await getBilling(invoiceID);
+  if (cached) return cached;
 
-  const loadInvoice = async (invoiceID) => {
-    let cached = await getInvoice(invoiceID);
-    requestInvoice(invoiceID).then((data) => {
-      createInvoice(data);
-    });
-  };
+  if (!navigator.onLine) return;
 
-  const loadServices = async (stopID) => {
-    let cached = await getServices(stopID);
-    requestServices(stopID).then((data) => {
-      createService(data, stopID);
-   
-    });
-  };
+  const dt = await requestBilling(invoiceID);
+  dt.invoiceID = invoiceID;
+  createItem(dt);
 
-  const loadItems = async (invoiceID) => {
-    let cached = await getLineItems(invoiceID);
-    requestItems(invoiceID).then((data) => {
-      addLineItems(data, invoiceID);
-    });
-  };
+  return dt;
+};
 
-  const loadReport = async (reportID) => {
-    let cached = await getReport(reportID)
-    if (cached) return cached;
-    if (!navigator.onLine) return;
-    requestReport(reportID).then((report) => {
-      let obj = { ...report }
-      createReport(obj, reportID)
-      return report
-    })
-  }
+const loadInvoice = async (invoiceID) => {
+  const cached = await getInvoice(invoiceID);
+  if (cached) return cached;
 
-  const loadDevice = async (assemblyID) => {
-    let cached = await getAssembly(assemblyID)
-    if (cached) return cached;
-    if (!navigator.onLine) return;
-    requestAssembly(assemblyID).then((device) => {
-      let obj = { ...device }
-      createAssemblyItem(obj, assemblyID)
-      return device
-    })
-  }
+  if (!navigator.onLine) return;
 
-  // Function to load stops and bins for a given date
-  const handleDateChange = async (isoDate: string) => {
-    monitorMemory()
-    deleteAllStops().then(async(data, err) =>{
-      const dateToUse = isoDate || myDate
-      console.log("dateToUse", dateToUse)
-      setDate(dateToUse)
-      setMyDate(dateToUse)
-      try {
-        setLoading(true)
-        const stopsData = await requestDispatch(dateToUse)
-        setList(stopsData)
-        const binsData = await requestBins(dateToUse)
-        setBins(binsData)
-        setLoading(false);
+  const data = await requestInvoice(invoiceID);
+  createInvoice(data);
 
-      } catch (err) {
-        console.error("Error fetching dispatch/bins:", err)
+  return data;
+};
+
+const loadServices = async (stopID) => {
+  const cached = await getAllServices(stopID);
+  if (cached) return cached;
+  if (!navigator.onLine) return;
+  const data = await requestServices(stopID);
+  createService(data, stopID);
+  return data;
+};
+
+const loadItems = async (invoiceID) => {
+  const cached = await getLineItems(invoiceID);
+  if (cached) return cached;
+  if (!navigator.onLine) return;
+  const data = await requestItems(invoiceID);
+  addLineItems(data, invoiceID);
+  return data;
+};
+
+const loadReport = async (reportID) => {
+  const cached = await getReport(reportID);
+  if (cached) return cached;
+  if (!navigator.onLine) return;
+  const report = await requestReport(reportID);
+  const obj = { ...report };
+  createReport(obj, reportID);
+  return report;
+};
+
+const loadDevice = async (assemblyID) => {
+  const cached = await getAssembly(assemblyID);
+  if (cached) return cached;
+  if (!navigator.onLine) return;
+  const device = await requestAssembly(assemblyID);
+  const obj = { ...device };
+  createAssemblyItem(obj, assemblyID);
+  return device;
+};
+
+  const clearAll = async () =>{
+    return new Promise(async (resolve, rejec) =>{
+      try{
+        await deleteAllBilling(); 
+        await deleteAllServices(); 
+        await deleteAllAssemblies(); 
+        await deleteAllInvoices(); 
+        await deleteAllLineItems(); 
+        await deleteAllReports(); 
+        await deleteAllStops(); 
+        resolve()
+      }catch(err){
+        resolve()
       }
-
     })
+  }
+
+  // Function to  stops and bins for a given date
+  const handleDateChange = async (isoDate: string) => {
+    if(isoDate != myDate){
+      console.log("clearing out all the data")
+      await clearAll(); 
+    }
+    const dateToUse = isoDate || myDate
+    setDate(dateToUse)
+    setMyDate(dateToUse)
+    setLoading(true)
+    const stopsData = await requestDispatch(dateToUse)
+    setList(stopsData)
+    const binsData = await requestBins(dateToUse)
+    setBins(binsData)
+    setLoading(false);
   }
 
   const loadSecondLayer = async()=>{
-    let serv_list = await getAllServices()
+    let serv_list = await getAllServices(); 
     serv_list.map((item) =>{
       item.list.map((item2) =>{
         loadDevice(item2.assemblyID); 
@@ -130,18 +153,25 @@ export default function Home() {
     })
   }
 
-  useEffect(()=>{
-    list.map(async (item) =>{
-      loadBilling(item.invoiceID); 
-      loadInvoice(item.invoiceID); 
-      loadServices(item.stopID); 
-      loadItems(item.invoiceID); 
-      return
-    })
 
-    loadSecondLayer()
-     
-  }, [list])
+useEffect(() => {
+  const run = async () => {
+    const promises = list.flatMap((item) => [
+      loadBilling(item.invoiceID),
+      loadInvoice(item.invoiceID),
+      loadItems(item.invoiceID),
+      loadServices(item.stopID),
+    ]);
+
+    await Promise.all(promises);
+
+    loadSecondLayer();
+  };
+
+  if (list?.length) {
+    run();
+  }
+}, [list]);
 
   useEffect(()=>{
       list.map( (item) => createStop(item) )
