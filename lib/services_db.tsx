@@ -47,8 +47,42 @@ export async function updateService(updates){
 	await db.put('services', updated)
 }	
 
+export async function updateServiceAssembly(updates) {
+	console.log("updates to make: ", updates);
 
+	const db = await getDB();
+	const myitem = await db.get("services", updates.stopID);
 
+	if (!myitem || !Array.isArray(myitem.list)) return;
+
+	let found = false;
+
+	const updatedList = myitem.list.map(item => {
+		if (item.testReportID === updates.testReportID) {
+			found = true;
+			return {
+				...item,
+				state: "COMPLETED",
+				location: updates.location,
+				serial_number: updates.serial_number,
+			};
+		}
+		return item;
+	});
+
+	if (!found) {
+		console.warn("No matching reportID found:", updates.reportID);
+		return;
+	}
+
+	const updated = {
+		...myitem,
+		list: updatedList,
+		synced: false,
+	};
+	console.log("updated service: ", updated)
+	await db.put("services", updated);
+}
 export async function createItem(list, stopID) {
 	try{
 		const db = await getDB()
@@ -62,6 +96,43 @@ export async function createItem(list, stopID) {
 		console.log(err)
 	}
 }
+
+
+export async function serviceNotReady( stopID, serviceID, reason, isReady){
+	console.log("updating as ready/notready", stopID, serviceID, reason, isReady)
+	const db = await getDB();
+	const myitem = await db.get("services", Number(stopID) );
+	console.log("myitem: ", myitem)
+	if (!myitem || !Array.isArray(myitem.list)) return;
+	let found = false;
+	const updatedList = myitem.list.map(item => {
+		console.log("comparing: ", item, serviceID)
+		if (item.serviceID === serviceID) {
+			found = true;
+			return {
+				...item,
+				reason: reason,
+				ready: isReady
+			};
+		}
+		return item;
+	});
+
+	if (!found) {
+		console.warn("No matching reportID found:", updates.reportID);
+		return;
+	}
+	const updated = {
+		...myitem,
+		list: updatedList,
+		synced: false,
+	};
+
+	console.log("updated service: ", updated)
+	await db.put("services", updated);
+	return 
+}
+
 
 export const getUnsyncedServices = async () => {
   const db = await getDB()

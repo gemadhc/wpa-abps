@@ -21,8 +21,26 @@ export async function updateAssembly(updates){
 	await db.put('assemblyList', updated)
 }	
 
+export async function addAssembly(addressID, stopID){
+	try{
+		console.log("adding a new assembly: ", stopID, addressID)
+		const db = await getDB()
+		let item = {}; 
+		item.assemblyID  = crypto.randomUUID()
+		item.isNew = true; 
+		item.stopID = stopID;
+		item.addressID = addressID; 
+		item.synced = false; 
+		console.log(item)
+  	return await db.put('assemblyList', item)	
 
-export async function createItem(item, assemblyID) {
+	}catch(err){
+		console.log(err)
+	}
+}
+
+
+export async function createItem(item, assemblyID ) {
 	try{
 		const db = await getDB()
 		item.assemblyID  = Number( assemblyID )
@@ -40,7 +58,7 @@ export async function deleteAllAssemblies(){
       const db = await getDB()
       const list = await db.getAll('assemblyList')  
       list.map( async(item) =>{
-        await db.delete('assemblyList', item.id )
+        await db.delete('assemblyList', item?.id || item?.assemblyID)
       })
       resolve() 
     }catch(err){

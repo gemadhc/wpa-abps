@@ -12,7 +12,9 @@ import React from 'react';
 import { ReportProvider } from "../contexts/ReportContext";
 
 import { getReport, createItem as createReport } from "../lib/reports_db"
-import { getAssembly, createItem as createAssemblyItem } from "../lib/assemblies_db"
+import { getAssembly, createItem as createAssemblyItem, addAssembly} from "../lib/assemblies_db"
+import { syncServices, syncAssemblies} from "../lib/sync"
+import { serviceNotReady } from "../lib/services_db"
 
 export default function Assemblies({ list = [], reloadServices, stopID, addressID }) {
 
@@ -23,8 +25,14 @@ export default function Assemblies({ list = [], reloadServices, stopID, addressI
   const [initialReport, setInitialReport] = useState(null);
   const [initialDevice, setInitialDevice] = useState(null);
   const [loadAssembly, setLoadAssembly] = useState(false);
+  const [isOnline, setIsOnline] = useState(true)
   const [saving, setSaving] = useState(true)
   const router = useRouter();
+
+  useEffect(()=>{
+    setIsOnline(navigator.onLine)
+
+  }, [navigator.onLine])
 
   // ✅ SORT LIST: non-COMPLETED first, COMPLETED last
   const sortedList = useMemo(() => {
@@ -40,12 +48,18 @@ export default function Assemblies({ list = [], reloadServices, stopID, addressI
     router.push(`/report/${assembly.testReportID}/${assembly.assemblyID}`);
   };
 
+
   const handleToggleReady = (assembly) => {
     if (assembly.ready) {
       setSelectedAssembly(assembly);
       setOpenReasonDialog(true);
     } else {
-      setAsReady(assembly.serviceID).then(() => reloadServices());
+      serviceNotReady(stopID, assembly.serviceID, reason, true).then(
+        () =>{
+          syncServices()
+          reloadServices();
+        } 
+      );
     }
   };
 
@@ -57,12 +71,13 @@ export default function Assemblies({ list = [], reloadServices, stopID, addressI
   const handleSubmitReason = async () => {
     if (applyToAll) {
       await Promise.all(
-        list.map(item => setAsNotReady(item.serviceID, reason))
+        list.map(item => serviceNotReady(stopID, item.serviceID,  reason, false) )
       );
     } else {
-      await setAsNotReady(selectedAssembly.serviceID, reason);
+      await serviceNotReady(stopID, selectedAssembly.serviceID, reason, false);
     }
-
+    console.log("syncing")
+    syncServices();
     reloadServices();
     setOpenReasonDialog(false);
     setReason('');
@@ -81,10 +96,17 @@ export default function Assemblies({ list = [], reloadServices, stopID, addressI
   }, [unableToLocate, ranOutOfTime, removed]);
 
   const handleAddAssembly = () => {
-    createAssembly(addressID, stopID).then(() => {
+    addAssembly(addressID, stopID).then(async(data)=>{
+      await syncServices();
+      await syncAssemblies(); 
       reloadServices();
-    });
+    })
   };
+
+  useEffect(()=>{
+    reloadServices()
+
+  }, [])
 
   return (
     <div className="space-y-3 p-0 no-scrollbar">
@@ -104,7 +126,7 @@ export default function Assemblies({ list = [], reloadServices, stopID, addressI
           <div className="flex justify-between items-start ">
             <div>
               <p className="font-semibold text-gray-900 ">
-                SN# {assembly.serial_number || `Assembly ${ind + 1}`}
+                SN# {assembly?.serial_number || `Assembly ${ind + 1}`}
               </p>
               <p className="text-sm text-gray-500">
                 {assembly?.location?.toLowerCase() || ''}
@@ -127,13 +149,13 @@ export default function Assemblies({ list = [], reloadServices, stopID, addressI
           {/* SERVICE INFO */}
           <div className="text-sm text-gray-500">
             <p>{assembly.serviceType?.toUpperCase() || '—'}</p>
-            <p className="text-gray-500">{assembly.state}</p>
+            <p className="text-gray-500">{assembly?.state}</p>
           </div>
 
           {/* REASON */}
           {assembly.reason && (
             <div className="bg-red-50 text-red-700 text-sm p-2 rounded-lg">
-              {assembly.reason}
+              {assembly?.reason}
             </div>
           )}
 
@@ -141,13 +163,19 @@ export default function Assemblies({ list = [], reloadServices, stopID, addressI
       ))}
 
       {/* ADD BUTTON */}
-      <button
-        onClick={handleAddAssembly}
-        className="w-full flex items-center justify-center gap-2 p-3 rounded-xl bg-gray-300 text-gray-800 font-medium active:bg-blue-700 transition"
-      >
-        <PlusCircle className="w-5 h-5" />
-        Add Assembly
-      </button>
+      { !isOnline ?
+          <> </>
+          : 
+          <button
+            onClick={handleAddAssembly}
+            className={`w-full flex items-center justify-center gap-2 p-3 rounded-xl 
+            bg-gray-300 text-gray-800 font-medium active:bg-amber-700 transition disabled:bg-gray-100 disabled:cursor-not-allowed`}
+          >
+            <PlusCircle className="w-5 h-5" />
+            Add Assembly
+          </button>
+      }
+      
 
       {/* REASON DIALOG */}
       <Dialog open={openReasonDialog} onClose={() => setOpenReasonDialog(false)} className="relative z-50">

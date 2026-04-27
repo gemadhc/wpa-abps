@@ -2,7 +2,7 @@ import { getUnsyncedPopList, markAsSynced } from './db'
 import { getUnsyncedStops, markStopAsSynced } from "./stop_db.tsx" 
 import { getUnsyncedInvoices, markInvoiceAsSynced } from "./invoice_db.tsx" 
 import { getUnsyncedLineItems, markLineItemAsSynced } from "./lineitem_db.tsx" 
-import { getUnsyncedServices, markServiceAsSynced} from "./services_db.tsx"
+import { getUnsyncedServices, markServiceAsSynced, createItem as createService} from "./services_db.tsx"
 import { getUnsyncedReports, markReportAsSynced } from "./reports_db.tsx"
 import { getUnsyncedAssemblies, markAssemblyAsSynced } from "./assemblies_db.tsx"
 
@@ -10,7 +10,9 @@ import { completeStop } from "../actions/stop.js"
 import {updateStatus, requestQuickbooksID} from "../actions/invoice"
 import  { updateLineItemStatus } from "../actions/invoice"
 import { updateReport } from "../actions/report"
-import { updateAssembly} from "../actions/assembly"
+import { updateAssembly, createAssembly} from "../actions/assembly"
+
+import { setAsReady, setAsNotReady } from "../actions/service";
 
 export async function syncItems() {
   if (!navigator.onLine) {
@@ -91,15 +93,23 @@ export async function syncServices(){
     console.log('Offline - will sync later')
     return
   }
+
   const unsyncedItems = await getUnsyncedServices()
+  console.log("unsynced services: ", unsyncedItems)
   if (unsyncedItems.length === 0) {
     return
   }
   for (const item of unsyncedItems) {
     try {
       console.log("unsynced service: ", item)
-      //await updateLineItemStatus(item)
-      await markServiceAsSynced(item.id)
+      item.list.map(async (item) => {
+          if(item.ready){
+            await setAsReady( item.serviceID ); 
+          }else{    
+            await setAsNotReady( item.serviceID, item.reason ); 
+          }
+      })
+      await markServiceAsSynced(item.stopID)
     } catch (error) {
       console.error('Sync failed:', error)
     }
@@ -139,8 +149,14 @@ export async function syncAssemblies(){
   console.log("unsynced assemblies: ", unsyncedItems)
   for (const item of unsyncedItems) {
     try {
-      await updateAssembly(item)
-      await markAssemblyAsSynced(item.id)
+      //check if it needs to be created 
+      if(item.isNew){
+        await createAssembly(item.addressID, item.stopID);
+        
+      }else{
+        await updateAssembly(item)
+      }
+      await markAssemblyAsSynced(item?.id || item.assemblyID)
 
     } catch (error) {
       console.error('Sync failed:', error)

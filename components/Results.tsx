@@ -17,8 +17,8 @@ import { ArrowBigLeft, SaveAll } from 'lucide-react';
 
 import { updateReport } from "../lib/reports_db"
 import { updateAssembly } from "../lib/assemblies_db"
-import { updateService } from "../lib/services_db"
-import { syncReports, syncAssemblies } from "../lib/sync"
+import { updateServiceAssembly, } from "../lib/services_db"
+import { syncReports, syncAssemblies, syncServices } from "../lib/sync"
 
 // ---------------------------------------------------
 // Internal Body Component (uses form context only)
@@ -36,6 +36,8 @@ function ResultsBody({ closeMe, reloadServices, stopID }) {
       formData.serviceType = formData.state
       await updateReport(formData)
       await updateAssembly(formData)
+      await updateServiceAssembly(formData)
+      //update service with stopID
       await syncReports(); 
       await syncAssemblies(); 
       setSaving(false)
