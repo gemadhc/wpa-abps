@@ -3,6 +3,42 @@ import nextPWA from "next-pwa";
 
 const withPWA = nextPWA({
   dest: "public",
+  sw: 'sw.js', 
+  register: true, 
+  skipWaiting:true, 
+  runtimeCaching: [
+    // 1. Next data
+    {
+      urlPattern: /_next\/data\/.*\.json/,
+      handler: 'StaleWhileRevalidate',
+      options: {
+        cacheName: 'next-data-cache',
+      },
+    },
+
+    // 2. JS chunks (CRITICAL)
+    {
+      urlPattern: /\/_next\/static\/.*/,
+      handler: 'CacheFirst',
+      options: {
+        cacheName: 'next-static-cache',
+      },
+    },
+
+    // 3. Navigation fallback
+    {
+      urlPattern: ({ request }) => request.mode === 'navigate',
+      handler: 'NetworkFirst',
+      options: {
+        cacheName: 'pages-cache',
+        plugins: [
+          {
+            handlerDidError: async () => caches.match('/'),
+          },
+        ],
+      },
+    },
+  ], 
   disable: process.env.NODE_ENV === "development",
 });
 

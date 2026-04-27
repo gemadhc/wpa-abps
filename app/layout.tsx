@@ -2,7 +2,9 @@ import './globals.css';
 import { SessionProvider, useSession } from '../helpers/session';
 import OnlineChecker from "../components/OnlineChecker";
 import Footer from "../components/Footer"
+import Header from "../components/Header"
 import {DateProvider, useDate} from "@/contexts/DateContext"
+import { ViewProvider } from '@/contexts/ViewContext';
 
 
 function LayoutContent({ children }) {
@@ -10,19 +12,16 @@ function LayoutContent({ children }) {
     <div className="flex flex-col">
       {/* HEADER */}
       <header className="fixed top-0 left-0 right-0 z-50 h-13 py-2 pr-5 bg-slate-800 text-white ">
-        <div className="flex flex-row gap-2 justify-end">
-          <p className="companyName text-xs">American Backflow &<br/> Plumbing Services, Inc.</p>
-          <OnlineChecker />
-        </div>
+        <Header />
       </header>
 
       {/* MAIN */}
-      <main className="pt-15 mt-0  overflow-y-auto bg-gray-50 no-scrollbar h-screen">
+      <main className="pt-15 mt-0 bg-gray-50  overflow-y-clipped no-scrollbar max-h-50">
         {children}
       </main>
 
       {/* FOOTER */}
-        <footer >
+        <footer>
           <Footer />
         </footer>
       
@@ -40,10 +39,14 @@ export default function RootLayout({ children }) {
         <link rel="stylesheet" href="https://use.typekit.net/bgo3voa.css" />
       </head>
 
-      <body className="flex flex-col min-h-screen bg-white text-gray-800 overflow-hidden">
+      <body className ="no-scrollbar h-screen overflow-y-clipped">
         <SessionProvider>
           <DateProvider>
-           <LayoutContent>{children}</LayoutContent>
+          <ViewProvider>
+           <LayoutContent>
+              {children}
+            </LayoutContent>
+          </ViewProvider>
           </DateProvider>
         </SessionProvider>
       </body>

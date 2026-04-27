@@ -8,7 +8,7 @@ import Final from './Final';
 import { NumberPadProvider } from '../contexts/NumberPadContext';
 import { useRouter } from 'next/navigation';
 
-import { ArrowBigLeft, SaveAll } from 'lucide-react';
+import { ArrowLeft, SaveAll } from 'lucide-react';
 
 //import { updateReport  } from "../actions/report"
 //import { updateAssembly } from "../actions/assembly"
@@ -23,7 +23,7 @@ import { syncReports, syncAssemblies, syncServices } from "../lib/sync"
 // ---------------------------------------------------
 // Internal Body Component (uses form context only)
 // ---------------------------------------------------
-function ResultsBody({ closeMe, reloadServices, stopID }) {
+function ResultsBody({ closeMe, reloadServices, stopID, onSelectStop }) {
   const [activeTab, setActiveTab] = useState('Device');
   const [saving, setSaving] = useState(false)
   const {formData} = useReport()
@@ -31,7 +31,7 @@ function ResultsBody({ closeMe, reloadServices, stopID }) {
   
   const saveAll = () =>{
     return new Promise(async (resolve, reject) =>{
-      console.log("These are the params: ", stopID)
+      console.log("These are the params: ", formData)
       setSaving(true)
       formData.serviceType = formData.state
       await updateReport(formData)
@@ -46,38 +46,38 @@ function ResultsBody({ closeMe, reloadServices, stopID }) {
   }
 
   return (
-    <div className="flex flex-col h-full overflow-y-clip">
+    <div className="flex flex-col w-screen h-full  bg-white">
 
-       <div className="flex flex-row gap-10 sticky bottom-0 left-0 right-0 bg-white  shoadow-xl rounded-tl-lg rounded-tr-lg mb-5 ">
+      <div className="flex flex-row gap-10 sticky bottom-0 left-0 right-0 bg-white  shadow-xl rounded-tl-lg rounded-tr-lg mb-5 w-full ">
        <button
           disabled={saving}
-          onClick={() => router.back()}
-          className="w-full flex items-center justify-center px-4 py-2 bg-gray-500 text-white rounded-xl hover:bg-gray-600 disabled:bg-gray-400 transition"
+          onClick={() => onSelectStop(formData.stopID) }
+          className="w-full flex items-center justify-center  bg-gray-500 text-white hover:bg-gray-600 disabled:bg-gray-400 transition"
         >
-          <ArrowBigLeft className="w-6 h-6" />
+          <ArrowLeft className="w-4 h-6" />
         </button>
 
         <button
           disabled={saving}
           onClick={() =>
             saveAll().then(() => {
-              router.back()
+               onSelectStop(formData.stopID)
             })
           }
-          className="w-full flex items-center justify-center px-4 py-2 bg-green-700 text-white rounded-xl 
+          className="w-full flex items-center justify-center  bg-green-700 text-white  
                      hover:bg-green-600 disabled:bg-gray-400 transition"
         >
           {saving ? (
             <span className="text-base font-medium">Saving...</span>
           ) : (
-            <SaveAll className="w-6 h-6" />
+            <SaveAll className="w-4 h-6" />
           )}
         </button>
       </div>
 
 
       {/* Tabs */}
-      <div className="flex flex-row gap-0 mb-3 pb-1 border-b border-gray-200">
+      <div className="flex flex-row gap-0 mb-3 pb-1 border-b border-gray-200 w-full">
         {['Device', 'Initial', 'Repairs'].map((tabName) => (
           <button
             key={tabName}
@@ -94,16 +94,13 @@ function ResultsBody({ closeMe, reloadServices, stopID }) {
       </div>
 
       {/* Scrollable tab content */}
-      <div className="flex-1 overflow-y-auto px-2 no-scrollbar bg-slate-100">
+      <div className="flex-1 overflow-y-auto px-2 no-scrollbar bg-slate-100 w-full">
         {activeTab === 'Device' && <Assembly />}
         {activeTab === 'Initial' && <Initial />}
         {activeTab === 'Repairs' && <Final /> }
       </div>
 
       {/* Sticky Save Button */}
-     
-     
-    
     </div>
   );
 }
@@ -111,11 +108,11 @@ function ResultsBody({ closeMe, reloadServices, stopID }) {
 // ---------------------------------------------------
 // Wrapper that pulls report/device from the context
 // ---------------------------------------------------
-function ResultsWithContexts({ closeMe, reloadServices}) {
+function ResultsWithContexts({ closeMe, reloadServices, onSelectStop}) {
   return (
    
     <NumberPadProvider>
-      <ResultsBody closeMe={closeMe} reloadServices = {reloadServices}/>
+      <ResultsBody closeMe={closeMe} reloadServices = {reloadServices} onSelectStop = {onSelectStop}/>
     </NumberPadProvider>
    
   );
@@ -124,8 +121,8 @@ function ResultsWithContexts({ closeMe, reloadServices}) {
 // ---------------------------------------------------
 // Main Export: Only ReportProvider receives props
 // ---------------------------------------------------
-export default function Results({ report, device=null, closeMe, reloadServices, stopID }) {
+export default function Results({ report, device=null, closeMe, reloadServices, stopID, onSelectStop }) {
   return (
-    <ResultsWithContexts closeMe={closeMe}  reloadServices = {reloadServices} stopID = {stopID} />
+    <ResultsWithContexts closeMe={closeMe}  reloadServices = {reloadServices} stopID = {stopID} onSelectStop = {onSelectStop} />
   );
 }

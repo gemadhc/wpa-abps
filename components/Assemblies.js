@@ -16,7 +16,7 @@ import { getAssembly, createItem as createAssemblyItem, addAssembly} from "../li
 import { syncServices, syncAssemblies} from "../lib/sync"
 import { serviceNotReady } from "../lib/services_db"
 
-export default function Assemblies({ list = [], reloadServices, stopID, addressID }) {
+export default function Assemblies({ list = [], reloadServices, stopID, addressID, navigateToReport }) {
 
   const [openReasonDialog, setOpenReasonDialog] = useState(false);
   const [openResultsDialog, setOpenResultsDialog] = useState(false);
@@ -43,9 +43,13 @@ export default function Assemblies({ list = [], reloadServices, stopID, addressI
     });
   }, [list]);
 
+  useEffect(()=>{
+    //router.prefetch(`/report/${assembly.testReportID}/${assembly.assemblyID}`)
+  }, [])
+
 
   const handleRowClick = (assembly) => {
-    router.push(`/report/${assembly.testReportID}/${assembly.assemblyID}`);
+    navigateToReport(assembly.testReportID,  assembly.assemblyID) 
   };
 
 
@@ -109,7 +113,7 @@ export default function Assemblies({ list = [], reloadServices, stopID, addressI
   }, [])
 
   return (
-    <div className="space-y-3 p-0 no-scrollbar">
+    <div className="space-y-3 p-0 w-full no-scrollbar">
 
       {/* CARDS */}
       {sortedList.map((assembly, ind) => (
@@ -228,7 +232,7 @@ export default function Assemblies({ list = [], reloadServices, stopID, addressI
                   <WaterLoader />
                 </div>
                 :
-                <div className="flex-1 overflow-y-auto ">
+                <div className="flex-1 bg-teal-500 w-full">
                   {initialReport && initialDevice ? (
                     <ReportProvider initialReport={initialReport} initialDevice={initialDevice}>
                       <Results

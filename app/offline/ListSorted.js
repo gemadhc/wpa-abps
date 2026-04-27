@@ -5,7 +5,7 @@ import StopCard from "../../components/StopCard";
 import { routeStops } from "../../helpers/googlemaps.js";
 import WaterLoader from "../../components/WaterLoader"
 
-export default function StopsList({ stops, reloadList }) {
+export default function StopsList({ stops, reloadList, onSelectStop }) {
   const [sortedStops, setSortedStops] = useState([]);
   const [sorting, setSorting] = useState(false)
 
@@ -74,6 +74,7 @@ export default function StopsList({ stops, reloadList }) {
                 stopID={stop.stopID}
                 item={stop}
                 reloadList={reloadList}
+                onSelectStop = {onSelectStop}
               />
             ))}
           </>

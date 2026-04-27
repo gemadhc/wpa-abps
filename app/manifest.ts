@@ -2,10 +2,10 @@ import type { MetadataRoute } from 'next'
  
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: 'Next.js PWA',
-    short_name: 'NextPWA',
-    description: 'A Progressive Web App built with Next.js',
-    start_url: '/dispatch',
+    name: 'Backflow Reports',
+    short_name: 'Backflow Reports',
+    description: 'Application to submit test reports for American Backflow & Plumbing Services, Inc.',
+    start_url: '/',
     display: 'standalone',
     background_color: '#ffffff',
     theme_color: '#000000',

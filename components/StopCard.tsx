@@ -5,7 +5,7 @@ import { CheckCircle2 } from 'lucide-react';
 import { navigateWithTransition } from "@/lib/viewTransition";
 
 
-export default function StopCard({ stopID, item }) {
+export default function StopCard({ stopID, item, onSelectStop}) {
   const router = useRouter();
 
   const [completed, setCompleted] = useState(false);
@@ -34,6 +34,9 @@ export default function StopCard({ stopID, item }) {
       }
     }
   }, [item]);
+  useEffect(()=>{
+    router.prefetch(`/stop/${item.stopID}`);
+  }, [])
 
   const headerBg =
     item.status === 'COMPLETED'
@@ -41,9 +44,7 @@ export default function StopCard({ stopID, item }) {
       : 'bg-gray-50 border-gray-200';
 
   const handleNavigate = () => {
-    navigateWithTransition(() => {
-      router.push(`/stop/${item.stopID}`);
-    })
+    onSelectStop(stopID)
   };
 
   return (

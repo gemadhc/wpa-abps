@@ -31,7 +31,7 @@ import { createItem as createAssemblyItem, getAssembly, deleteAllAssemblies } fr
 import { getLineItems, addLineItems, deleteAllLineItems } from "@/lib/lineitem_db";
 import { createItem as createReport, getReport, deleteAllReports } from "@/lib/reports_db";
 
-export default function Home() {
+export default function Home({ onSelectStop}) {
   const pacificTimeZone = 'America/Los_Angeles'
   const [list, setList] = useState([])
   const [services, setServices] = useState([])
@@ -223,6 +223,7 @@ useEffect(() => {
   		            <ListSorted  
   		              stops={list}
   		              reloadList={() => handleDateChange(myDate)}
+                    onSelectStop = {onSelectStop}
   		            />
   		          :
   		            <div className = "p-10 rounded-xl shadow">

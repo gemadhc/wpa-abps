@@ -39,7 +39,7 @@ export default function Home() {
       localStorage.setItem("session", JSON.stringify(data));
 
       setTimeout(() => {
-        router.push("/offline");
+        router.push("/");
       }, 500);
 
     } catch (err) {
@@ -51,7 +51,7 @@ export default function Home() {
   };
 
   return (
-    <div className="absolute b-0 min-h-screen flex items-center justify-center bg-gray-50 px-4">
+    <div className="absolute b-0 min-h-screen flex items-center justify-center bg-gray-50 px-4 w-full">
       <div className="w-full max-w-sm bg-white shadow-md rounded-xl p-6 border border-gray-200">
         <h1 className="text-center text-xl font-semibold text-gray-800 mb-4">
           Welcome Back

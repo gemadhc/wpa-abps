@@ -24,7 +24,7 @@ import { createItem as createAssemblyItem, getAssembly } from "../lib/assemblies
 import { getLineItems, addLineItems } from "../lib/lineitem_db";
 import { createItem as createReport, getReport } from "../lib/reports_db";
 
-export default function StopBody({ item, stopID, reloadList }) {
+export default function StopBody({ item, stopID, reloadList, navigateToReport}) {
   const [activeTab, setActiveTab] = useState('Assemblies');
   const [completed, setCompleted] = useState(false);
   const [openConfirmDialog, setOpenConfirmDialog] = useState(false);
@@ -170,6 +170,7 @@ const loadDevice = async (assemblyID) => {
           reloadServices={loadServices}
           stopID={stopID}
           addressID={item?.addressID || null}
+          navigateToReport = { navigateToReport }
         />
       ),
     },
@@ -198,7 +199,7 @@ const loadDevice = async (assemblyID) => {
   }
 
   return (
-    <div className="h-screen flex flex-col max-w-3xl mx-auto bg-slate-50 text-black">
+    <div className="h-screen flex flex-col w-full mx-auto bg-slate-50 text-black">
 
       {/* ✅ COMPLETED BANNER */}
       <div
