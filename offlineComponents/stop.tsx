@@ -27,11 +27,6 @@ export default  function ClientComponent({ stopID, navigateToReport, navigateToL
   		
 
   		<ViewTransition>
-  		<button 
-  			className = 'text-black hover:underline hover:cursor-pointer px-3 border rounded-xl ml-5'
-  			onClick = {navigateToList}  > 
-  			<ArrowLeft />
-  		</button>
 
   		{
   			stop ? 
@@ -41,12 +36,21 @@ export default  function ClientComponent({ stopID, navigateToReport, navigateToL
 			      navigateToReport={navigateToReport}
 			    />
 			: 
-				<div> 
-					<h2>Loading...</h2>
+				<div className = "bg-white min-h-screen min-h-screen"> 
+					<h2>Loading Stop...</h2>
 					<WaterLoader />
 				</div>
   		}
+
+
 	    </ViewTransition>
+	    <div className = "fixed bottom-0 bg-white py-10 w-full min-h-20">
+	    	<button 
+	  			className = 'text-black hover:underline hover:cursor-pointer px-10 py-1 border rounded-xl ml-5 '
+	  			onClick = {navigateToList}  > 
+	  			<ArrowLeft />
+	  		</button>
+	    </div>
     </div>
   );
 }

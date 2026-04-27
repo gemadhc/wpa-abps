@@ -59,7 +59,7 @@ export default  function ClientComponent({ reportID, deviceID, onSelectStop }) {
 	}, [])
 
   return (
-  	<div className = "text-black h-screen w-full ">	
+  	<div className = "text-black h-screen w-full bg-white ">	
       {
         initialReport && initialDevice ? 
           <ReportProvider initialReport={initialReport} initialDevice={initialDevice}>

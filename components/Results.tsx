@@ -47,14 +47,38 @@ function ResultsBody({ closeMe, reloadServices, stopID, onSelectStop }) {
 
   return (
     <div className="flex flex-col w-screen h-full  bg-white">
+      {/* Tabs */}
+      <div className="flex flex-row gap-0  pb-1 border-b border-gray-200 w-full">
+        {['Device', 'Initial', 'Repairs'].map((tabName) => (
+          <button
+            key={tabName}
+            onClick={() => setActiveTab(tabName)}
+            className={`px-3 py-5 w-full text-sm font-bold transition ${
+              activeTab === tabName
+                ? 'bg-slate-300 text-slate-700'
+                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+            }`}
+          >
+            {tabName}
+          </button>
+        ))}
+      </div>
 
-      <div className="flex flex-row gap-10 sticky bottom-0 left-0 right-0 bg-white  shadow-xl rounded-tl-lg rounded-tr-lg mb-5 w-full ">
+      {/* Scrollable tab content */}
+      <div className="flex-1 overflow-y-auto px-2 no-scrollbar bg-slate-100 w-full">
+        {activeTab === 'Device' && <Assembly />}
+        {activeTab === 'Initial' && <Initial />}
+        {activeTab === 'Repairs' && <Final /> }
+      </div>
+
+
+      <div className="flex flex-row gap-10 sticky bottom-0 left-0 right-0 bg-white  shadow-xl rounded-tl-lg rounded-tr-lg mb-5 w-full  bg-white py-5 px-2">
        <button
           disabled={saving}
           onClick={() => onSelectStop(formData.stopID) }
           className="w-full flex items-center justify-center  bg-gray-500 text-white hover:bg-gray-600 disabled:bg-gray-400 transition"
         >
-          <ArrowLeft className="w-4 h-6" />
+          <ArrowLeft className="w-4 h-20" />
         </button>
 
         <button
@@ -73,31 +97,6 @@ function ResultsBody({ closeMe, reloadServices, stopID, onSelectStop }) {
             <SaveAll className="w-4 h-6" />
           )}
         </button>
-      </div>
-
-
-      {/* Tabs */}
-      <div className="flex flex-row gap-0 mb-3 pb-1 border-b border-gray-200 w-full">
-        {['Device', 'Initial', 'Repairs'].map((tabName) => (
-          <button
-            key={tabName}
-            onClick={() => setActiveTab(tabName)}
-            className={`px-3 py-1 w-full text-sm font-bold transition ${
-              activeTab === tabName
-                ? 'bg-slate-300 text-slate-700'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-            }`}
-          >
-            {tabName}
-          </button>
-        ))}
-      </div>
-
-      {/* Scrollable tab content */}
-      <div className="flex-1 overflow-y-auto px-2 no-scrollbar bg-slate-100 w-full">
-        {activeTab === 'Device' && <Assembly />}
-        {activeTab === 'Initial' && <Initial />}
-        {activeTab === 'Repairs' && <Final /> }
       </div>
 
       {/* Sticky Save Button */}

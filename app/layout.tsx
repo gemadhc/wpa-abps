@@ -16,7 +16,7 @@ function LayoutContent({ children }) {
      
 
       {/* MAIN */}
-      <main className="pt-15 mt-0 bg-gray-50  overflow-y-clipped no-scrollbar max-h-50">
+      <main className="pt-5 mt-0 bg-gray-50  overflow-y-clipped no-scrollbar max-h-50">
         {children}
       </main>
 

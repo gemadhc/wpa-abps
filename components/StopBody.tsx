@@ -191,7 +191,7 @@ const loadDevice = async (assemblyID) => {
 
   if (loading) {
     return (
-      <div className="pt-20 text-center">
+      <div className="pt-20 text-center bg-white min-h-screen">
         <p className="text-gray-500 font-bold">Loading Stop...</p>
         <WaterLoader />
       </div>
@@ -231,7 +231,7 @@ const loadDevice = async (assemblyID) => {
         {!completed && (
           <button
             onClick={() => setOpenConfirmDialog(true)}
-            className="shrink-0 bg-green-700 text-white px-3 py-2 rounded-lg text-sm shadow active:scale-95 transition"
+            className="shrink-0 bg-green-700 text-white px-5 py-7 rounded-lg text-sm shadow active:scale-95 transition"
           >
             Complete
           </button>
@@ -268,7 +268,7 @@ const loadDevice = async (assemblyID) => {
       >
         <div className="fixed inset-0 bg-black/30" />
 
-        <div className="fixed inset-0 flex items-center justify-center p-4">
+        <div className="fixed inset-0 flex items-center justify-center p-4 text-black">
           <Dialog.Panel className="bg-white rounded-2xl shadow-xl w-full max-w-sm p-6">
 
             <div className="flex justify-between mb-3">
@@ -293,7 +293,7 @@ const loadDevice = async (assemblyID) => {
             <div className="flex justify-end gap-2">
               <button
                 onClick={() => setOpenConfirmDialog(false)}
-                className="px-3 py-2 text-sm bg-gray-100 rounded-lg"
+                className="px-3 py-2 text-sm bg-slate-200 rounded-lg"
               >
                 Cancel
               </button>
@@ -301,7 +301,7 @@ const loadDevice = async (assemblyID) => {
               <button
                 onClick={handleConfirmCompletion}
                 disabled={!confirmed}
-                className="px-3 py-2 text-sm bg-green-600 text-white rounded-lg disabled:bg-gray-300"
+                className="px-3 py-2 text-sm bg-green-600 text-white rounded-lg disabled:bg-gray-300 disabled:text-gray-900"
               >
                 {completing ? "Completing..." : "Complete"}
               </button>
