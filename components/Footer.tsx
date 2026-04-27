@@ -44,7 +44,7 @@ export default function Footer(){
 
 	return(
 		<div>{
-			!hideFooter ?
+			!hideFooter && show ?
 				<div className="fixed bottom-0 left-0 right-0 z-50 bg-slate-100 border-t border-gray-200 flex justify-around items-center h-25 shadow-md">
 					<button
 					onClick={handleDispatch}
