@@ -44,12 +44,17 @@ export default  function ClientComponent({ stopID, navigateToReport, navigateToL
 
 
 	    </ViewTransition>
-	    <div className = "fixed bottom-0 bg-white py-10 w-full min-h-20">
+	    <div className = "flex flex-row gap-10 sticky bottom-0 left-0 right-0 bg-white  shadow-xl rounded-tl-lg rounded-tr-lg mb-5 w-full  bg-white py-5 px-2">
 	    	<button 
-	  			className = 'text-black hover:underline hover:cursor-pointer px-10 py-1 border rounded-xl ml-5 '
-	  			onClick = {navigateToList}  > 
-	  			<ArrowLeft />
+          		className="w-full flex items-center justify-center  bg-gray-500 text-white hover:bg-gray-600 disabled:bg-gray-400 transition"
+	  			onClick = {navigateToList}  
+	  		> 
+	  			<ArrowLeft className="w-4 h-20"/>
 	  		</button>
+	  		<button        
+	  		   	className="w-full flex items-center justify-center  bg-white text-white hover:bg-gray-600 disabled:bg-gray-400 transition"
+			>			
+			</button>
 	    </div>
     </div>
   );
