@@ -61,7 +61,7 @@ export default function Home() {
       // the blank page instead of login form
       setTimeout(() => {
         window.location.replace('/offline');
-      }, 50);
+      }, 500);
 
     } catch (err) {
       console.error("Login error:", err);

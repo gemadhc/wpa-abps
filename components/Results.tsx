@@ -46,7 +46,7 @@ function ResultsBody({ closeMe, reloadServices, stopID, onSelectStop }) {
   }
 
   return (
-    <div className="flex flex-col w-screen h-full  bg-white">
+    <div className="flex flex-col w-screen h-full  bg-slate-500">
       <div className = "grid grid-cols-20 gap-2 px-10 py-8 bg-slate-800 text-white">
         <h2 className = "col-span-12" >Test Report</h2>
         <button
@@ -73,7 +73,7 @@ function ResultsBody({ closeMe, reloadServices, stopID, onSelectStop }) {
           <button
             key={tabName}
             onClick={() => setActiveTab(tabName)}
-            className={`px-3 py-5 w-full text-sm font-bold transition ${
+            className={`px-3 py-2 w-full text-sm font-bold transition ${
               activeTab === tabName
                 ? 'bg-slate-300 text-slate-700'
                 : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -85,7 +85,7 @@ function ResultsBody({ closeMe, reloadServices, stopID, onSelectStop }) {
       </div>
 
       {/* Scrollable tab content */}
-      <div className="flex-1 overflow-y-auto px-2 no-scrollbar bg-slate-100 w-full">
+      <div className="flex-1 overflow-y-auto px-10 no-scrollbar bg-slate-100 w-full">
         {activeTab === 'Device' && <Assembly />}
         {activeTab === 'Initial' && <Initial />}
         {activeTab === 'Repairs' && <Final /> }
