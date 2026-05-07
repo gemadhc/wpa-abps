@@ -44,7 +44,8 @@ export default  function ClientComponent({ stopID, navigateToReport, navigateToL
 
 
 	    </ViewTransition>
-	    <div className = { `flex flex-row gap-10 sticky bottom-0 left-0 right-0 bg-slate-800  
+
+	   {/* <div className = { `flex flex-row gap-10 sticky bottom-0 left-0 right-0 bg-slate-800  
 	    shadow-xl rounded-tl-lg rounded-tr-lg mb-5 w-full py-5 px-2`} >
 	    	<button 
           		className="w-full flex items-center justify-center  bg-slate-500 text-white hover:bg-gray-600 disabled:bg-gray-400 transition"
@@ -56,7 +57,7 @@ export default  function ClientComponent({ stopID, navigateToReport, navigateToL
 	  		   	className="w-full flex items-center justify-center  bg-slate-800 text-white hover:bg-slate-800 disabled:bg-gray-400 transition"
 			>			
 			</button>
-	    </div>
+	    </div>*/}
     </div>
   );
 }

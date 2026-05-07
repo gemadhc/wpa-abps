@@ -30,7 +30,7 @@ export default function Home() {
 
       // If the response is a string, treat it as an error message
       if (typeof data === "string") {
-        setErrorMessage(data);
+        setErrorMessage(data.message);
         return;
       }
 

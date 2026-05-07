@@ -47,6 +47,26 @@ function ResultsBody({ closeMe, reloadServices, stopID, onSelectStop }) {
 
   return (
     <div className="flex flex-col w-screen h-full  bg-white">
+      <div className = "grid grid-cols-20 gap-2 px-10 py-8 bg-slate-800 text-white">
+        <h2 className = "col-span-12" >Test Report</h2>
+        <button
+          disabled={saving}
+          onClick={() =>
+            saveAll().then(() => {
+               onSelectStop( formData?.stopID )
+            })
+          }
+          className="col-span-8 flex items-center justify-center h-10  bg-green-700 text-white  
+                     hover:bg-green-600 disabled:bg-gray-400 transition"
+        >
+          {saving ? (
+            <span className="text-base font-medium">Saving...</span>
+          ) : (
+            <SaveAll className="w-6 h-6" />
+          )}
+        </button>
+        
+      </div>
       {/* Tabs */}
       <div className="flex flex-row gap-0  pb-1 border-b border-gray-200 w-full">
         {['Device', 'Initial', 'Repairs'].map((tabName) => (
@@ -72,31 +92,8 @@ function ResultsBody({ closeMe, reloadServices, stopID, onSelectStop }) {
       </div>
 
 
-      <div className="flex flex-row gap-10 sticky bottom-0 left-0 right-0 bg-white  shadow-xl rounded-tl-lg rounded-tr-lg mb-5 w-full  bg-white py-5 px-2">
-       <button
-          disabled={saving}
-          onClick={() => onSelectStop(formData.stopID) }
-          className="w-full flex items-center justify-center  bg-gray-500 text-white hover:bg-gray-600 disabled:bg-gray-400 transition"
-        >
-          <ArrowLeft className="w-4 h-20" />
-        </button>
-
-        <button
-          disabled={saving}
-          onClick={() =>
-            saveAll().then(() => {
-               onSelectStop(formData.stopID)
-            })
-          }
-          className="w-full flex items-center justify-center  bg-green-700 text-white  
-                     hover:bg-green-600 disabled:bg-gray-400 transition"
-        >
-          {saving ? (
-            <span className="text-base font-medium">Saving...</span>
-          ) : (
-            <SaveAll className="w-4 h-6" />
-          )}
-        </button>
+      <div className="flex flex-row gap-10 sticky bottom-0 left-0 right-0 bg-white  shadow-xl rounded-tl-lg rounded-tr-lg mb-5 w-full  bg-white  px-2">
+        
       </div>
 
       {/* Sticky Save Button */}
