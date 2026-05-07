@@ -24,24 +24,26 @@ export default function Form({ fields, title, hasTitle = false, totalRows = 2 })
   };
 
   const inputBase =
-    'peer w-full border border-gray-300 rounded-bl-lg pt-5 pb-1 pl-2 pr-2 text-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-400';
+    'peer w-full border border-gray-300 rounded-bl-lg pt-5 pb-1 pl-2 pr-2 mb-3 text-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-400';
 
   return (
     <div className="flex flex-col gap-4 w-full text-base">
       {hasTitle && title && <h3 className="text-left">{title}</h3>}
 
-      <div className={`grid grid-cols-${totalRows} gap-1`}>
+      <div className={`grid grid-cols-${totalRows}`}>
+
+
         {fields.map((field) => {
           const isFull = field.full === true ? `col-span-${totalRows}` : 'col-span-1';
 
           if (field.type === 'checkbox') {
             return (
-              <div key={field.name} className={`${isFull} flex items-center gap-2 pt-2`}>
+              <div key={field.name} className={`${isFull}  flex items-center justify-start gap-2 pt-3 `}>
                 <input
                   type="checkbox"
                   checked={!!formData?.[field.name]}
                   onChange={(e) => updateField(field.name, e.target.checked)}
-                  className="w-4 h-5 accent-pink-300"
+                  className="w-5 h-5 accent-pink-500 "
                 />
                 <span>{field.label}</span>
               </div>
@@ -50,8 +52,9 @@ export default function Form({ fields, title, hasTitle = false, totalRows = 2 })
 
           if (field.type === 'radio') {
             return (
-              <div key={field.name} className={`${isFull} flex items-center gap-2`}>
-                <span className="text-base">{field.label}:</span>
+              <div key={field.name} className={`${isFull} flex flex-col items-start gap-2 mb-2 `}>
+                <span className="text-base ">{field.label}</span> 
+                <div className = "flex gap-3">
                 <label className="flex items-center gap-1">
                   <input
                     type="radio"
@@ -62,7 +65,7 @@ export default function Form({ fields, title, hasTitle = false, totalRows = 2 })
                   />
                   On
                 </label>
-                <label className="flex items-center gap-1">
+                <label className="flex items-center gap-1 ">
                   <input
                     type="radio"
                     name={field.name}
@@ -72,6 +75,7 @@ export default function Form({ fields, title, hasTitle = false, totalRows = 2 })
                   />
                   Off
                 </label>
+                </div>
               </div>
             );
           }
@@ -91,7 +95,7 @@ export default function Form({ fields, title, hasTitle = false, totalRows = 2 })
           if (field.type === 'textarea') {
             return (
               <div key={field.name} className={`${isFull} relative`}>
-                <textarea {...sharedProps} className={`${inputBase} min-h-[140px] min-w-[300px] bg-white rounded-xl`} />
+                <textarea {...sharedProps} className={`${inputBase} min-h-[200px] min-w-[300px] bg-white  mt-2`} />
                 <label className="absolute left-5 top-1 text-base text-gray-500 transition-all bg-white
                 peer-placeholder-shown:top-5 peer-placeholder-shown:text-base ">
                   {field.label}

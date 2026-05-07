@@ -41,7 +41,7 @@ export default function Initial() {
   };
 
   return (
-    <div className="grid grid-cols-10 gap-8 pb-50">
+    <div className="grid grid-cols-10 gap-1 pb-50">
       <div className="col-span-10">
         <Approved />
       </div>

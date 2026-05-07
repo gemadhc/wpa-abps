@@ -247,10 +247,10 @@ const loadDevice = async (assemblyID) => {
           <button
             key={tab.name}
             onClick={() => setActiveTab(tab.name)}
-            className={`flex-1 py-2 text-sm transition ${
+            className={`flex-1  text-slate-800 py-2 text-sm transition ${
               activeTab === tab.name
-                ? "bg-slate-500 font-semibold border-b-5 border-slate-600"
-                : "text-slate-100"
+                ? "bg-slate-200 font-bold"
+                : " bg-white"
             }`}
           >
             {tab.name}

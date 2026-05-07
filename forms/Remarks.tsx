@@ -6,7 +6,7 @@ export default function Remarks(){
 		{ name: 'so1_rusted', label: 'Rusted', type:"checkbox", full: false},
 		{ name: 'so2', label: 'SO2', type:"radio"}, 
 		{ name: 'so2_rusted', label: 'Rusted', type:"checkbox"},
-		{ name: 'upstream', label: 'Upstream', type:"radio"}, 
+		{ name: 'upstream', label: 'Upstream', type:"radio", full: true }, 
 		{ name: 'upstream_rusted', label: 'Rusted', type:"checkbox", full: true},
 		{ name: 'comments', label: 'Note', type:"textarea", full: true},
 	]

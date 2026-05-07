@@ -127,7 +127,7 @@ export default function Assemblies({ list = [], reloadServices, stopID, addressI
           onClick={() => handleRowClick(assembly)}
           className={`${assembly.state == 'COMPLETED'
               ? 'bg-green-50 border border-green-500'
-              : 'bg-slate-50 border border-slate-100'
+              : 'bg-white border border-slate-100'
             } rounded-xl shadow-sm p-4 transition`}
         >
 

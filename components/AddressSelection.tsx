@@ -69,7 +69,7 @@ export default function AddressSelection({addresses = [], reload}) {
         {/* Dialog panel */}
 
         <div className="fixed inset-0 flex items-center justify-center p-4 pt-0  overflow-y-scroll">
-          <Dialog.Panel className="bg-white rounded-xl shadow-lg max-w-sm w-full p-4 h-200 overflow-y-scroll">
+          <Dialog.Panel className="bg-white rounded-xl shadow-lg max-w-sm w-full p-4 min-h-150 max-h-150 overflow-y-scroll">
             {/* Header */}
             <div className="flex justify-between items-center mb-3 border-b pb-2">
               <Dialog.Title className="text-base font-semibold text-gray-800">
