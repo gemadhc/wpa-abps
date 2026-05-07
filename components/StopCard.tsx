@@ -34,6 +34,8 @@ export default function StopCard({ stopID, item, onSelectStop}) {
       }
     }
   }, [item]);
+
+  
   useEffect(()=>{
     router.prefetch(`/stop/${item.stopID}`);
   }, [])

@@ -259,7 +259,7 @@ const loadDevice = async (assemblyID) => {
       </div>
 
       {/* 📜 SCROLLABLE CONTENT */}
-      <div id ="tab-content"className="flex-1 overflow-y-auto bg-slate-100 p-3 pb-500">
+      <div id ="tab-content"className="flex-1 overflow-y-auto bg-slate-100 p-3 px-10 pb-500">
         {tabs.find((t) => t.name === activeTab)?.content}
       </div>
 

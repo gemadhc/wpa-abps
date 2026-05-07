@@ -48,7 +48,7 @@ function ResultsBody({ closeMe, reloadServices, stopID, onSelectStop }) {
   return (
     <div className="flex flex-col w-screen h-full  bg-slate-500">
       <div className = "grid grid-cols-20 gap-2 px-10 py-8 bg-slate-800 text-white">
-        <h2 className = "col-span-12" >Test Report</h2>
+        <h2 className = "col-span-12  font-stretch-extra-expanded" >Test Report</h2>
         <button
           disabled={saving}
           onClick={() =>
@@ -56,7 +56,7 @@ function ResultsBody({ closeMe, reloadServices, stopID, onSelectStop }) {
                onSelectStop( formData?.stopID )
             })
           }
-          className="col-span-8 flex items-center justify-center h-10  bg-green-700 text-white  
+          className="col-span-8 flex items-center justify-center h-10  bg-green-700 text-white  rounded-xl
                      hover:bg-green-600 disabled:bg-gray-400 transition"
         >
           {saving ? (
