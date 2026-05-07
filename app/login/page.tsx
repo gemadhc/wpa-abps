@@ -44,7 +44,6 @@ export default function Home() {
         setErrorMessage(data);
         return;
       }
-
       // Immediately blank page before redirect
       // prevents iOS swipe-back snapshot
       setRedirecting(true);
@@ -60,7 +59,7 @@ export default function Home() {
       // Small delay lets Safari capture
       // the blank page instead of login form
       setTimeout(() => {
-        window.location.replace('/offline');
+        window.location.replace('/');
       }, 5000 );
 
     } catch (err) {

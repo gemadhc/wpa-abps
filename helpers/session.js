@@ -6,6 +6,8 @@ const SessionContext = createContext();
 
 export const SessionProvider = ({ children }) => {
   const [session, setSession] = useState(null);
+  const [loading, setLoading] = useState(true)
+  
   const router = useRouter();
   const pathname = usePathname();
 
@@ -20,10 +22,13 @@ export const SessionProvider = ({ children }) => {
         console.error('Invalid session in storage');
       }
     }
+    setLoading(false);
   }, []);
 
   // Redirect logic
   useEffect(() => {
+    if (loading) return;
+
     if (session) {
       // Only redirect to /dispatch if not already there
       if (pathname === '/login') router.push('/');
@@ -31,7 +36,9 @@ export const SessionProvider = ({ children }) => {
       // If not logged in, redirect to /login (except when already there)
       if (pathname !== '/login') router.push('/login');
     }
-  }, [session, pathname, router]);
+
+  }, [session, pathname, router, loading]);
+  
 
   // When session changes, update localStorage
   useEffect(() => {
@@ -43,7 +50,7 @@ export const SessionProvider = ({ children }) => {
   }, [session]);
 
   return (
-    <SessionContext.Provider value={{ session, setSession }}>
+    <SessionContext.Provider value={{ session, setSession, loading }}>
       {children}
     </SessionContext.Provider>
   );

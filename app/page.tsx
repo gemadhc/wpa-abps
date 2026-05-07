@@ -6,9 +6,15 @@ import StopList from "./offline/page.tsx"
 import StopComponent from "@/offlineComponents/stop.tsx"
 import ReportComponent from "@/offlineComponents/report.tsx"
 import { useView } from '@/contexts/ViewContext';
+import { SessionProvider, useSession } from '@/helpers/session';
+import WaterLoader from "@/components/WaterLoader"
 
 export default function Home() {
   const { view, setView } = useView();
+
+  const { loading } = useSession();
+
+  
 
   const touchStartX = useRef<number | null>(null);
   const touchEndX = useRef<number | null>(null);
@@ -132,6 +138,15 @@ export default function Home() {
     touchStartX.current = null;
     touchEndX.current = null;
   };
+
+  if (loading) {
+    return (
+      <div className = "pt-30 bg-white h-screen"> 
+        <p className = "text-slate-500 font-bold text-center "> Loading Session </p>
+        <WaterLoader />
+      </div>
+    );
+  }
 
   return (
     <div

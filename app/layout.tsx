@@ -8,10 +8,11 @@ import { ViewProvider } from '@/contexts/ViewContext';
 
 
 function LayoutContent({ children }) {
+
   return (
     <div className="flex flex-col">
       {/* HEADER */}
-        <Header />
+      <Header />
       {/* MAIN */}
       <main className="mt-0 bg-slate-900  overflow-y-clipped no-scrollbar max-h-50">
         {children}

@@ -13,7 +13,7 @@ export default function Footer(){
 	const [isLoggingOut, setIsLoggingOut] = useState(false);
 
 	const { view } = useView();
-	const { session, setSession } = useSession();
+	const { session, setSession, loading } = useSession();
 
 	const handleDispatch = () => {
 		if (isLoggingOut) return;
@@ -43,8 +43,11 @@ export default function Footer(){
 	};
 
 	useEffect(() => {
+		if(loading) return
+			
 		if (!session) router.push('/login');
-	}, [session, router]);
+	}, [session, router, loading]);
+
 
 	useEffect(()=>{
 		if (pathname.includes('/login')) {
