@@ -68,7 +68,7 @@ function ResultsBody({ closeMe, reloadServices, stopID, onSelectStop }) {
         
       </div>
       {/* Tabs */}
-      <div className="flex flex-row gap-0  pb-1 border-b border-gray-200 w-full">
+      <div className="flex flex-row gap-0   border-b border-gray-200 w-full">
         {['Device', 'Initial', 'Repairs'].map((tabName) => (
           <button
             key={tabName}
@@ -85,18 +85,11 @@ function ResultsBody({ closeMe, reloadServices, stopID, onSelectStop }) {
       </div>
 
       {/* Scrollable tab content */}
-      <div className="flex-1 overflow-y-auto px-10 no-scrollbar bg-slate-100 w-full">
+      <div className="flex-1 overflow-y-auto px-10 no-scrollbar bg-slate-100 w-full pt-10">
         {activeTab === 'Device' && <Assembly />}
         {activeTab === 'Initial' && <Initial />}
         {activeTab === 'Repairs' && <Final /> }
       </div>
-
-
-      <div className="flex flex-row gap-10 sticky bottom-0 left-0 right-0 bg-white  shadow-xl rounded-tl-lg rounded-tr-lg mb-5 w-full  bg-white  px-2">
-        
-      </div>
-
-      {/* Sticky Save Button */}
     </div>
   );
 }
