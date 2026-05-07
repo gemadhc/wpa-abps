@@ -100,13 +100,10 @@ export default function Invoice({
   };
 
   return (
-    <div className="bg-white rounded-2xl">
-
+    <div className="bg-transparent  text-black">
       {/* HEADER */}
-      <div className="px-4 py-3 border-b flex items-center justify-between">
-
+      <div className="py-3 px-4 bg-white rounded-xl mb-2 flex items-center justify-between">
         <div>
-          <p className="text-sm text-gray-500">Invoice</p>
           <p className="font-semibold text-lg">#{invoice.id}</p>
         </div>
 
@@ -114,7 +111,7 @@ export default function Invoice({
 
           {/* STATUS */}
           <span
-            className={`text-xs px-2 py-1 rounded-full font-medium ${
+            className={`text-xs px-2 py-2 font-bold ${
               statusStyles[invoice.status?.toUpperCase()] || "bg-gray-100"
             }`}
           >
@@ -185,8 +182,8 @@ export default function Invoice({
       </div>
 
       {/* BILLING */}
-      <div className="px-4 py-3 text-sm">
-        <h2 className="font-medium text-gray-700 mb-1">Billing To</h2>
+      <div className=" py-3 text-sm bg-white px-4 rounded-xl">
+        <span className="font-semibold text-lg">Billing To</span>
         {billing ? (
           <p className="text-gray-600 leading-relaxed">
             {billing.name}<br />
@@ -201,10 +198,11 @@ export default function Invoice({
       </div>
 
       {/* LINE ITEMS */}
-      <div className="px-4 pb-40">
-        <div className="flex justify-between items-center mb-2">
-          <h2 className="font-medium text-gray-700">Work Performed</h2>
-          <span className="font-semibold text-lg">${total.toFixed(2)}</span>
+      <div className="pb-40 bg-white py-3 px-4 mt-2 rounded-xl">
+
+        <div className="flex justify-between items-center mb-2 ">
+          <span className="font-semibold text-lg">Work Performed</span>
+          <span className="font-semibold text-lg"> Total: ${total.toFixed(2)}</span>
         </div>
 
         <LineItems

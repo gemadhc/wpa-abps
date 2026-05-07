@@ -96,7 +96,7 @@ export default function LineItems({ items: initialItems = [], invoiceID, reloadI
                     : itm.quantity * itm.unitPriceDefined;
 
                   return (
-                    <div key={itm.id} className="p-4 flex flex-col gap-2 bg-white">
+                    <div key={itm.id} className="p-4 py-10 flex flex-col gap-2  mb-5">
                       <div className="flex justify-between items-center">
                         <span className="font-semibold text-gray-800">{itm.item}</span>
                         <div className="flex gap-2">
