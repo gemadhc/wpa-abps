@@ -56,7 +56,7 @@ export default function AddressSelection({addresses = [], reload}) {
       {/* Change Button */}
       <button
         onClick={() => setIsOpen(true)}
-        className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition"
+        className="px-4 py-2 bg-slate-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition"
       >
         Change
       </button>
@@ -68,13 +68,12 @@ export default function AddressSelection({addresses = [], reload}) {
 
         {/* Dialog panel */}
 
-        <div className="fixed inset-0 flex items-center justify-center p-4 pt-0 overflow-y-scroll">
-          <Dialog.Panel className="bg-white rounded-xl shadow-lg max-w-sm w-full p-4 h-150 overflow-y-scroll">
+        <div className="fixed inset-0 flex items-center justify-center p-4 pt-0  overflow-y-scroll">
+          <Dialog.Panel className="bg-white rounded-xl shadow-lg max-w-sm w-full p-4 h-200 overflow-y-scroll">
             {/* Header */}
             <div className="flex justify-between items-center mb-3 border-b pb-2">
               <Dialog.Title className="text-base font-semibold text-gray-800">
-
-                Select Address
+                Select a destination
               </Dialog.Title>
               <button
                 onClick={handleClose}
@@ -83,28 +82,33 @@ export default function AddressSelection({addresses = [], reload}) {
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="max-w-md mx-auto p-6 bg-white rounded-lg shadow border border-gray-200">
-            {/* Address List */}
-            <ul className="divide-y divide-gray-200">
-              { addresses.map((address) => (
-                <li
-                  key={address.id}
-                  className="py-2 cursor-pointer text-sm text-gray-700 hover:bg-blue-50 px-2 rounded"
-                  onClick={() => handleAddressChange(address.id)}
-                >
-                  <strong> {address.label} </strong> <br/> 
-                  {address.street} {address.city} {address.state} {address.zipcode}
-                  
-                </li>
-              ))}
-            </ul>
+            <div className = "flex flex-col gap-5 w-full">
+              <div className="flex flex-col gap-5 max-w-md mx-auto p-3 bg-white rounded-lg shadow border border-gray-200">
 
-            <br/> <br/>
+                {/* Address List */}
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-800 mb-4">Select from your locations</h2>
+                  <ul className="divide-y divide-gray-200 h-50 overflow-y-scroll">
+                    { addresses.map((address) => (
+                      <li
+                        key={address.id}
+                        className="py-2 cursor-pointer text-sm text-gray-700 hover:bg-blue-50 px-2 rounded"
+                        onClick={() => handleAddressChange(address.id)}
+                      >
+                        <strong> {address.label} </strong> <br/> 
+                        {address.street} {address.city} {address.state} {address.zipcode}
+                        
+                      </li>
+                    ))}
+                  </ul>
+                </div>
 
-            </div>
+              </div>
+
             <NewAddress 
               handleNew = {handleNew}
             />
+            </div>
       
           </Dialog.Panel>
         </div>
