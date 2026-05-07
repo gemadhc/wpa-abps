@@ -13,7 +13,8 @@ import { ReportProvider } from "../contexts/ReportContext";
 
 import { getReport, createItem as createReport } from "../lib/reports_db"
 import { getAssembly, createItem as createAssemblyItem, addAssembly} from "../lib/assemblies_db"
-import { syncServices, syncAssemblies} from "../lib/sync"
+import { syncServices, syncAssemblies, syncReports} from "../lib/sync"
+
 import { serviceNotReady } from "../lib/services_db"
 
 export default function Assemblies({ list = [], reloadServices, stopID, addressID, navigateToReport }) {
@@ -81,8 +82,12 @@ export default function Assemblies({ list = [], reloadServices, stopID, addressI
       await serviceNotReady(stopID, selectedAssembly.serviceID, reason, false);
     }
     console.log("syncing")
-    syncServices();
+    await syncServices();
+    await syncReports(); 
+    await syncAssemblies(); 
     reloadServices();
+
+
     setOpenReasonDialog(false);
     setReason('');
     setUnableToLocate(false);
@@ -144,9 +149,9 @@ export default function Assemblies({ list = [], reloadServices, stopID, addressI
                 checked={assembly.ready ?? true}
                 onChange={() => handleToggleReady(assembly)}
                 onClick={(e) => e.stopPropagation()}
-                className="w-4 h-4 rounded-md border-gray-300 text-green-600 focus:ring-green-500 ml-2"
+                className="w-6 h-6 rounded-md border-gray-300 text-green-600 focus:ring-green-500 ml-2"
               />
-              <label className="italic"> Ready </label>
+              <label className="italic text-slate-800"> Ready </label>
             </div>
           </div>
 
