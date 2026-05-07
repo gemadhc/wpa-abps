@@ -53,15 +53,15 @@ export default function Form({ fields, title, hasTitle = false, totalRows = 2 })
           if (field.type === 'radio') {
             return (
               <div key={field.name} className={`${isFull} flex flex-col items-start gap-2 mb-2 `}>
-                <span className="text-base ">{field.label}</span> 
+                <span className="text-base font-bold">{field.label}</span> 
                 <div className = "flex gap-3">
-                <label className="flex items-center gap-1">
+                <label className="flex items-center gap-1 ">
                   <input
                     type="radio"
                     name={field.name}
                     checked={formData?.[field.name] === true || formData?.[field.name] === 1 }
                     onChange={() => updateField(field.name, true)}
-                    className="w-5 h-5 accent-pink-300"
+                    className="w-5 h-5 accent-pink-500"
                   />
                   On
                 </label>

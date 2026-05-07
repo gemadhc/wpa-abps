@@ -92,7 +92,7 @@ export default function AddressSelection({addresses = [], reload}) {
                     { addresses.map((address) => (
                       <li
                         key={address.id}
-                        className="py-2 cursor-pointer text-sm text-gray-700 hover:bg-blue-50 px-2 rounded"
+                        className="py-2 cursor-pointer text-sm text-gray-700 hover:bg-blue-50 px-2 rounded border border-green-600"
                         onClick={() => handleAddressChange(address.id)}
                       >
                         <strong> {address.label} </strong> <br/> 

@@ -24,6 +24,8 @@ import { createItem as createAssemblyItem, getAssembly } from "../lib/assemblies
 import { getLineItems, addLineItems } from "../lib/lineitem_db";
 import { createItem as createReport, getReport } from "../lib/reports_db";
 
+import Confetti from "react-confetti";
+
 export default function StopBody({ item, stopID, reloadList, navigateToReport}) {
   const [activeTab, setActiveTab] = useState('Assemblies');
   const [completed, setCompleted] = useState(false);
@@ -38,6 +40,13 @@ export default function StopBody({ item, stopID, reloadList, navigateToReport}) 
   const [loading, setLoading] = useState(true);
   const [loadingItems, setLoadingItems] = useState(false);
   const [completing, setCompleting] = useState(false);
+
+  const [showConfetti, setShowConfetti] = useState(false);
+
+  const triggerConfetti = () => {
+    setShowConfetti(true);
+    setTimeout(() => setShowConfetti(false), 2500); // Stop after ~2.5s
+  };
 
   // ---------------- LOADERS ----------------
   const loadBilling = async () => {
@@ -154,6 +163,7 @@ const loadDevice = async (assemblyID) => {
     await updateStop(item);
     await syncStops();
     await reloadList?.();
+    triggerConfetti()
 
     setCompleted(true);
     setOpenConfirmDialog(false);
@@ -202,7 +212,18 @@ const loadDevice = async (assemblyID) => {
   }
 
   return (
-    <div id ="stop-content" className="h-screen flex flex-col w-full mx-auto bg-slate-800 text-slate-100">
+    <div id ="stop-content" className="h-screen overflow-y-clip flex flex-col w-full mx-auto bg-slate-800 text-slate-100">
+      {showConfetti && (
+        <div className="fixed inset-0 flex justify-center items-center pointer-events-none">
+          <Confetti
+            width={window.innerWidth * 0.8}     // narrower spread
+            height={window.innerHeight * 0.8}    // slightly shorter area
+            recycle={false}
+            numberOfPieces={400}
+            gravity={0.25}
+          />
+        </div>
+      )}
 
       {/* ✅ COMPLETED BANNER */}
       <div

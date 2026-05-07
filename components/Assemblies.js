@@ -149,7 +149,7 @@ export default function Assemblies({ list = [], reloadServices, stopID, addressI
                 checked={assembly.ready ?? true}
                 onChange={() => handleToggleReady(assembly)}
                 onClick={(e) => e.stopPropagation()}
-                className="w-6 h-6 rounded-md border-gray-300 text-green-600 focus:ring-green-500 ml-2"
+                className="w-6 h-6 rounded-md border-gray-300 text-green-600 focus:ring-green-500 ml-2 accent-pink-500"
               />
               <label className="italic text-slate-800"> Ready </label>
             </div>
