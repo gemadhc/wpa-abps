@@ -37,10 +37,7 @@ export default function Home() {
       // Otherwise, assume successful session object
       setSession(data);
       localStorage.setItem("session", JSON.stringify(data));
-      router.replace('/offline')
-      setTimeout(() => {
-        router.push("/");
-      }, 500);
+      window.location.replace('/offline');    
 
     } catch (err) {
       console.error("Login error:", err);

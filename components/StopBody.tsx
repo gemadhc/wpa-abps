@@ -279,7 +279,7 @@ const loadDevice = async (assemblyID) => {
                 Confirm Completion
               </Dialog.Title>
               <button onClick={() => setOpenConfirmDialog(false)}>
-                <X className="w-5 h-5 text-gray-500" />
+                <X className="w-5 h-5 text-slate-800" />
               </button>
             </div>
 
