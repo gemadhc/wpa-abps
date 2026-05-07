@@ -185,11 +185,16 @@ export default function Assemblies({ list = [], reloadServices, stopID, addressI
       <Dialog open={openReasonDialog} onClose={() => setOpenReasonDialog(false)} className="relative z-50">
         <div className="fixed inset-0 bg-black/30" />
         <div className="fixed inset-0 flex items-center justify-center p-4">
-          <Dialog.Panel className="bg-white rounded-2xl p-5 w-full max-w-sm text-black">
+          <Dialog.Panel className="bg-white rounded-2xl px-5 pb-10 w-full max-w-sm text-black">
 
-            <Dialog.Title className="font-semibold text-lg mb-3">
-              Mark as Not Ready
-            </Dialog.Title>
+            <div className = "flex flex-row justify-between py-3 mb-5" >
+              <Dialog.Title className="font-semibold text-lg">
+                Mark as Not Ready
+              </Dialog.Title>
+              <button onClick={() => setOpenReasonDialog(false)}>
+                  <X className="w-5 h-5 text-slate-800 border rounded" />
+              </button>
+            </div>
 
             <textarea
               value={reason}
@@ -211,7 +216,7 @@ export default function Assemblies({ list = [], reloadServices, stopID, addressI
 
             <button
               onClick={handleSubmitReason}
-              className="mt-4 w-full bg-blue-600 text-white p-2 rounded-lg"
+              className="mt-4 w-full bg-slate-600 text-white p-2 rounded-lg"
             >
               Submit
             </button>
