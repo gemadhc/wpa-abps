@@ -37,7 +37,7 @@ export default function Home() {
       // Otherwise, assume successful session object
       setSession(data);
       localStorage.setItem("session", JSON.stringify(data));
-
+      router.replace('/offline')
       setTimeout(() => {
         router.push("/");
       }, 500);
