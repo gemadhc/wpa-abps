@@ -11,7 +11,7 @@ export default async function Page({
 
   if (!stopID) {
     return (
-      <div className="bg-white h-[100px] p-10 text-black">
+      <div className="bg-slate-800 h-[100px] p-5 text-black">
         Stop Does Not Exist
       </div>
     );

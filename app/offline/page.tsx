@@ -188,7 +188,7 @@ useEffect(() => {
   }, [])
 
   return (
-    <div className="min-h-screen bg-white text-gray-900 flex flex-col pt-10">
+    <div className="min-h-screen bg-white text-gray-900 flex flex-col pt-15">
       <DateProvider>
         {/* HEADER SECTION */}
         <div className="flex flex-row justify-between py-2 px-10 border-b border-gray-200 bg-gray-50 sticky top-0 z-10 gap-10">
@@ -209,7 +209,7 @@ useEffect(() => {
         </div>
 
         {/* LIST SECTION */}
-        <div className="flex-1 max-h-200 overflow-y-scroll p-0 space-y-0 bg-white pb-500">
+        <div className=" flex-1 max-h-200 overflow-y-scroll p-0 space-y-0 bg-white pb-500">
         	{
         		loading ? 
         			<div className = "pt-15"> 

@@ -50,7 +50,8 @@ export default function StopCard({ stopID, item, onSelectStop}) {
   return (
     <div
       onClick={handleNavigate}
-      className="bg-white rounded-2xl shadow-md border border-gray-200 overflow-hidden cursor-pointer transition-all hover:shadow-lg hover:scale-[1.01] max-w-xl mx-auto"
+      className="bg-white rounded-2xl shadow-md border border-gray-200 
+      overflow-hidden cursor-pointer transition-all hover:shadow-lg hover:scale-[1.01] max-w-xl mx-auto"
       style={{ viewTransitionName: `stop-${stopID}` }}
     >
       <div className={`flex justify-between items-start p-3 ${headerBg} border-b gap-2`}>

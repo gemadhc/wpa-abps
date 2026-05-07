@@ -11,12 +11,9 @@ function LayoutContent({ children }) {
   return (
     <div className="flex flex-col">
       {/* HEADER */}
-      
         <Header />
-     
-
       {/* MAIN */}
-      <main className="pt-5 mt-0 bg-gray-50  overflow-y-clipped no-scrollbar max-h-50">
+      <main className="mt-0 bg-slate-900  overflow-y-clipped no-scrollbar max-h-50">
         {children}
       </main>
 

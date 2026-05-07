@@ -161,7 +161,10 @@ const loadDevice = async (assemblyID) => {
   };
 
   const tabs = [
-    { name: 'Details', content: <Details item={item} /> },
+    { name: 'Details', 
+
+      content: <Details item={item} /> 
+    },
     {
       name: 'Assemblies',
       content: (
@@ -199,7 +202,7 @@ const loadDevice = async (assemblyID) => {
   }
 
   return (
-    <div className="h-screen flex flex-col w-full mx-auto bg-slate-50 text-black">
+    <div id ="stop-content" className="h-screen flex flex-col w-full mx-auto bg-slate-800 text-slate-100">
 
       {/* ✅ COMPLETED BANNER */}
       <div
@@ -207,21 +210,21 @@ const loadDevice = async (assemblyID) => {
           completed ? "min-h-16 opacity-100" : "max-h-0 opacity-0"
         }`}
       >
-        <div className="bg-green-700 text-white flex items-center justify-center gap-2 py-2 shadow">
+        <div className="bg-green-800 text-green-100 flex items-center justify-center gap-2 py-2 shadow">
           <CheckCircle2 className="w-5 h-5" />
           <span className="font-semibold">Stop Completed</span>
         </div>
       </div>
 
       {/* 🔒 STICKY HEADER */}
-      <div className="sticky top- z-20 bg-white border-b px-4 py-3 flex items-start justify-between">
+      <div className="sticky top- z-20 bg-transparent border-b px-4 py-3 flex items-start justify-between">
 
         {/* ADDRESS */}
         <div>
           <h1 className="text-lg font-bold leading-tight">
             {item.location_name}
           </h1>
-          <p className="text-xs text-gray-500 mt-1">
+          <p className="text-xs text-slate-200 mt-1">
             {item.street}<br />
             {item.city}, {item.state} {item.zipcode}
           </p>
@@ -239,15 +242,15 @@ const loadDevice = async (assemblyID) => {
       </div>
 
       {/* 🔒 STICKY TABS */}
-      <div className="sticky top-[72px] z-10 bg-slate-100 flex border-b">
+      <div className="sticky top-[72px] z-10 bg-slate-500 text-slate-100 flex border-b">
         {tabs.map((tab) => (
           <button
             key={tab.name}
             onClick={() => setActiveTab(tab.name)}
             className={`flex-1 py-2 text-sm transition ${
               activeTab === tab.name
-                ? "bg-white font-semibold border-b-2 border-green-600"
-                : "text-gray-600"
+                ? "bg-slate-500 font-semibold border-b-5 border-slate-600"
+                : "text-slate-100"
             }`}
           >
             {tab.name}
@@ -256,7 +259,7 @@ const loadDevice = async (assemblyID) => {
       </div>
 
       {/* 📜 SCROLLABLE CONTENT */}
-      <div className="flex-1 overflow-y-auto bg-white p-3 pb-500">
+      <div id ="tab-content"className="flex-1 overflow-y-auto bg-slate-100 p-3 pb-500">
         {tabs.find((t) => t.name === activeTab)?.content}
       </div>
 
@@ -264,8 +267,8 @@ const loadDevice = async (assemblyID) => {
       <Dialog
         open={openConfirmDialog}
         onClose={() => setOpenConfirmDialog(false)}
-        className="relative z-50"
-      >
+        className="relative z-50">
+        
         <div className="fixed inset-0 bg-black/30" />
 
         <div className="fixed inset-0 flex items-center justify-center p-4 text-black">
@@ -310,6 +313,7 @@ const loadDevice = async (assemblyID) => {
           </Dialog.Panel>
         </div>
       </Dialog>
+
 
     </div>
   );

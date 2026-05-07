@@ -23,7 +23,7 @@ export default  function ClientComponent({ stopID }) {
 	}, [])
 
   return (
-  	<div  style={{ viewTransitionName: `stop-${stopID}` }}>
+  	<div  id = "stop-client" style={{ viewTransitionName: `stop-${stopID}` }}>
   		<ViewTransition>
   		{
   			stop ? 
