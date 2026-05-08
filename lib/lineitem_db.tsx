@@ -49,26 +49,109 @@ export async function addLineItems(items, invoiceID){
 	}
 }
 
+export async function removeLineItem (itemID, invoiceID) { 
+	return new Promise( async(resolve, reject) =>{
+		try{
+			const db = await getDB()
+			const myitem = await db.get('lineItems', invoiceID ); 
+			console.log("This is the item: ", myitem)
+			//find the line item inside the invoice item list
+			for(let i = 0; i < myitem.list.length; i++){
+				console.log("comparing: ", myitem.list[i].id,  itemID)
+				if(myitem.list[i].id == itemID){
+					//this is the item to remove
+					myitem.list[i].action = "REMOVE"; 
+					break; 
+				}
+			}
+			myitem.synced = false; 
+			console.log("Is this item updated: ", myitem)
+			await db.put('lineItems', myitem)
+	  		resolve()
+		}catch(err){
+			console.log(err)
+			resolve(err)
+		}
+	})
+}
 
-export async function removeLineItem(item){ 
+export async function removeFromLocal(invoiceID, itemID) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      const db = await getDB();
+
+      const myitem = await db.get('lineItems', invoiceID);
+
+      if (!myitem || !Array.isArray(myitem.list)) {
+        resolve();
+        return;
+      }
+
+      myitem.list = myitem.list.filter(
+        (item) => item.id !== itemID
+      );
+
+      await db.put('lineItems', myitem);
+
+      resolve();
+
+    } catch (err) {
+      console.log(err);
+      reject(err);
+    }
+  });
+}
+
+export async function createLineItem(invoiceID){
 	try{
 		const db = await getDB()
-		item.action = 'REMOVE'
-		item.synced = false
-  		return db.put('lineItems', item)
+		const myitem = await db.get('lineItems', invoiceID );
+
+		let obj = {}
+		obj.action = "NEW"; 
+		obj.amount = 0.0; 
+		obj.description = ''; 
+		obj.quantity = 0;
+		obj.unitPriceDefined = 0.0;
+		obj.invoiceID = invoiceID; 
+		obj.item = "Backflow Inspection"; 
+		obj.qb_id = "221"; 
+		obj.sku = 200; 
+		obj.taxable = false;
+		obj.id = crypto.randomUUID(); 
+
+		myitem.list.push(obj); 
+		myitem.synced = false
+
+		console.log("Creating a new assembly: ", myitem)
+		await db.put('lineItems', myitem)
+  		return 
+
 	}catch(err){
 		console.log(err)
 	}
-
 }
 
-export async function createLineItem(item){
+
+export async function updateLineItem(invoiceID, updates){
 	try{
 		const db = await getDB()
-		item.offline_id = crypto.randomUUID()
-		item.action = "NEW"
-		item.synced = false
-  		return db.put('lineItems', item)
+		const myitem = await db.get('lineItems', invoiceID );
+		myitem.list = myitem.list.map((item) => {
+			if (item.id === updates.id) {
+		    	return {
+		      	...item,
+		      	...updates,
+		      	action: "EDIT",
+		    	};
+ 			} 
+ 			return item; 
+ 		})
+
+		myitem.synced = false; 
+		console.log("item to update: ", myitem)
+		await db.put('lineItems', myitem)
+  		return 
 	}catch(err){
 		console.log(err)
 	}

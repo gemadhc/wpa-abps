@@ -31,10 +31,11 @@ export default function Invoice({
   const [allowPayment, setAllowPayment] = useState(navigator.onLine);
   const [mycustomer, setMyCustomer] = useState(null);
 
-  const total = items.reduce(
-    (sum, itm) => sum + itm.quantity * itm.unitPriceDefined,
-    0
-  );
+  const total = items.reduce((sum, itm) => {
+    if (itm.action === "REMOVE") return sum;
+
+    return sum + itm.quantity * itm.unitPriceDefined;
+  }, 0);
 
   // ---------------- ONLINE / OFFLINE ----------------
   useEffect(() => {
@@ -82,6 +83,7 @@ export default function Invoice({
     }
 
     await syncInvoices();
+    reload()
     setStatusLoading(false);
   };
 
@@ -96,7 +98,7 @@ export default function Invoice({
     PAID: "bg-green-100 text-green-700",
     VOID: "bg-red-100 text-red-700",
     VOIDED: "bg-red-100 text-red-700",
-    SCHEDULED: "bg-blue-100 text-blue-700",
+    SCHEDULED: "bg-purple-100 text-purple-700",
   };
 
   return (

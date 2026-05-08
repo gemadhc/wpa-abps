@@ -106,6 +106,7 @@ const loadItems = async () => {
   return data;
 };
 
+
 const loadReport = async (reportID) => {
   const cached = await getReport(reportID);
   if (cached) return cached;
@@ -195,6 +196,7 @@ const loadDevice = async (assemblyID) => {
           invoice={myInvoice}
           loadingItems={loadingItems}
           reloadItems={loadItems}
+          reload= { loadInvoice }
           address={item}
         />
       ),

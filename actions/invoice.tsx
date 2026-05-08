@@ -149,6 +149,7 @@ export const createItem = async (invoiceID) => {
 export const updateStatus = async (id, newStatus) => {
   return new Promise( async(resolve, reject) =>{
     try {
+      
       const response = await updateStatusFetch(id, newStatus);
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || "Failed to update invoice status");

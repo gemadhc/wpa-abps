@@ -1,14 +1,18 @@
 import { getUnsyncedPopList, markAsSynced } from './db'
 import { getUnsyncedStops, markStopAsSynced } from "./stop_db.tsx" 
 import { getUnsyncedInvoices, markInvoiceAsSynced } from "./invoice_db.tsx" 
-import { getUnsyncedLineItems, markLineItemAsSynced } from "./lineitem_db.tsx" 
+import { getUnsyncedLineItems, markLineItemAsSynced, removeFromLocal} from "./lineitem_db.tsx" 
 import { getUnsyncedServices, markServiceAsSynced, createItem as createService} from "./services_db.tsx"
 import { getUnsyncedReports, markReportAsSynced } from "./reports_db.tsx"
 import { getUnsyncedAssemblies, markAssemblyAsSynced } from "./assemblies_db.tsx"
 
 import { completeStop } from "../actions/stop.js" 
-import {updateStatus, requestQuickbooksID} from "../actions/invoice"
-import  { updateLineItemStatus } from "../actions/invoice"
+import {updateStatus,  updateLineItemStatus,
+  requestQuickbooksID, 
+  createItem as createLineItem,  
+  removeItem as removeLineItem, 
+  updateItem as updateLineItem } from "../actions/invoice"
+
 import { updateReport } from "../actions/report"
 import { updateAssembly, createAssembly} from "../actions/assembly"
 
@@ -59,6 +63,7 @@ export async function syncInvoices(){
   if (unsyncedItems.length === 0) {
     return
   }
+  console.log("unsynced items: ", unsyncedItems )
   for (const item of unsyncedItems) {
     try {
       await updateStatus(item.id, item.status)
@@ -78,10 +83,33 @@ export async function syncLineItems(){
   if (unsyncedItems.length === 0) {
     return
   }
+
+  console.log("these are the unsynced line items: ", unsyncedItems)
   for (const item of unsyncedItems) {
     try {
-      await updateLineItemStatus(item)
-      await markLineItemAsSynced(item.offline_id)
+      //look at the list of items 
+      let mylist = item.list; 
+      mylist.map( (item) =>{
+        if(item?.action){
+          if(item.action == "REMOVE"){
+            removeLineItem(item.id); 
+
+            //remove item from indexedDB
+            removeFromLocal(item.invoiceID, item.id)
+          }
+
+          if(item.action == "NEW"){
+            createLineItem(item.invoiceID); 
+          }
+
+          if(item.action == "EDIT"){
+            updateLineItem(item.id, item); 
+          }
+        }
+      })
+
+      await markLineItemAsSynced(item.invoiceID)
+      return; 
 
     } catch (error) {
       console.error('Sync failed:', error)

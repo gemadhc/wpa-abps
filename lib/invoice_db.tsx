@@ -29,8 +29,10 @@ export async function updateInvoiceStatus(invoice, newstatus) {
 	const db = await getDB()
 	const myinvoice = await db.get('invoices', invoice )
 	if (!invoice) return
+	console.log("updating this invoice: ", invoice, newstatus)
 	const updated = { ...myinvoice, synced: false, status: newstatus }
 	await db.put('invoices', updated)
+	return 
 }
 
 

@@ -5,6 +5,11 @@ import { Pencil, Trash2, Save, PlusCircle } from 'lucide-react';
 import { createItem, removeItem, updateItem } from "../actions/invoice"
 import { getQuickbooksItems } from "../actions/quickbooks.js"
 
+
+import { removeLineItem, createLineItem, updateLineItem} from "@/lib/lineitem_db"
+import { syncLineItems } from "@/lib/sync"
+
+
 export default function LineItems({ items: initialItems = [], invoiceID, reloadItems }) {
   const [items, setItems] = useState(initialItems);
   const [editingId, setEditingId] = useState<number | null>(null);
@@ -30,24 +35,30 @@ export default function LineItems({ items: initialItems = [], invoiceID, reloadI
     setEditedItem(item);
   };
 
-  const handleSave = (id: number) => {
+  const handleSave = async(id: number) => {
     setSaving(true)
-    updateItem(editedItem.id, editedItem).then(() => {
-      reloadItems();
-      setEditingId(null);
-      setEditedItem({});
-      setSaving(false)
-    });
+
+    await updateLineItem(invoiceID, editedItem)
+    await syncLineItems(); 
+
+    reloadItems();
+    setEditingId(null);
+    setEditedItem({});
+    setSaving(false)
+
   };
 
-  const handleRemove = (id: number) => {
+  const handleRemove = async (id: number) => {
     setRemovingId(id)
     setRemoving(true)
-    removeItem(id).then(() => {
-      reloadItems();
-      setRemovingId(null)
-      setRemoving(false)
-    });
+
+    await removeLineItem(id, invoiceID)
+    await syncLineItems()
+
+    reloadItems();
+    setRemovingId(null)
+    setRemoving(false)
+
   };
 
   const handleChange = (field: string, value: any) => {
@@ -71,15 +82,20 @@ export default function LineItems({ items: initialItems = [], invoiceID, reloadI
     });
   };
 
-  const handleAddNewItem = () => {
+  const handleAddNewItem = async () => {
     setCreating(true)
-    createItem(invoiceID).then(() => {
-      reloadItems();
-      setCreating(false)
-    });
+    await createLineItem(invoiceID)
+    await syncLineItems()
+    reloadItems();
+    setCreating(false)
+
   };
 
-  const total = items.reduce( (sum, itm) => sum + itm.quantity * itm.unitPriceDefined, 0 );
+  const total = items.reduce((sum, itm) => {
+    if (itm.action === "REMOVE") return sum;
+
+    return sum + itm.quantity * itm.unitPriceDefined;
+  }, 0);
   
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
@@ -87,13 +103,20 @@ export default function LineItems({ items: initialItems = [], invoiceID, reloadI
         {
           items.length ? 
             <> 
-              {items.map((itm) => {
+              {
+                items.map((itm) => {
                   const isEditing = itm.id === editingId;
                   const isRemoving = removingId === itm.id;
 
                   const currentAmount = isEditing
                     ? (editedItem.quantity || 0) * (editedItem.unitPriceDefined || 0)
-                    : itm.quantity * itm.unitPriceDefined;
+                    : itm?.quantity * itm?.unitPriceDefined;
+
+                  if( itm?.action == "REMOVE" ){
+                    return(
+                      <> </>
+                    )
+                  }
 
                   return (
                     <div key={itm.id} className="p-4 py-10 flex flex-col gap-2  mb-5">
