@@ -58,11 +58,12 @@ export async function updateServiceAssembly(updates) {
 	let found = false;
 
 	const updatedList = myitem.list.map(item => {
+		console.log("is this the list? ", item.testReportID, updates.testReportID)
 		if (item.testReportID === updates.testReportID) {
 			found = true;
 			return {
 				...item,
-				state: "COMPLETED",
+				state: "Edited",
 				location: updates.location,
 				serial_number: updates.serial_number,
 			};

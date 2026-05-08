@@ -12,7 +12,7 @@ import  { updateLineItemStatus } from "../actions/invoice"
 import { updateReport } from "../actions/report"
 import { updateAssembly, createAssembly} from "../actions/assembly"
 
-import { setAsReady, setAsNotReady } from "../actions/service";
+import { setAsReady, setAsNotReady, updateStatus as updateServiceStatus } from "../actions/service";
 
 export async function syncItems() {
   if (!navigator.onLine) {
@@ -88,6 +88,8 @@ export async function syncLineItems(){
     }
   }
 }
+
+
 export async function syncServices(){
   if (!navigator.onLine) {
     console.log('Offline - will sync later')
@@ -103,6 +105,9 @@ export async function syncServices(){
     try {
       console.log("unsynced service: ", item)
       item.list.map(async (item) => {
+
+          await updateServiceStatus(item.serviceID, item.state )
+
           if(item.ready){
             await setAsReady( item.serviceID ); 
           }else{    
@@ -110,12 +115,16 @@ export async function syncServices(){
           }
       })
       await markServiceAsSynced(item.stopID)
+
     } catch (error) {
       console.error('Sync failed:', error)
     }
   }
 
+  return; 
 }
+
+
 export async function syncReports(){
   if (!navigator.onLine) {
     console.log('Offline - will sync later')

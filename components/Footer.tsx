@@ -40,7 +40,7 @@ export default function Footer(){
 			console.error('Logout error:', err);
 			setIsLoggingOut(false); // allow retry if failed
 		}
-	};
+	}
 
 	useEffect(() => {
 		if(loading) return

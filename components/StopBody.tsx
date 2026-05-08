@@ -76,11 +76,10 @@ export default function StopBody({ item, stopID, reloadList, navigateToReport}) 
 };
 
 const loadServices = async () => {
-  /*const cached = await getServices(item.stopID);
+  const cached = await getServices(item.stopID);
   setServices(cached?.list || []);
   if (cached) return cached;
-  if (!navigator.onLine) return;*/
-
+  if (!navigator.onLine) return;
   const data = await requestServices(item.stopID);
   setServices(data);
   createService(data, item.stopID);

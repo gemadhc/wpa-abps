@@ -31,15 +31,16 @@ function ResultsBody({ closeMe, reloadServices, stopID, onSelectStop }) {
   
   const saveAll = () =>{
     return new Promise(async (resolve, reject) =>{
-      console.log("These are the params: ", formData)
       setSaving(true)
       formData.serviceType = formData.state
       await updateReport(formData)
       await updateAssembly(formData)
       await updateServiceAssembly(formData)
+
       //update service with stopID
       await syncReports(); 
-      await syncAssemblies(); 
+      await syncAssemblies();
+      await syncServices(); 
       setSaving(false)
       resolve()
     })
@@ -48,7 +49,7 @@ function ResultsBody({ closeMe, reloadServices, stopID, onSelectStop }) {
   return (
     <div className="flex flex-col w-screen h-full  bg-slate-500">
       <div className = "grid grid-cols-20 gap-2 px-10 py-8 bg-slate-800 text-white">
-        <h2 className = "col-span-12  font-stretch-extra-expanded" >Test Report</h2>
+        <h2 className = "col-span-12" >Test Report</h2>
         <button
           disabled={saving}
           onClick={() =>
@@ -56,7 +57,7 @@ function ResultsBody({ closeMe, reloadServices, stopID, onSelectStop }) {
                onSelectStop( formData?.stopID )
             })
           }
-          className="col-span-8 flex items-center justify-center h-10  bg-green-700 text-white  rounded-xl
+          className="col-span-8 flex items-center justify-center h-10  bg-green-700 text-white 
                      hover:bg-green-600 disabled:bg-gray-400 transition"
         >
           {saving ? (

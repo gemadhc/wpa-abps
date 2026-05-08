@@ -27,6 +27,13 @@ const notReadyFetch = (id, reason) =>
     body: JSON.stringify({ id, reason }),
   });
 
+const update = (id, newstatus) =>
+  fetchWithJWT(`${server}/service/status`, {
+    method: 'PUT',
+    body: JSON.stringify({ id, newstatus }),
+  });
+
+
 // ---- Exported async functions ---- //
 export const setAsReady = async (id) => {
   try {
@@ -48,6 +55,17 @@ export const setAsNotReady = async (id, reason) => {
     return data;
   } catch (err) {
     console.error('setAsNotReady error:', err);
+    throw err;
+  }
+};
+
+export const updateStatus = async (id, newstatus) => {
+  try {
+    const response = await update(id, newstatus);
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.message || 'Failed to set service as not ready');
+    return data;
+  } catch (err) {
     throw err;
   }
 };
