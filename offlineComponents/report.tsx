@@ -14,7 +14,7 @@ import { getAssembly, createItem as createAssemblyItem } from "@/lib/assemblies_
 
 import { ReportProvider } from "@/contexts/ReportContext";
 
-export default  function ClientComponent({ reportID, deviceID, onSelectStop }) {
+export default  function ClientComponent({ reportID, deviceID, stopID,  onSelectStop }) {
 	const [initialReport, setInitialReport] = useState(null); 	
 	const [initialDevice, setInitialDevice] = useState(null); 
 
@@ -67,6 +67,7 @@ export default  function ClientComponent({ reportID, deviceID, onSelectStop }) {
               closeMe={() => setOpenResultsDialog(false)}
               reloadServices={() => reloadServices()}
               saving = { (bool) => setSaving(bool)}
+              stopID = {stopID}
               onSelectStop = { onSelectStop }
             />
           </ReportProvider>

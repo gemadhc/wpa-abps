@@ -3,7 +3,6 @@ import nextPWA from "next-pwa";
 
 const withPWA = nextPWA({
   dest: "public",
-  sw: 'sw.js', 
   register: true, 
   skipWaiting:true, 
   runtimeCaching: [
@@ -44,9 +43,9 @@ const withPWA = nextPWA({
 
 const nextConfig: NextConfig = {
   env: {
-    SERVER: "https://sandbox.abps-erp.com/field",
-    QUICKBOOKS: "https://sandbox.abps-erp.com/quickbooks",
-    OFFICE: "https://sandbox.abps-erp.com/backflow",
+    SERVER: "https://server.abps-erp.com/field",
+    QUICKBOOKS: "https://server.abps-erp.com/quickbooks",
+    OFFICE: "https://server.abps-erp.com/backflow",
     TOKEN_SERVER: "https://api.intuit.com/quickbooks/v4/payments/tokens",
     VISA_METHOD_REF: "9",
     CASH_METHOD_REF: "4",

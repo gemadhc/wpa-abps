@@ -11,11 +11,7 @@ import WaterLoader from "@/components/WaterLoader"
 
 export default function Home() {
   const { view, setView } = useView();
-
   const { loading } = useSession();
-
-  
-
   const touchStartX = useRef<number | null>(null);
   const touchEndX = useRef<number | null>(null);
 
@@ -78,12 +74,15 @@ export default function Home() {
 
   const navigateToReport = (
     reportID: string | number,
-    deviceID: string | number
+    deviceID: string | number, 
+    stopID: string | number
   ) => {
+    console.log("navigating to report: ", reportID, deviceID, stopID)
     setView({
       type: 'report',
       reportID,
-      deviceID
+      deviceID, 
+      stopID
     });
   };
 
@@ -180,6 +179,7 @@ export default function Home() {
         <ReportComponent
           reportID={view.reportID}
           deviceID={view.deviceID}
+          stopID = {view.stopID }
           onSelectStop={navigateToStop}
         />
       )}

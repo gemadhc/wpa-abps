@@ -100,9 +100,11 @@ export default function Assemblies({
   ========================= */
 
   const handleRowClick = (assembly) => {
+    console.log("opening report... ",  assembly.testReportID, assembly.assemblyID, stopID)
     navigateToReport(
       assembly.testReportID,
-      assembly.assemblyID
+      assembly.assemblyID, 
+      stopID
     );
   };
 

@@ -17,7 +17,8 @@ export function useReport() {
 
 export function ReportProvider({ initialReport, initialDevice, children}: { children: React.ReactNode }) {
   useEffect(()=>{
-    initialReport.reportID = initialReport.id;
+    console.log("initial report and initial device: ", initialReport, initialDevice)
+    initialReport.reportID = initialReport.reportID;
     initialDevice.assemblyID = initialDevice.id; 
     loadReport(initialReport, initialDevice)
     

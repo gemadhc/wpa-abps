@@ -31,8 +31,11 @@ function ResultsBody({ closeMe, reloadServices, stopID, onSelectStop }) {
   
   const saveAll = () =>{
     return new Promise(async (resolve, reject) =>{
+      console.log("Saving: ", stopID)
       setSaving(true)
       formData.serviceType = formData.state
+      formData.stopID = stopID; 
+      
       await updateReport(formData)
       await updateAssembly(formData)
       await updateServiceAssembly(formData)
@@ -98,11 +101,16 @@ function ResultsBody({ closeMe, reloadServices, stopID, onSelectStop }) {
 // ---------------------------------------------------
 // Wrapper that pulls report/device from the context
 // ---------------------------------------------------
-function ResultsWithContexts({ closeMe, reloadServices, onSelectStop}) {
+function ResultsWithContexts({ closeMe, reloadServices, onSelectStop, stopID}) {
   return (
    
     <NumberPadProvider>
-      <ResultsBody closeMe={closeMe} reloadServices = {reloadServices} onSelectStop = {onSelectStop}/>
+      <ResultsBody 
+        closeMe={closeMe} 
+        reloadServices = {reloadServices} 
+        onSelectStop = {onSelectStop}
+        stopID = { stopID }
+      />
     </NumberPadProvider>
    
   );

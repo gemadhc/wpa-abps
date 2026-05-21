@@ -14,6 +14,7 @@ export async function getReport(id) {
 
 export async function updateReport(updates){
 	const db = await getDB()
+  console.log("updating this report: ", updates, updates.reportID)
 	const myitem = await db.get('reports', updates.reportID )
 	if (!myitem) return
 	const updated = { ...updates, synced: false }

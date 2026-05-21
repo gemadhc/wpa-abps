@@ -49,7 +49,7 @@ export async function updateService(updates){
 
 export async function updateServiceAssembly(updates) {
 	console.log("updates to make: ", updates);
-
+	//updates.stopID = 62983; 
 	const db = await getDB();
 	const myitem = await db.get("services", updates.stopID);
 
@@ -58,8 +58,8 @@ export async function updateServiceAssembly(updates) {
 	let found = false;
 
 	const updatedList = myitem.list.map(item => {
-		console.log("is this the list? ", item.testReportID, updates.testReportID)
-		if (item.testReportID === updates.testReportID) {
+		console.log("is this the list? ", item.testReportID, updates.reportID, item, updates)
+		if (item.testReportID === updates.reportID) {
 			found = true;
 			return {
 				...item,
