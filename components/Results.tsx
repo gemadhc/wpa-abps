@@ -34,15 +34,16 @@ function ResultsBody({ closeMe, reloadServices, stopID, onSelectStop }) {
       console.log("Saving: ", stopID)
       setSaving(true)
       formData.serviceType = formData.state
-      formData.stopID = stopID; 
-      
-      await updateReport(formData)
+      formData.stopID = stopID;
+
       await updateAssembly(formData)
       await updateServiceAssembly(formData)
+      await updateReport(formData)
+      
 
       //update service with stopID
-      await syncReports(); 
       await syncAssemblies();
+      await syncReports(); 
       await syncServices(); 
       setSaving(false)
       resolve()
