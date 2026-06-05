@@ -24,10 +24,7 @@ export default  function ClientComponent({ stopID, navigateToReport, navigateToL
 
   return (
   	<div  style={{ viewTransitionName: `stop-${stopID}` }}>
-  		
-
   		<ViewTransition>
-
   		{
   			stop ? 
   				<StopBody

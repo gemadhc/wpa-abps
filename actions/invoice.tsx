@@ -139,6 +139,7 @@ export const createItem = async (invoiceID) => {
     const response = await createLineItemFetch(invoiceID);
     const data = await response.json();
     if (!response.ok) throw new Error(data.message || "Failed to create line item");
+    console.log("This is the data: ", data)
     return data;
   } catch (err) {
     console.error("createItem error:", err);

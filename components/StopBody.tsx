@@ -77,8 +77,8 @@ export default function StopBody({ item, stopID, reloadList, navigateToReport}) 
 
 const loadServices = async () => {
   const cached = await getServices(item.stopID);
-  setServices(cached?.list || []);
-  if (cached) return cached;
+  //setServices(cached?.list || []);
+  //if (cached) return cached;
   if (!navigator.onLine) return;
   const data = await requestServices(item.stopID);
   setServices(data);
@@ -91,10 +91,10 @@ const loadItems = async () => {
   setLoadingItems(true);
   const cached = await getLineItems(item.invoiceID);
   setMyLines(cached?.list || []);
-  if (cached) {
+  /*if (cached) {
     setLoadingItems(false);
     return cached;
-  }
+  }*/
   if (!navigator.onLine) {
     setLoadingItems(false);
     return;

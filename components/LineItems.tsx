@@ -195,6 +195,8 @@ export default function LineItems({ items: initialItems = [], invoiceID, reloadI
                             <input
                               type="number"
                               value={editedItem.quantity}
+                              min={1}
+                              step={0.5}
                               onChange={(e) => handleChange('quantity', +e.target.value)}
                               className="w-16 border border-gray-300 rounded-md px-1 py-1 text-sm ml-1"
                             />

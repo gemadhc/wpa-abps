@@ -109,10 +109,10 @@ export async function createLineItem(invoiceID){
 
 		let obj = {}
 		obj.action = "NEW"; 
-		obj.amount = 0.0; 
+		obj.amount = 65.0; 
 		obj.description = ''; 
-		obj.quantity = 0;
-		obj.unitPriceDefined = 0.0;
+		obj.quantity = 1;
+		obj.unitPriceDefined = 65.0;
 		obj.invoiceID = invoiceID; 
 		obj.item = "Backflow Inspection"; 
 		obj.qb_id = "221"; 
@@ -157,6 +157,30 @@ export async function updateLineItem(invoiceID, updates){
 	}
 }
 
+export async function updateLineItemID(invoiceID, updates){
+	try{
+		const db = await getDB()
+		const myitem = await db.get('lineItems', invoiceID );
+		myitem.list = myitem.list.map((item) => {
+			if (item.id === updates.oldID) {
+		    	return {
+		      	...item,
+		      	...updates,
+		      	action: "EDIT",
+		    	};
+ 			} 
+ 			return item; 
+ 		})
+
+		myitem.synced = false; 
+		console.log("item to update: ", myitem)
+		await db.put('lineItems', myitem)
+  		return 
+	}catch(err){
+		console.log(err)
+	}
+}
+
 
 export const getUnsyncedLineItems = async () => {
   const db = await getDB()
@@ -167,7 +191,23 @@ export const getUnsyncedLineItems = async () => {
 export const  markLineItemAsSynced = async(id) => {
   const db = await getDB()
   const item = await db.get('lineItems', id)
+
+  console.log("defaulting action to nothing")
+  //change the actions to nothing 
+  item.list = item.list.map( (item) =>{
+  	return {
+  		...item, 
+  		action: null
+  	}
+  })
+  await db.put('lineItems', item)
   if (!item) return
   item.synced = true
   await db.put('lineItems', item) 
 } 
+
+
+
+
+
+

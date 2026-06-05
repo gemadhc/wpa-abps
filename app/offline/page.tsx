@@ -185,6 +185,8 @@ useEffect(() => {
   // Load current day's stops on initial render
   useEffect(() => {
     handleDateChange(myDate)
+    const clean = async () => { await clearAll() }
+    clean()
   }, [])
 
   return (

@@ -100,38 +100,46 @@ export async function createItem(list, stopID) {
 
 
 export async function serviceNotReady( stopID, serviceID, reason, isReady){
-	console.log("updating as ready/notready", stopID, serviceID, reason, isReady)
-	const db = await getDB();
-	const myitem = await db.get("services", Number(stopID) );
-	console.log("myitem: ", myitem)
-	if (!myitem || !Array.isArray(myitem.list)) return;
-	let found = false;
-	const updatedList = myitem.list.map(item => {
-		console.log("comparing: ", item, serviceID)
-		if (item.serviceID === serviceID) {
-			found = true;
-			return {
-				...item,
-				reason: reason,
-				ready: isReady
+	return new Promise( async(resolve, reject) =>{
+		try{
+			console.log("updating as ready/notready", stopID, serviceID, reason, isReady)
+			const db = await getDB();
+			const myitem = await db.get("services", Number(stopID) );
+			console.log("myitem: ", myitem)
+			if (!myitem || !Array.isArray(myitem.list)) return;
+			let found = false;
+			const updatedList = myitem.list.map(item => {
+				console.log("comparing: ", item, serviceID)
+				if (item.serviceID === serviceID) {
+					found = true;
+					return {
+						...item,
+						reason: reason,
+						ready: isReady
+					};
+				}
+				return item;
+			});
+
+			if (!found) {
+				console.warn("No matching reportID found:", updates.reportID);
+				return;
+			}
+			const updated = {
+				...myitem,
+				list: updatedList,
+				synced: false,
 			};
+
+			console.log("updated service: ", updated)
+			await db.put("services", updated);
+			return 
+		}catch(err){
+			console.log("Err: ", err)
+			return
 		}
-		return item;
-	});
-
-	if (!found) {
-		console.warn("No matching reportID found:", updates.reportID);
-		return;
-	}
-	const updated = {
-		...myitem,
-		list: updatedList,
-		synced: false,
-	};
-
-	console.log("updated service: ", updated)
-	await db.put("services", updated);
-	return 
+	})
+	
 }
 
 

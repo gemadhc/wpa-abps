@@ -113,10 +113,10 @@ export default function Assemblies({
   ========================= */
 
   const handleToggleReady = async (assembly) => {
-
     if (assembly.ready) {
       setSelectedAssembly(assembly);
       setOpenReasonDialog(true);
+
     } else {
       /* optimistic update */
       setLocalList(prev =>
@@ -209,13 +209,15 @@ export default function Assemblies({
     if (applyToAll) {
 
       await Promise.all(
-        localList.map(item =>
-          serviceNotReady(
-            stopID,
-            item.serviceID,
-            reason,
-            false
-          )
+
+        localList.map( async (item) =>{ 
+            await serviceNotReady(
+              stopID,
+              item.serviceID,
+              reason,
+              false
+            )
+          }
         )
       );
 
@@ -243,9 +245,8 @@ export default function Assemblies({
   ========================= */
 
   const handleAddAssembly = async () => {
-
     await addAssembly(addressID, stopID);
-
+    await syncReports();
     await syncServices();
     await syncAssemblies();
 
@@ -269,7 +270,6 @@ export default function Assemblies({
     <div className="space-y-3 p-0 w-full no-scrollbar">
 
       {/* ASSEMBLY CARDS */}
-
       {sortedList.map((assembly, ind) => (
 
         <div
@@ -288,7 +288,6 @@ export default function Assemblies({
           {/* HEADER */}
 
           <div className="flex justify-between items-start">
-
             <div>
               <p className="font-semibold text-gray-900">
                 SN# {assembly?.serial_number || `Assembly ${ind + 1}`}

@@ -1,12 +1,13 @@
 import { getUnsyncedPopList, markAsSynced } from './db'
 import { getUnsyncedStops, markStopAsSynced } from "./stop_db.tsx" 
 import { getUnsyncedInvoices, markInvoiceAsSynced } from "./invoice_db.tsx" 
-import { getUnsyncedLineItems, markLineItemAsSynced, removeFromLocal} from "./lineitem_db.tsx" 
+import { getUnsyncedLineItems, markLineItemAsSynced, removeFromLocal, updateLineItemID} from "./lineitem_db.tsx" 
 import { getUnsyncedServices, markServiceAsSynced, createItem as createService} from "./services_db.tsx"
 import { getUnsyncedReports, markReportAsSynced } from "./reports_db.tsx"
 import { getUnsyncedAssemblies, markAssemblyAsSynced } from "./assemblies_db.tsx"
 
 import { completeStop } from "../actions/stop.js" 
+
 import {updateStatus,  updateLineItemStatus,
   requestQuickbooksID, 
   createItem as createLineItem,  
@@ -89,20 +90,27 @@ export async function syncLineItems(){
     try {
       //look at the list of items 
       let mylist = item.list; 
-      mylist.map( (item) =>{
+      mylist.map( async (item) =>{
+        console.log("This is the action: ", item?.action, item)
         if(item?.action){
           if(item.action == "REMOVE"){
-            removeLineItem(item.id); 
-
+            await removeLineItem(item.id); 
             //remove item from indexedDB
-            removeFromLocal(item.invoiceID, item.id)
+            await removeFromLocal(item.invoiceID, item.id)
           }
 
           if(item.action == "NEW"){
-            createLineItem(item.invoiceID); 
+            console.log("new item",  item.invoiceID)
+            let data = await createLineItem(item.invoiceID); 
+            console.log("data: ", data)
+            let updates = { ...data.LineItem[0], oldID: item.id}
+            console.log("assignning id: ", updates)
+            updateLineItemID( item.invoiceID, updates); 
+
           }
 
           if(item.action == "EDIT"){
+            console.log("Editing the item",  item.id)
             updateLineItem(item.id, item); 
           }
         }
@@ -133,8 +141,8 @@ export async function syncServices(){
     try {
       console.log("unsynced service: ", item)
       item.list.map(async (item) => {
-
-          await updateServiceStatus(item.serviceID, item.state )
+          console.log("updating this service: ", item)
+          //await updateServiceStatus(item.serviceID, item.state )
 
           if(item.ready){
             await setAsReady( item.serviceID ); 
