@@ -58,7 +58,7 @@ export async function updateServiceAssembly(updates) {
 	let found = false;
 
 	const updatedList = myitem.list.map(item => {
-		console.log("is this the list? ", item.testReportID, updates.reportID, item, updates)
+		//console.log("is this the list? ", item.testReportID, updates.reportID, item, updates)
 		if (item.testReportID === updates.reportID) {
 			found = true;
 			return {
@@ -81,7 +81,7 @@ export async function updateServiceAssembly(updates) {
 		list: updatedList,
 		synced: false,
 	};
-	console.log("updated service: ", updated)
+	//console.log("updated service: ", updated)
 	await db.put("services", updated);
 }
 export async function createItem(list, stopID) {
@@ -102,15 +102,16 @@ export async function createItem(list, stopID) {
 export async function serviceNotReady( stopID, serviceID, reason, isReady){
 	return new Promise( async(resolve, reject) =>{
 		try{
-			console.log("updating as ready/notready", stopID, serviceID, reason, isReady)
+			//console.log("updating as ready/notready", stopID, serviceID, reason, isReady)
 			const db = await getDB();
 			const myitem = await db.get("services", Number(stopID) );
-			console.log("myitem: ", myitem)
+			//console.log("myitem: ", myitem)
 			if (!myitem || !Array.isArray(myitem.list)) return;
 			let found = false;
 			const updatedList = myitem.list.map(item => {
-				console.log("comparing: ", item, serviceID)
+				//console.log("comparing: ", item, serviceID, typeof(item.serviceID), typeof(serviceID) )
 				if (item.serviceID === serviceID) {
+					//console.log("It was found!")
 					found = true;
 					return {
 						...item,
@@ -123,7 +124,7 @@ export async function serviceNotReady( stopID, serviceID, reason, isReady){
 
 			if (!found) {
 				console.warn("No matching reportID found:", updates.reportID);
-				return;
+				resolve(); 
 			}
 			const updated = {
 				...myitem,
@@ -131,12 +132,12 @@ export async function serviceNotReady( stopID, serviceID, reason, isReady){
 				synced: false,
 			};
 
-			console.log("updated service: ", updated)
+			//console.log("updated service: ", updated)
 			await db.put("services", updated);
-			return 
+			resolve()
 		}catch(err){
 			console.log("Err: ", err)
-			return
+			resolve()
 		}
 	})
 	

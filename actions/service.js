@@ -36,27 +36,32 @@ const update = (id, newstatus) =>
 
 // ---- Exported async functions ---- //
 export const setAsReady = async (id) => {
-  try {
-    const response = await readyFetch(id);
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.message || 'Failed to set service as ready');
-    return data;
-  } catch (err) {
-    console.error('setAsReady error:', err);
-    throw err;
-  }
+  return new Promise(async(resolve, reject) =>{
+    try {
+      const response = await readyFetch(id);
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || 'Failed to set service as ready');
+      resolve( data);
+
+    } catch (err) {
+      console.error('setAsReady error:', err);
+      reject(err);
+    }
+  })
 };
 
 export const setAsNotReady = async (id, reason) => {
-  try {
-    const response = await notReadyFetch(id, reason);
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.message || 'Failed to set service as not ready');
-    return data;
-  } catch (err) {
-    console.error('setAsNotReady error:', err);
-    throw err;
-  }
+  return new Promise( async(resolve, reject) =>{
+    try {
+      const response = await notReadyFetch(id, reason);
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || 'Failed to set service as not ready');
+      resolve(data)
+    } catch (err) {
+      console.error('setAsNotReady error:', err);
+      reject(err)
+    }
+  })
 };
 
 export const updateStatus = async (id, newstatus) => {

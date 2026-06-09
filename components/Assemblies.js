@@ -118,6 +118,7 @@ export default function Assemblies({
       setOpenReasonDialog(true);
 
     } else {
+      console.log("flagging as ready")
       /* optimistic update */
       setLocalList(prev =>
         prev.map(item =>
@@ -165,12 +166,10 @@ export default function Assemblies({
   ========================= */
 
   const handleSubmitReason = async () => {
-
-    /* OPTIMISTIC UI UPDATE */
-
     if (applyToAll) {
+      console.log("flagging all as not ready ", reason)
 
-      setLocalList(prev =>
+      setLocalList( prev =>
         prev.map(item => ({
           ...item,
           ready: false,
@@ -178,39 +177,10 @@ export default function Assemblies({
         }))
       );
 
-    } else {
-
-      setLocalList(prev =>
-        prev.map(item =>
-          item.serviceID === selectedAssembly.serviceID
-            ? {
-                ...item,
-                ready: false,
-                reason
-              }
-            : item
-        )
-      );
-    }
-
-    /* CLOSE DIALOG IMMEDIATELY */
-
-    setOpenReasonDialog(false);
-
-    /* RESET FORM */
-
-    setUnableToLocate(false);
-    setRanOutOfTime(false);
-    setRemoved(false);
-    setApplyToAll(false);
-
-    /* API + SYNC */
-
-    if (applyToAll) {
-
       await Promise.all(
-
-        localList.map( async (item) =>{ 
+        localList.map(  
+          async(item) => { 
+            console.log("updating this: ", item)
             await serviceNotReady(
               stopID,
               item.serviceID,
@@ -222,27 +192,42 @@ export default function Assemblies({
       );
 
     } else {
-
+      setLocalList(prev =>
+        prev.map(item =>
+          item.serviceID === selectedAssembly.serviceID
+            ? {
+                ...item,
+                ready: false,
+                reason
+              }
+            : item
+        )
+      );
+      
       await serviceNotReady(
-        stopID,
-        selectedAssembly.serviceID,
-        reason,
-        false
+          stopID,
+          selectedAssembly.serviceID,
+          reason,
+          false
       );
     }
 
+    /* RESET FORM */
+    setUnableToLocate(false);
+    setRanOutOfTime(false);
+    setRemoved(false);
+    setApplyToAll(false);
+    await syncServices();
     await syncReports();
     await syncAssemblies();
-    await syncServices();
-
     reloadServices();
 
     setReason('');
+    /* CLOSE DIALOG IMMEDIATELY */
+    setOpenReasonDialog(false);
   };
 
-  /* =========================
-      ADD ASSEMBLY
-  ========================= */
+
 
   const handleAddAssembly = async () => {
     await addAssembly(addressID, stopID);
@@ -450,7 +435,7 @@ export default function Assemblies({
 
             </div>
 
-            {/* APPLY TO ALL */}
+            {/* APPLY TO ALL 
 
             <div className="mt-3 border-t pt-2">
 
@@ -468,7 +453,7 @@ export default function Assemblies({
 
               </label>
 
-            </div>
+            </div>*/}
 
             {/* SUBMIT */}
 
