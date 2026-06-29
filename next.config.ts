@@ -51,6 +51,8 @@ const nextConfig: NextConfig = {
     CASH_METHOD_REF: "4",
     CHECK_METHOD_REF: "5",
     GOOGLE_API_KEY: "AIzaSyDDN477JYDDS-g_c3hLBxR3HEnqaGKSfFo",
+    GET_FILES: "https://default23ee31ddf4fb4382aa7b4ac682d35a.71.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/ca19ecbc37f14337a0fa3628bc992315/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=2_ZhA2kqFd02wO3naJCRZ3X33g4494ihGTMrQX2YuXc", 
+    GET_LINK: "https://default23ee31ddf4fb4382aa7b4ac682d35a.71.environment.api.powerplatform.com:443/powerautomate/automations/direct/workflows/ac6eca14d9444001b88c052545e3ef13/triggers/manual/paths/invoke?api-version=1&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=NB-CWZzK3kZgAs68-8lQe780V3oWpL1NhK6wdiuiI7w"
   },
   eslint: {
     ignoreDuringBuilds: true,

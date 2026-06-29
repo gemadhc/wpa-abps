@@ -14,6 +14,15 @@ const request = (id) =>
     }
   });
 
+const requestGau = ()=> 
+  fetch(`${server}/session/gauge`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${getToken()}`
+    }
+  });
+
 const updateDefault = (newDefault) =>
   fetch(`${server}/session/addresses`, {
     method: "PUT",
@@ -56,6 +65,16 @@ const requestSessionCheck = () =>
   });
 
 // ---- Exported Actions ---- //
+
+export const requestGauge = async () => {
+  try {
+    const response = await requestGau();
+    const data = await response.json();
+    return data.list;
+  } catch (err) {
+    return err;
+  }
+};
 
 export const requestAddresses = async () => {
   try {

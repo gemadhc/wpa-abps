@@ -63,7 +63,14 @@ export default function LineItems({ items: initialItems = [], invoiceID, reloadI
 
   const handleChange = (field: string, value: any) => {
     setEditedItem((prev: any) => {
-      const updated = { ...prev, [field]: value };
+      let  updated; 
+      if( field === "taxable"){
+        updated = { ...prev, [field]: value };
+
+      }else{
+        updated = { ...prev, [field]: String(value).replace(/^0+(?!$)/, "") };
+      }
+      
 
       // === Auto-update unit price & amount ===
       if (field === 'qb_id') {
@@ -197,8 +204,8 @@ export default function LineItems({ items: initialItems = [], invoiceID, reloadI
                               value={editedItem.quantity}
                               min={1}
                               step={0.5}
-                              onChange={(e) => handleChange('quantity', +e.target.value)}
-                              className="w-16 border border-gray-300 rounded-md px-1 py-1 text-sm ml-1"
+                              onChange={(e) => handleChange('quantity', + e.target.value)}
+                              className="w-16 border border-gray-300 rounded-md px-2 py-2 text-sm ml-1"
                             />
                           ) : (
                             itm.quantity
@@ -210,11 +217,11 @@ export default function LineItems({ items: initialItems = [], invoiceID, reloadI
                             <input
                               type="number"
                               value={editedItem.unitPriceDefined}
-                              onChange={(e) => handleChange('unitPriceDefined', +e.target.value)}
+                              onChange={(e) => handleChange('unitPriceDefined', + e.target.value)}
                               className="w-20 border border-gray-300 rounded-md px-1 py-1 text-sm text-right ml-1"
                             />
                           ) : (
-                            `$${itm.unitPriceDefined.toFixed(2)}`
+                            `$${Number(itm.unitPriceDefined).toFixed(2)}`
                           )}
                         </div>
                         <div>

@@ -77,53 +77,56 @@ export async function syncInvoices(){
 }
 
 export async function syncLineItems(){
-  if (!navigator.onLine) {
-    console.log('Offline - will sync later')
-    return
-  }
-  const unsyncedItems = await getUnsyncedLineItems()
-  if (unsyncedItems.length === 0) {
-    return
-  }
-
-  console.log("these are the unsynced line items: ", unsyncedItems)
-  for (const item of unsyncedItems) {
-    try {
-      //look at the list of items 
-      let mylist = item.list; 
-      mylist.map( async (item) =>{
-        console.log("This is the action: ", item?.action, item)
-        if(item?.action){
-          if(item.action == "REMOVE"){
-            await removeLineItem(item.id); 
-            //remove item from indexedDB
-            await removeFromLocal(item.invoiceID, item.id)
-          }
-
-          if(item.action == "NEW"){
-            console.log("new item",  item.invoiceID)
-            let data = await createLineItem(item.invoiceID); 
-            console.log("data: ", data)
-            let updates = { ...data.LineItem[0], oldID: item.id}
-            console.log("assignning id: ", updates)
-            updateLineItemID( item.invoiceID, updates); 
-
-          }
-
-          if(item.action == "EDIT"){
-            console.log("Editing the item",  item.id)
-            updateLineItem(item.id, item); 
-          }
-        }
-      })
-
-      await markLineItemAsSynced(item.invoiceID)
-      return; 
-
-    } catch (error) {
-      console.error('Sync failed:', error)
+  return new Promise( async(resolve, reject) =>{
+    if (!navigator.onLine) {
+      console.log('Offline - will sync later')
+      resolve()
     }
-  }
+    const unsyncedItems = await getUnsyncedLineItems()
+    if (unsyncedItems.length === 0) {
+      resolve()
+    }
+
+    console.log("these are the unsynced line items: ", unsyncedItems)
+    for (const item of unsyncedItems) {
+      try {
+        //look at the list of items 
+        let mylist = item.list; 
+        mylist.map( async (item) =>{
+          console.log("This is the action: ", item?.action, item)
+          if(item?.action){
+            if(item.action == "REMOVE"){
+              await removeLineItem(item.id); 
+              //remove item from indexedDB
+              await removeFromLocal(item.invoiceID, item.id)
+            }
+
+            if(item.action == "NEW"){
+              console.log("new item",  item.invoiceID)
+              let data = await createLineItem(item.invoiceID); 
+              console.log("data: ", data)
+              let updates = { ...data.LineItem[0], oldID: item.id}
+              console.log("assignning id: ", updates)
+              updateLineItemID( item.invoiceID, updates); 
+
+            }
+
+            if(item.action == "EDIT"){
+              console.log("Editing the item",  item.id)
+              updateLineItem(item.id, item); 
+            }
+          }
+        })
+
+        await markLineItemAsSynced(item.invoiceID)
+        resolve()
+
+      } catch (error) {
+        console.error('Sync failed:', error)
+        resolve(error)
+      }
+    }
+  })
 }
 
 
