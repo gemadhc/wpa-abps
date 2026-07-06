@@ -30,6 +30,9 @@ export const SessionProvider = ({ children }) => {
     if (loading) return;
 
     if (session) {
+      if( !session.token){
+        router.push('/login');
+      }
       console.log( "This is the session: ", session)
       if( !session?.user?.account_activated ){
         console.log("resetting")
