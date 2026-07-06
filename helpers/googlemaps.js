@@ -65,7 +65,7 @@ const createRoute = async (waypoints, currentLocation, destination) => {
 export const routeStops = async (stoplist) => {
   try {
     const currentLocation = await getCurrentLocation();
-    const stopsToRoute = stoplist.slice(0, process.env.MAX_WAYPOINTS || 20);
+    const stopsToRoute = stoplist.slice(0, process.env.MAX_WAYPOINTS || 10);
     const waypoints = stopsToRoute.map((stop) => convertToWayPoint(stop));
     const order = await createRoute(waypoints, currentLocation);
 

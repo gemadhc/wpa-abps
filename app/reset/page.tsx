@@ -2,8 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { updatePassword, requestIfActivated } from "../../actions/employee";
-import { useSession } from "../../helpers/session";
+import { updatePassword, requestIfActivated } from "@/actions/employee";
+import { logout } from '@/actions/session';
+import { useSession } from "@/helpers/session";
 import { CheckCircle2 } from "lucide-react";
 
 export default function Page() {
@@ -11,14 +12,16 @@ export default function Page() {
   const [confirm, setConfirm] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [status, setStatus] = useState("verifying"); // "verifying" | "verified" | "ready"
+  const [status, setStatus] = useState("ready"); // "verifying" | "verified" | "ready"
+  const { session, setSession } = useSession();
+
   const [passwordChecks, setPasswordChecks] = useState({
     length: false,
     capital: false,
   });
 
   const router = useRouter();
-  const { session } = useSession();
+
 
   useEffect(() => {
     if (!session) router.push("/login");
@@ -27,26 +30,26 @@ export default function Page() {
   useEffect(() => {
     setPasswordChecks({
       length: password.length >= 6,
-      capital: /[A-Z]/.test(password),
     });
   }, [password]);
 
-  useEffect(() => {
-    requestIfActivated().then((data) => {
-      if (data.isActivated) {
-        setStatus("verified"); // trigger verified animation
-        setTimeout(() => router.push("/offline"), 1500); // delay before redirect
-      } else {
-        setStatus("ready"); // show password form
-      }
-    });
-  }, [router]);
+
+  const logmeout = async ()=>{
+    setTimeout(async()=>{
+      await logout();
+      localStorage.removeItem('session');
+      setSession(null);
+      router.push('/login');
+    }, 3000)
+
+    
+  }
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
-    if (!passwordChecks.length || !passwordChecks.capital) {
+    if (!passwordChecks.length) {
       setError("Password does not meet all requirements.");
       return;
     }
@@ -58,8 +61,9 @@ export default function Page() {
     setLoading(true);
     try {
       await updatePassword(password);
-      setStatus("verified");
-      setTimeout(() => router.push("/offline"), 1500);
+      setStatus("SUCCESS")
+      logmeout()
+      //setTimeout(() => router.push("/"), 1500);
     } catch (err) {
       console.error(err);
       setError("An unexpected error occurred. Please try again.");
@@ -69,7 +73,19 @@ export default function Page() {
   };
 
   return (
-    <div className="flex flex-col shadow h-screen p-5 max-w-md mx-auto justify-center shadow-2xl text-black">
+    <div className="flex flex-col  h-screen px-30 mx-auto justify-center shadow-2xl text-black bg-white">
+      {
+        status === "SUCCESS" ? 
+          <div className="text-center">
+            <h2 className="italic text-lg !text-lg"> New password set successfully.  <br/>
+            Please login again using your new password.</h2>
+          </div>
+        :  
+          <> 
+          </>
+
+      }
+
       {status === "verifying" && (
         <div className="text-center">
           <h2 className="italic text-lg">VERIFYING ACCOUNT...</h2>
@@ -102,9 +118,7 @@ export default function Page() {
                 <p className={passwordChecks.length ? "text-green-600" : "text-red-600"}>
                   • At least 6 characters
                 </p>
-                <p className={passwordChecks.capital ? "text-green-600" : "text-red-600"}>
-                  • At least one capital letter (A–Z)
-                </p>
+                
               </div>
             </div>
 

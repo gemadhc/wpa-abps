@@ -1,5 +1,5 @@
 import './globals.css';
-import { SessionProvider, useSession } from '../helpers/session';
+import { SessionProvider, useSession } from '@/helpers/session';
 import OnlineChecker from "../components/OnlineChecker";
 import Footer from "../components/Footer"
 import Header from "../components/Header"

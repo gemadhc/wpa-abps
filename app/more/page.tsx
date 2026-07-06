@@ -134,9 +134,10 @@ export default function Home() {
                 : 
                   <> 
                     {
-                      filelist.map( (item) =>{
+                      filelist.map( (item, ind) =>{
                         return(
                           <div
+                            key = {ind}
                             onClick = { ()=> handleNavLink(item) } 
                             className="py-2"> 
                             {item.Name}

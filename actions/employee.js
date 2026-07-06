@@ -1,118 +1,117 @@
 // features/actions/employee.js
+
+import { getToken as getAuthToken } from './session.js'; 
 const server = process.env.OFFICE;
+
+
+
+const fetchWithJWT = (url, options = {}) => {
+  const token = getAuthToken();
+
+  const headers = {
+    "Content-Type": "application/json",
+    ...(options.headers || {}),
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+
+  return fetch(url, { ...options, headers });
+};
 
 // ---- Requests ----
 
 const newPassword = (newpassword) =>
-  fetch(`${server}/employee/password`, {
+  fetchWithJWT(`${server}/employee/password`, {
     method: "PUT",
-    body: JSON.stringify({ newpassword: newpassword }),
-    headers: { 
-        "Content-Type": "application/json"
-    },
-    credentials: 'include'
+    body: JSON.stringify({ newpassword }),
+    credentials: "include",
   });
 
 const isActivated = () =>
-  fetch(`${server}/employee/isActivated` , {
+  fetchWithJWT(`${server}/employee/isActivated`, {
     method: "GET",
-    headers: { 
-        "Content-Type": "application/json", 
-        
-      },
-      credentials: 'include'
+    credentials: "include",
   });
 
 // GET all employees
 const requestAll = () =>
-  fetch(`${server}/employee/list`, {
+  fetchWithJWT(`${server}/employee/list`, {
     method: "GET",
-    headers: { "Content-Type": "application/json" },
   });
 
 const getCerts = (id) =>
-  fetch(`${server}/employee/certification?` + new URLSearchParams({ id }), {
-    method: "GET",
-    headers: { "Content-Type": "application/json" },
-});
+  fetchWithJWT(
+    `${server}/employee/certification?${new URLSearchParams({ id })}`,
+    {
+      method: "GET",
+    }
+  );
 
 const updateCert = (obj) =>
-  fetch(`${server}/employee/certification`, {
+  fetchWithJWT(`${server}/employee/certification`, {
     method: "PUT",
-    body: JSON.stringify(obj), 
-    headers: { "Content-Type": "application/json" },
-});
+    body: JSON.stringify(obj),
+  });
 
 const createCert = (obj) =>
-  fetch(`${server}/employee/certification`, {
+  fetchWithJWT(`${server}/employee/certification`, {
     method: "POST",
-    body: JSON.stringify(obj), 
-    headers: { "Content-Type": "application/json" },
-});
+    body: JSON.stringify(obj),
+  });
 
 const removeCert = (id) =>
-  fetch(`${server}/employee/certification`, {
+  fetchWithJWT(`${server}/employee/certification`, {
     method: "DELETE",
-    body: JSON.stringify({id}), 
-    headers: { "Content-Type": "application/json" },
-});
+    body: JSON.stringify({ id }),
+  });
 
-// GET single employee by ID
+// GET single employee
 const requestOne = (id) =>
-  fetch(`${server}/employee?` + new URLSearchParams({ id }), {
+  fetchWithJWT(`${server}/employee?${new URLSearchParams({ id })}`, {
     method: "GET",
-    headers: { "Content-Type": "application/json" },
   });
 
 // PUT update employee
 const updateReq = (id, obj) =>
-  fetch(`${server}/employee`, {
+  fetchWithJWT(`${server}/employee`, {
     method: "PUT",
-    credentials: 'include',
-    body: JSON.stringify({ id: id, obj: obj }),
-    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ id, obj }),
   });
 
 // DELETE employee
 const deleteReq = (id) =>
-  fetch(`${server}/employee?` + new URLSearchParams({ id }), {
+  fetchWithJWT(`${server}/employee?${new URLSearchParams({ id })}`, {
     method: "DELETE",
-    credentials: 'include',
-    headers: { "Content-Type": "application/json" },
+    credentials: "include",
   });
 
-const createNew = (obj) => 
- fetch(`${server}/employee`, {
+// POST create employee
+const createNew = (obj) =>
+  fetchWithJWT(`${server}/employee`, {
     method: "POST",
-    credentials: 'include',
-    body: JSON.stringify({obj}),
-    headers: { "Content-Type": "application/json" },
-
+    credentials: "include",
+    body: JSON.stringify({ obj }),
   });
 
-const deactivate = (id) => 
-  fetch(`${server}/employee/deactivate`, {
+const deactivate = (id) =>
+  fetchWithJWT(`${server}/employee/deactivate`, {
     method: "POST",
-    credentials: 'include',
-    body: JSON.stringify({id: id}),
-    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ id }),
+  });
 
-});
-const activate = (id) => 
-  fetch(`${server}/employee/activate`, {
+const activate = (id) =>
+  fetchWithJWT(`${server}/employee/activate`, {
     method: "POST",
-    credentials: 'include',
-    body: JSON.stringify({id: id}),
-    headers: { "Content-Type": "application/json" },
+    credentials: "include",
+    body: JSON.stringify({ id }),
+  });
 
-});
-const reset = (id) => 
-  fetch(`${server}/employee/reset`, {
+const reset = (id) =>
+  fetchWithJWT(`${server}/employee/reset`, {
     method: "POST",
-    body: JSON.stringify({id: id}),
-    headers: { "Content-Type": "application/json" },
-
-});
+    body: JSON.stringify({ id }),
+  });
 // ---- Action Functions ----
 
 

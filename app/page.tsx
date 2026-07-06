@@ -77,7 +77,6 @@ export default function Home() {
     deviceID: string | number, 
     stopID: string | number
   ) => {
-    console.log("navigating to report: ", reportID, deviceID, stopID)
     setView({
       type: 'report',
       reportID,
@@ -90,7 +89,6 @@ export default function Home() {
   // Swipe Handling
   // -----------------------------------
   const handleTouchStart = (e: React.TouchEvent) => {
-
     // Disable ALL custom swipe navigation in report view
     if (view.type === 'report') {
       return;

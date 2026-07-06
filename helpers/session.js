@@ -30,8 +30,15 @@ export const SessionProvider = ({ children }) => {
     if (loading) return;
 
     if (session) {
+      console.log( "This is the session: ", session)
+      if( !session?.user?.account_activated ){
+        console.log("resetting")
+        router.push('/reset')
+      }
       // Only redirect to /dispatch if not already there
-      if (pathname === '/login') router.push('/');
+      if (pathname === '/login'){
+        router.push('/');
+      } 
     } else {
       // If not logged in, redirect to /login (except when already there)
       if (pathname !== '/login') router.push('/login');

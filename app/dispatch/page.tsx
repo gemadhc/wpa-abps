@@ -10,7 +10,7 @@ import ListSorted from "./ListSorted"
 import { ViewTransition } from 'react'
 import { useRouter, usePathname } from 'next/navigation';
 
-import { requestDispatch, requestBins } from "../../actions/dispatch"
+import { requestDispatch, requestBins } from "@/actions/dispatch"
 
 export default function Home() {
   const pacificTimeZone = 'America/Los_Angeles'

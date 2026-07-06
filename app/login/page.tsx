@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from "react";
-import { login } from "../../actions/session.js";
+import { login } from "@/actions/session.js";
 import { useSession } from "../../helpers/session";
 import { Loader2 } from "lucide-react";
 
@@ -40,8 +40,8 @@ export default function Home() {
       console.log("API response:", data);
 
       // Handle error response
-      if (typeof data === "string") {
-        setErrorMessage(data);
+      if (!data.success) {
+        setErrorMessage(data.message) ;
         return;
       }
       // Immediately blank page before redirect
@@ -58,9 +58,9 @@ export default function Home() {
 
       // Small delay lets Safari capture
       // the blank page instead of login form
-      setTimeout(() => {
+      /*setTimeout(() => {
         window.location.replace('/');
-      }, 5000 );
+      }, 5000 );*/
 
     } catch (err) {
       console.error("Login error:", err);
@@ -89,7 +89,7 @@ export default function Home() {
 
   return (
     <div className="absolute inset-0 min-h-screen flex items-center justify-center bg-gray-50 px-4 w-full">
-      <div className="w-full max-w-sm bg-white shadow-md rounded-xl p-6 border border-gray-200">
+      <div className="w-full max-w-xxl bg-white shadow-md rounded-xl p-6 border border-gray-200">
 
         <h1 className="text-center text-xl font-semibold text-gray-800 mb-4">
           Welcome Back

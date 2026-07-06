@@ -50,7 +50,7 @@ export default function Footer(){
 
 
 	useEffect(()=>{
-		if (pathname.includes('/login')) {
+		if (pathname.includes('/login') || pathname.includes('/reset')) {
 			setShow(false);
 		} else {
 			setShow(true);
