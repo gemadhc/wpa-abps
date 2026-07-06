@@ -4,10 +4,164 @@ import { useState, useEffect } from 'react';
 import { Pencil, Trash2, Save, PlusCircle } from 'lucide-react';
 import { createItem, removeItem, updateItem } from "../actions/invoice"
 import { getQuickbooksItems } from "../actions/quickbooks.js"
-
+import { X, CheckCircle2 } from 'lucide-react';
 
 import { removeLineItem, createLineItem, updateLineItem} from "@/lib/lineitem_db"
 import { syncLineItems } from "@/lib/sync"
+
+import { Dialog, Menu, Transition } from '@headlessui/react';
+
+
+function EditForm({
+  lineItem,
+  onSave,
+  onCancel,
+}) {
+  const [itemOptions, setItemOptions] = useState([]);
+  const [formData, setFormData] = useState({
+    description: lineItem.description || "",
+    quantity: lineItem.quantity || 1,
+    unitPrice: lineItem.unitPrice || 0,
+    taxable: lineItem.taxable || false,
+    notes: lineItem.notes || "",
+  });
+
+  useEffect(() => {
+    getQuickbooksItems().then((data) => {
+      setItemOptions(data || []);
+    });
+  }, []);
+
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]:
+        type === "checkbox"
+          ? checked
+          : type === "number"
+          ? Number(value)
+          : value,
+    }));
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    onSave(formData);
+  };
+
+  const total = (formData.quantity * formData.unitPrice).toFixed(2);
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-5 px-10">
+      <div>
+        <select
+          className="border border-gray-300 rounded-md px-2 py-1 text-sm w-full mt-2"
+        >
+          <option value="">Select an item</option>
+          {itemOptions.map(opt => (
+            <option key={opt.Id} value={opt.Id}>
+              {opt.Name}
+            </option>
+          ))}
+        </select>
+
+        <label className="block text-sm font-medium mb-1">
+          Description
+        </label>
+        <textarea
+          name="description"
+          value={formData.description}
+          onChange={handleChange}
+          rows={3}
+          className="w-full border rounded px-3 py-2"
+        />
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-sm font-medium mb-1">
+            Quantity
+          </label>
+          <input
+            type="number"
+            name="quantity"
+            min="0"
+            step="1"
+            value={formData.quantity}
+            onChange={handleChange}
+            className="w-full border rounded px-3 py-2"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium mb-1">
+            Unit Price
+          </label>
+          <input
+            type="number"
+            name="unitPrice"
+            min="0"
+            step="0.01"
+            value={formData.unitPrice}
+            onChange={handleChange}
+            className="w-full border rounded px-3 py-2"
+          />
+        </div>
+      </div>
+
+      <div>
+        <label className="flex items-center gap-2">
+          <input
+            type="checkbox"
+            name="taxable"
+            checked={formData.taxable}
+            onChange={handleChange}
+          />
+          Taxable
+        </label>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium mb-1">
+          Notes
+        </label>
+        <textarea
+          name="notes"
+          value={formData.notes}
+          onChange={handleChange}
+          rows={2}
+          className="w-full border rounded px-3 py-2"
+        />
+      </div>
+
+      <div className="bg-gray-100 rounded p-3">
+        <div className="flex justify-between font-medium">
+          <span>Total</span>
+          <span>${total}</span>
+        </div>
+      </div>
+
+      <div className="flex justify-end gap-3 pt-2">
+        <button
+          type="button"
+          onClick={onCancel}
+          className="px-4 py-2 border rounded"
+        >
+          Cancel
+        </button>
+
+        <button
+          type="submit"
+          className="px-4 py-2 bg-blue-600 text-white rounded"
+        >
+          Save Changes
+        </button>
+      </div>
+    </form>
+  );
+}
 
 
 export default function LineItems({ items: initialItems = [], invoiceID, reloadItems }) {
@@ -19,7 +173,7 @@ export default function LineItems({ items: initialItems = [], invoiceID, reloadI
   const [creating, setCreating] = useState(false)
   const [removing, setRemoving] = useState(false)
   const [saving, setSaving] = useState(false)
-
+  const [openEditDialog, setOpenEditDialog] = useState(false)
 
   useEffect(() => {
     getQuickbooksItems().then((data) => {
@@ -33,6 +187,7 @@ export default function LineItems({ items: initialItems = [], invoiceID, reloadI
   const handleEdit = (item: any) => {
     setEditingId(item.id);
     setEditedItem(item);
+    setOpenEditDialog(true)
   };
 
   const handleSave = async(id: number) => {
@@ -98,6 +253,8 @@ export default function LineItems({ items: initialItems = [], invoiceID, reloadI
 
   };
 
+
+
   const total = items.reduce((sum, itm) => {
     if (itm.action === "REMOVE") return sum;
 
@@ -106,6 +263,33 @@ export default function LineItems({ items: initialItems = [], invoiceID, reloadI
   
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+
+      <Dialog
+        open={openEditDialog}
+        onClose={() => setOpenEditDialog(false)}
+        className="relative z-50"
+      >
+         <div className="fixed inset-0 bg-black/30" />
+
+        <div className="fixed inset-0 flex items-center justify-center sm:p-4 text-black">
+          <Dialog.Panel className="bg-white w-full sm:max-w-md min-h-screen sm:min-h-0 rounded-none sm:rounded-2xl ">
+            <div className="flex justify-between items-center mb-3 h-20 w-full px-5 shadow">
+              <Dialog.Title className="font-semibold text-lg">
+                Process Payment
+              </Dialog.Title>
+              <button onClick={() => setOpenEditDialog(false)}>
+                <X className="w-10 h-10 text-gray-500 border rounded-xl " />
+              </button>
+            </div>
+            <EditForm 
+              lineItem = {editedItem}
+              onSave = { () => console.log("saving ..." )} 
+              onCancel = { ()=> console.log( "canceling")}
+            />
+          </Dialog.Panel>
+        </div>
+        
+      </Dialog>
       <div className="divide-y divide-gray-100">
         {
           items.length ? 
@@ -130,27 +314,14 @@ export default function LineItems({ items: initialItems = [], invoiceID, reloadI
                       <div className="flex justify-between items-center">
                         <span className="font-semibold text-gray-800">{itm.item}</span>
                         <div className="flex gap-2">
-                          {isEditing ? (
-                            <button
-                              disabled = { saving }
-                              onClick={() => handleSave(itm.id)}
-                              className="p-1 text-green-600 hover:bg-green-50 rounded-lg disabled:bg-gray-50 disabled:cursor-not-allowed disabled:text-gray-800"
-                            >
-                              {
-                                saving ? 
-                                  <> Saving... </>
-                                : 
-                                  <Save className="w-6 h-6" />
-                              }
-                            </button>
-                          ) : (
+                          
                             <button
                               onClick={() => handleEdit(itm)}
                               className="p-1 text-blue-600 hover:bg-blue-50 rounded-lg"
                             >
                               <Pencil className="w-6 h-6" />
                             </button>
-                          )}
+                        
                           <button
                             disabled = { saving || isRemoving }
                             onClick={() => handleRemove(itm.id)}
@@ -165,83 +336,15 @@ export default function LineItems({ items: initialItems = [], invoiceID, reloadI
                           </button>
                         </div>
                       </div>
-
-                      {/* ITEM SELECT */}
-                      {isEditing && (
-                        <select
-                          value={editedItem.qb_id || ''}
-                          onChange={(e) => handleChange('qb_id', e.target.value)}
-                          className="border border-gray-300 rounded-md px-2 py-1 text-sm w-full mt-2"
-                        >
-                          <option value="">Select an item</option>
-                          {itemOptions.map(opt => (
-                            <option key={opt.Id} value={opt.Id}>
-                              {opt.Name}
-                            </option>
-                          ))}
-                        </select>
-                      )}
-
+                
                       <div className="text-sm text-gray-600">
-                        {isEditing ? (
-                          <input
-                            value={editedItem.description || ''}
-                            onChange={(e) => handleChange('description', e.target.value)}
-                            className="w-full border border-gray-300 rounded-md px-2 py-1 text-sm mt-1"
-                            placeholder="Description"
-                          />
-                        ) : (
-                          itm.description
-                        )}
+                          {itm.description}
                       </div>
 
                       <div className="grid grid-cols-2 gap-x-4 text-sm mt-2">
-                        <div>
-                          <span className="text-gray-500">Qty:</span>{' '}
-                          {isEditing ? (
-                            <input
-                              type="number"
-                              value={editedItem.quantity}
-                              min={1}
-                              step={0.5}
-                              onChange={(e) => handleChange('quantity', + e.target.value)}
-                              className="w-16 border border-gray-300 rounded-md px-2 py-2 text-sm ml-1"
-                            />
-                          ) : (
-                            itm.quantity
-                          )}
-                        </div>
-                        <div className="text-right">
-                          <span className="text-gray-500">Unit:</span>{' '}
-                          {isEditing ? (
-                            <input
-                              type="number"
-                              value={editedItem.unitPriceDefined}
-                              onChange={(e) => handleChange('unitPriceDefined', + e.target.value)}
-                              className="w-20 border border-gray-300 rounded-md px-1 py-1 text-sm text-right ml-1"
-                            />
-                          ) : (
-                            `$${Number(itm.unitPriceDefined).toFixed(2)}`
-                          )}
-                        </div>
-                        <div>
-                          <span className="text-gray-500">Taxable:</span>{' '}
-                          {isEditing ? (
-                            <input
-                              type="checkbox"
-                              checked={!!editedItem.taxable}
-                              onChange={(e) => handleChange('taxable', e.target.checked)}
-                              className="w-4 h-4 accent-blue-600 ml-1"
-                            />
-                          ) : itm.taxable ? (
-                            'Yes'
-                          ) : (
-                            'No'
-                          )}
-                        </div>
-                        <div className="text-right font-medium text-gray-800">
-                          <span className="text-gray-500">Amount:</span> ${currentAmount.toFixed(2)}
-                        </div>
+                            Quantity: {itm.quantity} <br/>
+                            Unit Price: {`$${Number(itm.unitPriceDefined).toFixed(2)}`} <br/>
+                            Line Total: {`$${currentAmount.toFixed(2)}`}
                       </div>
                     </div>
                   );

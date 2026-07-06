@@ -264,7 +264,7 @@ const loadDevice = async (assemblyID) => {
       </div>
 
       {/* 🔒 STICKY TABS */}
-      <div className="sticky top-[72px] z-10 bg-slate-500 text-slate-100 flex border-b">
+      <div className="sticky top-[72px] z-10 bg-slate-500 text-slate-100 flex border-b border-pink-500">
         {tabs.map((tab) => (
           <button
             key={tab.name}
@@ -281,7 +281,7 @@ const loadDevice = async (assemblyID) => {
       </div>
 
       {/* 📜 SCROLLABLE CONTENT */}
-      <div id ="tab-content"className="flex-1 overflow-y-auto bg-slate-100 p-3 px-10 pb-500">
+      <div id ="tab-content"className="flex-1 overflow-y-auto bg-slate-100 p-3 px-3 pb-500">
         {tabs.find((t) => t.name === activeTab)?.content}
       </div>
 
