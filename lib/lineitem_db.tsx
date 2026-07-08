@@ -134,27 +134,29 @@ export async function createLineItem(invoiceID){
 
 
 export async function updateLineItem(invoiceID, updates){
-	try{
-		const db = await getDB()
-		const myitem = await db.get('lineItems', invoiceID );
-		myitem.list = myitem.list.map((item) => {
-			if (item.id === updates.id) {
-		    	return {
-		      	...item,
-		      	...updates,
-		      	action: "EDIT",
-		    	};
- 			} 
- 			return item; 
- 		})
+	return new Promise(async( resolve, reject) =>{
+		try{
+			const db = await getDB()
+			const myitem = await db.get('lineItems', invoiceID );
+			myitem.list = myitem.list.map((item) => {
+				if (item.id === updates.id) {
+			    	return {
+			      	...item,
+			      	...updates,
+			      	action: "EDIT",
+			    	};
+	 			} 
+	 			return item; 
+	 		})
 
-		myitem.synced = false; 
-		console.log("item to update: ", myitem)
-		await db.put('lineItems', myitem)
-  		return 
-	}catch(err){
-		console.log(err)
-	}
+			myitem.synced = false; 
+			console.log("item to update: ", myitem)
+			await db.put('lineItems', myitem)
+	  	resolve()
+		}catch(err){
+			console.log(err)
+		}
+	})
 }
 
 export async function updateLineItemID(invoiceID, updates){

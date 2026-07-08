@@ -30,7 +30,10 @@ export const SessionProvider = ({ children }) => {
     if (loading) return;
 
     if (session) {
-      if( !session.token){
+
+      console.log("initial session: ", session, session.token)
+      if( session.token == undefined){
+        localStorage.removeItem('session');
         router.push('/login');
       }
       console.log( "This is the session: ", session)

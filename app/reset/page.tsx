@@ -14,13 +14,14 @@ export default function Page() {
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState("ready"); // "verifying" | "verified" | "ready"
   const { session, setSession } = useSession();
+  const router = useRouter();
 
   const [passwordChecks, setPasswordChecks] = useState({
     length: false,
     capital: false,
   });
 
-  const router = useRouter();
+  
 
 
   useEffect(() => {
@@ -73,7 +74,7 @@ export default function Page() {
   };
 
   return (
-    <div className="flex flex-col  h-screen px-30 mx-auto justify-center shadow-2xl text-black bg-white">
+    <div className="flex flex-col  h-screen px-5 mx-auto justify-center shadow-2xl text-black bg-white">
       {
         status === "SUCCESS" ? 
           <div className="text-center">
@@ -138,7 +139,7 @@ export default function Page() {
             <button
               type="submit"
               disabled={loading}
-              className="bg-blue-600 text-white py-2 rounded flex items-center justify-center gap-2 disabled:opacity-50"
+              className="bg-slate-600 text-white py-2 rounded flex items-center justify-center gap-2 disabled:opacity-50"
             >
               {loading && (
                 <div className="h-5 w-5 border-2 border-white border-t-transparent animate-spin rounded-full"></div>

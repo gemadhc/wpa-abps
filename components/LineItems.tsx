@@ -21,9 +21,10 @@ function EditForm({
 
   
   const [itemOptions, setItemOptions] = useState([]);
+  const [message, setMessage] = useState(null)
   const [formData, setFormData] = useState({
     description: "",
-    quantity: 0.5,
+    quantity: 1,
     unitPriceDefined: 0.01,
     taxable: false,
     notes: "",
@@ -43,8 +44,8 @@ function EditForm({
     setFormData({
         ...lineItem,
         description: lineItem.description || "",
-        quantity: lineItem.quantity || 0.5,
-        unitPriceDefined: lineItem.unitPriceDefined || 0.01,
+        quantity: Number(lineItem.quantity ?? 0.5),
+        unitPriceDefined: Number(lineItem.unitPriceDefined ?? 0.01) ,
         taxable: lineItem.taxable || false,
         notes: lineItem.notes || "",
         qb_id: lineItem.qb_id || "",
@@ -63,11 +64,18 @@ function EditForm({
           ...prev,
           [name]: checked,
         };
-      } else if (name === "quantity" || name === "unitPriceDefined") {
-        updated = {
-          ...prev,
-          [name]: Number(String(value).replace(/^0+(?!$)/, "")),
-        };
+      } else if (name == "quantity" || name == "unitPriceDefined") {
+        if(value == 0 ){
+          updated = {
+            ...prev,
+            [name]: '',
+         };
+        }else{
+          updated = {
+            ...prev,
+            [name]: value,
+          };
+        }
       } else {
         updated = {
           ...prev,
@@ -77,23 +85,19 @@ function EditForm({
 
       if (name === "qb_id") {
         const selected = itemOptions.find(opt => opt.Id === value);
-        console.log("Selected QB item: ", selected)
         if (selected) {
           updated.qb_id = selected.Id;
-          updated.item = selected.Name;
+          updated.item = selected.Description;
           updated.description = selected.Name;
-          updated.unitPriceDefined = selected.UnitPrice || 0;
+          updated.unitPriceDefined = Number(selected.UnitPrice ?? 0);
           updated.amount = selected.UnitPrice * updated.quantity; 
         }
       }
 
-      /*if (name === "quantity" && Number(value) === 0) {
-        updated.quantity = 0.5;
-      }*/
 
       updated.amount =
-        (updated.quantity || 0.5) *
-        (updated.unitPriceDefined || 0.01);
+        (updated.quantity) *
+        (updated.unitPriceDefined);
 
       return updated;
     });
@@ -101,8 +105,24 @@ function EditForm({
 
   const [saving, setSaving] = useState(false);
 
+  const validate = ()=>{
+    setMessage(null)
+    if(formData.quantity == '' || formData.quantity == 0 ){
+      return false
+    }
+    if( formData.unitPriceDefined == 0 || formData.unitPriceDefined == ''){
+      return false
+    }
+    return true; 
+
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if(!validate() ){
+      setMessage("Quantity and Unit Price missing")
+      return
+    }
 
     setSaving(true);
 
@@ -119,13 +139,23 @@ function EditForm({
   const total = (formData.quantity * formData.unitPriceDefined).toFixed(2);
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5 px-10">
+    <form onSubmit={handleSubmit} className="space-y-5 px-10 min-w-100">
+      {
+        message ? 
+          <div className = 'bg-amber-100 p-3 rounded text-black'>
+            {message}
+          </div>
+        :   
+        <> </>
+      }
+         
       <div>
         <label className="block text-sm font-medium mb-1">Item</label>
         <select
           name="qb_id"
           onChange={handleChange}
           className="border border-gray-300 rounded-md px-2 py-1 text-sm w-full mt-2"
+          value = { formData.qb_id}
         >
           <option value="">Select an item</option>
           {itemOptions.map(opt => (
@@ -148,7 +178,7 @@ function EditForm({
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 gap-4">
         <div>
           <label className="block text-sm font-medium mb-1">
             Quantity
@@ -156,8 +186,8 @@ function EditForm({
           <input
             type="number"
             name="quantity"
-            min="0.5"
-            step="0.5"
+            min={1}
+            step={0.5}
             value={formData.quantity}
             onChange={handleChange}
             className="border border-gray-300 rounded-md px-2 py-1 text-sm w-full mt-2"

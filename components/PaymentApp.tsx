@@ -52,6 +52,9 @@ export default function PaymentApp({
   const [checkNumber, setCheckNumber] = useState('');
   const [feedback, setFeedback] = useState({ message: '', type: '' });
 
+  const inputClass = "peer w-full h-14 rounded-xl border border-gray-300 px-3 pt-5 pb-2 text-base focus:ring-2 focus:ring-green-600 outline-none"
+  const labelClass =  `absolute left-3 top-2 text-xs text-gray-500 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-sm
+        peer-focus:top-2 peer-focus:text-xs peer-focus:text-green-700`
   const [cardData, setCardData] = useState({
     cardName: '',
     cardNumber: '',
@@ -68,13 +71,14 @@ export default function PaymentApp({
 
   // ---------------- INPUT COMPONENTS ----------------
 
-  const FloatingInput = ({ label, value, onChange, type = "text", inputMode }) => (
+  const FloatingInput = ({ label, value, onChange, type = "text", inputMode, name }) => (
     <div className="relative">
       <input
         type={type}
         value={value}
         onChange={onChange}
         inputMode={inputMode}
+        name = {name}
         placeholder=" "
         className="peer w-full h-14 rounded-xl border border-gray-300 px-3 pt-5 pb-2 text-base
         focus:ring-2 focus:ring-green-600 outline-none"
@@ -163,6 +167,21 @@ export default function PaymentApp({
     await finishSuccess();
   });
 
+  const handleChange = (e) =>{
+    const { name, value, type, checked } = e.target;
+    console.log("handling this change: ", name, value, type, checked)
+    setCardData( (prev) =>{
+      let updated; 
+      updated = {
+        ...prev, 
+        [name]: value
+      }
+      return updated
+
+    })
+
+  }
+
   const handleCashPayment = (e) => safeSubmit(async () => {
     e.preventDefault();
 
@@ -238,14 +257,30 @@ export default function PaymentApp({
 
         {paymentType === 'CARD' && (
           <form onSubmit={handleCardPayment} className="space-y-3">
-            <FloatingInput label="Name on Card" value={cardData.cardName}
-              onChange={(e) => setCardData({ ...cardData, cardName: e.target.value })} />
+            <div className = "relative">
+              <input
+                className = {inputClass}
+                name = "cardName"
+                value={cardData.cardName}
+                onChange={(e)=> handleChange(e) }
 
-            <FloatingInput label="Card Number" inputMode="numeric"
-              value={cardData.cardNumber}
-              onChange={(e) => setCardData({ ...cardData, cardNumber: e.target.value })} />
+              />
+              <label className = { labelClass}>Name on Card</label>
+            </div>
+            <div className="relative">
+              <input
+                name = "cardNumber"
+                inputMode="numeric"
+                value={cardData.cardNumber}
+                onChange={handleChange} 
+                className={ inputClass}
+              />
+              <label className = {labelClass}> Card Number</label> 
+            </div>
 
-            <div className="flex gap-2">
+            
+            
+            {/*<div className="flex gap-2">
               <FloatingSelect label="Month" value={cardData.expiryMonth}
                 onChange={(e) => setCardData({ ...cardData, expiryMonth: e.target.value })}>
                 {months.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
@@ -255,8 +290,8 @@ export default function PaymentApp({
                 onChange={(e) => setCardData({ ...cardData, expiryYear: e.target.value })}>
                 {years.map(y => <option key={y} value={y}>{y}</option>)}
               </FloatingSelect>
-            </div>
-
+            </div>*/}
+            {/*
             <FloatingInput label="CVV" inputMode="numeric"
               value={cardData.cvv}
               onChange={(e) => setCardData({ ...cardData, cvv: e.target.value })} />
@@ -267,7 +302,7 @@ export default function PaymentApp({
 
             <FloatingInput label="Email" type="email"
               value={cardData.email}
-              onChange={(e) => setCardData({ ...cardData, email: e.target.value })} />
+              onChange={(e) => setCardData({ ...cardData, email: e.target.value })} />*/}
           </form>
         )}
 
