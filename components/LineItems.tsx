@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Pencil, Trash2, Save, PlusCircle } from 'lucide-react';
+import { Pencil, Trash2, Save, PlusCircle, ArrowUp, ArrowDown } from 'lucide-react';
 import { createItem, removeItem, updateItem } from "../actions/invoice"
 import { getQuickbooksItems } from "../actions/quickbooks.js"
 import { X, CheckCircle2 } from 'lucide-react';
@@ -14,49 +14,117 @@ import { Dialog, Menu, Transition } from '@headlessui/react';
 
 function EditForm({
   lineItem,
-  onSave,
-  onCancel,
+  invoiceID, 
+  reloadItems, 
+  onClose
 }) {
+
+  
   const [itemOptions, setItemOptions] = useState([]);
   const [formData, setFormData] = useState({
-    description: lineItem.description || "",
-    quantity: lineItem.quantity || 1,
-    unitPrice: lineItem.unitPrice || 0,
-    taxable: lineItem.taxable || false,
-    notes: lineItem.notes || "",
+    description: "",
+    quantity: 0.5,
+    unitPriceDefined: 0.01,
+    taxable: false,
+    notes: "",
+    qb_id: "",
+    item: "",
   });
-
   useEffect(() => {
     getQuickbooksItems().then((data) => {
       setItemOptions(data || []);
     });
   }, []);
 
+
+  useEffect(() => {
+    if (!lineItem) return;
+
+    setFormData({
+        ...lineItem,
+        description: lineItem.description || "",
+        quantity: lineItem.quantity || 0.5,
+        unitPriceDefined: lineItem.unitPriceDefined || 0.01,
+        taxable: lineItem.taxable || false,
+        notes: lineItem.notes || "",
+        qb_id: lineItem.qb_id || "",
+        item: lineItem.item || "",
+      });
+  }, [lineItem]);
+
   const handleChange = (e) => {
+    console.log("Changing this target: ", e.target)
     const { name, value, type, checked } = e.target;
+    setFormData(prev => {
+      let updated;
 
-    setFormData((prev) => ({
-      ...prev,
-      [name]:
-        type === "checkbox"
-          ? checked
-          : type === "number"
-          ? Number(value)
-          : value,
-    }));
+      if (type === "checkbox") {
+        updated = {
+          ...prev,
+          [name]: checked,
+        };
+      } else if (name === "quantity" || name === "unitPriceDefined") {
+        updated = {
+          ...prev,
+          [name]: Number(String(value).replace(/^0+(?!$)/, "")),
+        };
+      } else {
+        updated = {
+          ...prev,
+          [name]: String(value).replace(/^0+(?!$)/, ""),
+        };
+      }
+
+      if (name === "qb_id") {
+        const selected = itemOptions.find(opt => opt.Id === value);
+        console.log("Selected QB item: ", selected)
+        if (selected) {
+          updated.qb_id = selected.Id;
+          updated.item = selected.Name;
+          updated.description = selected.Name;
+          updated.unitPriceDefined = selected.UnitPrice || 0;
+          updated.amount = selected.UnitPrice * updated.quantity; 
+        }
+      }
+
+      /*if (name === "quantity" && Number(value) === 0) {
+        updated.quantity = 0.5;
+      }*/
+
+      updated.amount =
+        (updated.quantity || 0.5) *
+        (updated.unitPriceDefined || 0.01);
+
+      return updated;
+    });
   };
 
-  const handleSubmit = (e) => {
+  const [saving, setSaving] = useState(false);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onSave(formData);
+
+    setSaving(true);
+
+    await updateLineItem(invoiceID, formData);
+    await syncLineItems();
+
+    await reloadItems();
+
+    setSaving(false);
+
+    onClose();
   };
 
-  const total = (formData.quantity * formData.unitPrice).toFixed(2);
+  const total = (formData.quantity * formData.unitPriceDefined).toFixed(2);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5 px-10">
       <div>
+        <label className="block text-sm font-medium mb-1">Item</label>
         <select
+          name="qb_id"
+          onChange={handleChange}
           className="border border-gray-300 rounded-md px-2 py-1 text-sm w-full mt-2"
         >
           <option value="">Select an item</option>
@@ -66,7 +134,8 @@ function EditForm({
             </option>
           ))}
         </select>
-
+      </div>
+      <div>
         <label className="block text-sm font-medium mb-1">
           Description
         </label>
@@ -75,7 +144,7 @@ function EditForm({
           value={formData.description}
           onChange={handleChange}
           rows={3}
-          className="w-full border rounded px-3 py-2"
+          className="border border-gray-300 rounded-md px-2 py-1 text-sm w-full mt-2"
         />
       </div>
 
@@ -87,12 +156,13 @@ function EditForm({
           <input
             type="number"
             name="quantity"
-            min="0"
-            step="1"
+            min="0.5"
+            step="0.5"
             value={formData.quantity}
             onChange={handleChange}
-            className="w-full border rounded px-3 py-2"
+            className="border border-gray-300 rounded-md px-2 py-1 text-sm w-full mt-2"
           />
+
         </div>
 
         <div>
@@ -101,12 +171,12 @@ function EditForm({
           </label>
           <input
             type="number"
-            name="unitPrice"
-            min="0"
+            name="unitPriceDefined"
+            min="0.01"
             step="0.01"
-            value={formData.unitPrice}
+            value={formData.unitPriceDefined}
             onChange={handleChange}
-            className="w-full border rounded px-3 py-2"
+            className="border border-gray-300 rounded-md px-2 py-1 text-sm w-full mt-2"
           />
         </div>
       </div>
@@ -122,20 +192,6 @@ function EditForm({
           Taxable
         </label>
       </div>
-
-      <div>
-        <label className="block text-sm font-medium mb-1">
-          Notes
-        </label>
-        <textarea
-          name="notes"
-          value={formData.notes}
-          onChange={handleChange}
-          rows={2}
-          className="w-full border rounded px-3 py-2"
-        />
-      </div>
-
       <div className="bg-gray-100 rounded p-3">
         <div className="flex justify-between font-medium">
           <span>Total</span>
@@ -143,21 +199,14 @@ function EditForm({
         </div>
       </div>
 
-      <div className="flex justify-end gap-3 pt-2">
-        <button
-          type="button"
-          onClick={onCancel}
-          className="px-4 py-2 border rounded"
-        >
-          Cancel
-        </button>
-
+      <div className="flex justify-end gap-3 pt-2 border-t border-t-gray-300">
         <button
           type="submit"
-          className="px-4 py-2 bg-blue-600 text-white rounded"
-        >
-          Save Changes
-        </button>
+          disabled={saving}
+          className="px-4 py-2 bg-slate-600 text-white rounded-xl disabled:bg-gray-300"
+      >
+          {saving ? "Saving..." : "Save Changes"}
+      </button>
       </div>
     </form>
   );
@@ -166,42 +215,20 @@ function EditForm({
 
 export default function LineItems({ items: initialItems = [], invoiceID, reloadItems }) {
   const [items, setItems] = useState(initialItems);
-  const [editingId, setEditingId] = useState<number | null>(null);
   const [removingId, setRemovingId] = useState<number | null>(null)
-  const [editedItem, setEditedItem] = useState<any>({});
-  const [itemOptions, setItemOptions] = useState([]);
   const [creating, setCreating] = useState(false)
   const [removing, setRemoving] = useState(false)
-  const [saving, setSaving] = useState(false)
   const [openEditDialog, setOpenEditDialog] = useState(false)
-
-  useEffect(() => {
-    getQuickbooksItems().then((data) => {
-      setItemOptions(data || []);
-    });
-  }, []);
+  const [selectedItem, setSelectedItem] = useState(null);
 
   useEffect(() => {
     setItems(initialItems);  }, [initialItems]);
-
-  const handleEdit = (item: any) => {
-    setEditingId(item.id);
-    setEditedItem(item);
-    setOpenEditDialog(true)
+  
+  const handleEdit = (item) => {
+      setSelectedItem(item);
+      setOpenEditDialog(true);
   };
 
-  const handleSave = async(id: number) => {
-    setSaving(true)
-
-    await updateLineItem(invoiceID, editedItem)
-    await syncLineItems(); 
-
-    reloadItems();
-    setEditingId(null);
-    setEditedItem({});
-    setSaving(false)
-
-  };
 
   const handleRemove = async (id: number) => {
     setRemovingId(id)
@@ -214,34 +241,6 @@ export default function LineItems({ items: initialItems = [], invoiceID, reloadI
     setRemovingId(null)
     setRemoving(false)
 
-  };
-
-  const handleChange = (field: string, value: any) => {
-    setEditedItem((prev: any) => {
-      let  updated; 
-      if( field === "taxable"){
-        updated = { ...prev, [field]: value };
-
-      }else{
-        updated = { ...prev, [field]: String(value).replace(/^0+(?!$)/, "") };
-      }
-      
-
-      // === Auto-update unit price & amount ===
-      if (field === 'qb_id') {
-        const selected = itemOptions.find(opt => opt.Id === value);
-        if (selected) {
-          updated.unitPriceDefined = selected.UnitPrice || 0;
-          updated.item = selected.Name;
-        }
-      }
-
-      if (field === 'quantity' || field === 'unitPriceDefined' || field === 'qb_id') {
-        updated.amount = (updated.quantity || 0) * (updated.unitPriceDefined || 0);
-      }
-
-      return updated;
-    });
   };
 
   const handleAddNewItem = async () => {
@@ -269,22 +268,26 @@ export default function LineItems({ items: initialItems = [], invoiceID, reloadI
         onClose={() => setOpenEditDialog(false)}
         className="relative z-50"
       >
-         <div className="fixed inset-0 bg-black/30" />
+        <div className="fixed inset-0 bg-black/60" />
 
-        <div className="fixed inset-0 flex items-center justify-center sm:p-4 text-black">
-          <Dialog.Panel className="bg-white w-full sm:max-w-md min-h-screen sm:min-h-0 rounded-none sm:rounded-2xl ">
-            <div className="flex justify-between items-center mb-3 h-20 w-full px-5 shadow">
+        <div className="fixed inset-0 flex items-center justify-center sm:p-4 text-black px-10 ">
+          <Dialog.Panel className="bg-white max-w-200 min-h-100 sm:min-h-0 rounded-xl sm:rounded-2xl pb-10 ">
+            <div className="flex justify-between items-center mb-3 h-20 px-5 shadow">
               <Dialog.Title className="font-semibold text-lg">
-                Process Payment
+                Edit Item
               </Dialog.Title>
               <button onClick={() => setOpenEditDialog(false)}>
                 <X className="w-10 h-10 text-gray-500 border rounded-xl " />
               </button>
             </div>
-            <EditForm 
-              lineItem = {editedItem}
-              onSave = { () => console.log("saving ..." )} 
-              onCancel = { ()=> console.log( "canceling")}
+            <EditForm
+              lineItem={selectedItem}
+              invoiceID={invoiceID}
+              reloadItems={reloadItems}
+              onClose={() => {
+                  setOpenEditDialog(false);
+                  setSelectedItem(null);
+              }}
             />
           </Dialog.Panel>
         </div>
@@ -296,12 +299,10 @@ export default function LineItems({ items: initialItems = [], invoiceID, reloadI
             <> 
               {
                 items.map((itm) => {
-                  const isEditing = itm.id === editingId;
+          
                   const isRemoving = removingId === itm.id;
 
-                  const currentAmount = isEditing
-                    ? (editedItem.quantity || 0) * (editedItem.unitPriceDefined || 0)
-                    : itm?.quantity * itm?.unitPriceDefined;
+                  const currentAmount = itm.quantity * itm.unitPriceDefined;
 
                   if( itm?.action == "REMOVE" ){
                     return(
@@ -323,7 +324,7 @@ export default function LineItems({ items: initialItems = [], invoiceID, reloadI
                             </button>
                         
                           <button
-                            disabled = { saving || isRemoving }
+                            disabled = {  isRemoving }
                             onClick={() => handleRemove(itm.id)}
                             className="p-1 text-red-600 hover:bg-red-50 rounded-lg disabled:bg-gray-50 disabled:cursor-not-allowed disabled:text-gray-800"
                           >
