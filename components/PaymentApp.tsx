@@ -364,7 +364,7 @@ export default function PaymentApp({
               <input
                 name = "checkNumber"
                 value={checkNumber}
-                onChange={(e)=> setCheckNumber( e.target.value.toUpperCase() ) } 
+                onChange={(e)=> setCheckNumber( e.target.value.toUpperCase().replace( /[^a-zA-Z0-9]/g, "") ) } 
                 className={ inputClass}
               />
               <label className = {labelClass}>Check Number</label> 

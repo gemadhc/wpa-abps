@@ -103,33 +103,34 @@ export async function removeFromLocal(invoiceID, itemID) {
 }
 
 export async function createLineItem(invoiceID){
-	try{
-		const db = await getDB()
-		const myitem = await db.get('lineItems', invoiceID );
+	return new Promise(async(resolve, reject)=>{
+		try{
+			const db = await getDB()
+			const myitem = await db.get('lineItems', invoiceID );
 
-		let obj = {}
-		obj.action = "NEW"; 
-		obj.amount = 65.0; 
-		obj.description = ''; 
-		obj.quantity = 1;
-		obj.unitPriceDefined = 65.0;
-		obj.invoiceID = invoiceID; 
-		obj.item = "Backflow Inspection"; 
-		obj.qb_id = "221"; 
-		obj.sku = 200; 
-		obj.taxable = false;
-		obj.id = crypto.randomUUID(); 
+			let obj = {}
+			obj.action = "NEW"; 
+			obj.amount = 65.0; 
+			obj.description = ''; 
+			obj.quantity = 1;
+			obj.unitPriceDefined = 65.0;
+			obj.invoiceID = invoiceID; 
+			obj.item = "Backflow Inspection"; 
+			obj.qb_id = "221"; 
+			obj.sku = 200; 
+			obj.taxable = false;
+			obj.id = crypto.randomUUID(); 
+			myitem.list.push(obj); 
+			myitem.synced = false;
+			
+			await db.put('lineItems', myitem)
+	  		resolve()
 
-		myitem.list.push(obj); 
-		myitem.synced = false
-
-		console.log("Creating a new assembly: ", myitem)
-		await db.put('lineItems', myitem)
-  		return 
-
-	}catch(err){
-		console.log(err)
-	}
+		}catch(err){
+			console.log(err)
+		}
+	})
+	
 }
 
 

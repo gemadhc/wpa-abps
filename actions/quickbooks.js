@@ -1,7 +1,21 @@
+import { getToken as getAuthToken } from './session.js'; 
+
 const server = process.env.SERVER;
 const office = process.env.OFFICE;
 const quickbooks = process.env.QUICKBOOKS;
 const token_server = process.env.TOKEN_SERVER;
+
+const fetchWithJWT = (url, options = {}) => {
+  const token = getAuthToken();
+
+  const headers = {
+    "Content-Type": "application/json",
+    ...(options.headers || {}),
+    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+  };
+
+  return fetch(url, { ...options, headers });
+};
 
 const items = () => 
 	fetch(`${quickbooks}/items`, {
@@ -63,6 +77,24 @@ const flagAsAdded = (docNumber, quickbooksID, invoiceID, type) => {
     },
   });
 };
+
+const isConnectedRequest = () =>
+  fetchWithJWT(`${quickbooks}/check/is_connected`, {
+    method: "GET"
+  });
+
+export const isConnected = () => {
+  return new Promise(async( resolve, reject) =>{
+    try {
+      const response = await isConnectedRequest();
+      const data = await response.json();
+      if (!response.ok) throw new Error(data.message || "Failed to delete employee");
+      resolve( data) ;
+    } catch (err) {
+      throw err;
+    }
+  }) 
+}
 
 export async function createToken(card) {
 	const mycard = {

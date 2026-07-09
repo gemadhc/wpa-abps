@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Pencil, Trash2, Save, PlusCircle, ArrowUp, ArrowDown } from 'lucide-react';
 import { createItem, removeItem, updateItem } from "../actions/invoice"
-import { getQuickbooksItems } from "../actions/quickbooks.js"
+import { getQuickbooksItems, isConnected } from "../actions/quickbooks.js"
 import { X, CheckCircle2 } from 'lucide-react';
 import { removeLineItem, createLineItem, updateLineItem} from "@/lib/lineitem_db"
 import { syncLineItems } from "@/lib/sync"
@@ -15,8 +15,6 @@ function EditForm({
   reloadItems, 
   onClose
 }) {
-
-  
   const [itemOptions, setItemOptions] = useState([]);
   const [message, setMessage] = useState(null)
   const [formData, setFormData] = useState({
@@ -28,16 +26,15 @@ function EditForm({
     qb_id: "",
     item: "",
   });
+
   useEffect(() => {
     getQuickbooksItems().then((data) => {
       setItemOptions(data || []);
     });
   }, []);
 
-
   useEffect(() => {
     if (!lineItem) return;
-
     setFormData({
         ...lineItem,
         description: lineItem.description || "",
@@ -101,7 +98,6 @@ function EditForm({
   };
 
   const [saving, setSaving] = useState(false);
-
   const validate = ()=>{
     setMessage(null)
     if(formData.quantity == '' || formData.quantity == 0 ){
@@ -120,16 +116,11 @@ function EditForm({
       setMessage("Quantity and Unit Price missing")
       return
     }
-
     setSaving(true);
-
     await updateLineItem(invoiceID, formData);
     await syncLineItems();
-
     await reloadItems();
-
     setSaving(false);
-
     onClose();
   };
 
@@ -182,6 +173,7 @@ function EditForm({
           </label>
           <input
             type="number"
+            inputMode = "numeric"
             name="quantity"
             min={1}
             step={0.5}
@@ -198,6 +190,7 @@ function EditForm({
           </label>
           <input
             type="number"
+            inputMode = "numeric"
             name="unitPriceDefined"
             min="0.01"
             step="0.01"
@@ -239,7 +232,6 @@ function EditForm({
   );
 }
 
-
 export default function LineItems({ items: initialItems = [], invoiceID, reloadItems }) {
   const [items, setItems] = useState(initialItems);
   const [removingId, setRemovingId] = useState<number | null>(null)
@@ -248,8 +240,14 @@ export default function LineItems({ items: initialItems = [], invoiceID, reloadI
   const [openEditDialog, setOpenEditDialog] = useState(false)
   const [selectedItem, setSelectedItem] = useState(null);
 
+  useEffect(()=>{
+    let connected = isConnected();  
+    console.log(connected)
+  }, [])
+
   useEffect(() => {
-    setItems(initialItems);  }, [initialItems]);
+    setItems(initialItems);  
+  }, [initialItems]);
   
   const handleEdit = (item) => {
       setSelectedItem(item);
@@ -264,7 +262,7 @@ export default function LineItems({ items: initialItems = [], invoiceID, reloadI
     await removeLineItem(id, invoiceID)
     await syncLineItems()
 
-    reloadItems();
+    await reloadItems();
     setRemovingId(null)
     setRemoving(false)
 
@@ -272,8 +270,12 @@ export default function LineItems({ items: initialItems = [], invoiceID, reloadI
 
   const handleAddNewItem = async () => {
     setCreating(true)
+    console.log("1: creating new item")
     await createLineItem(invoiceID)
+
+    console.log("2: sync items")
     await syncLineItems()
+    console.log("3:Reload items")
     reloadItems();
     setCreating(false)
 
@@ -338,16 +340,16 @@ export default function LineItems({ items: initialItems = [], invoiceID, reloadI
                   }
 
                   return (
-                    <div key={itm.id} className="p-4 py-10 flex flex-col gap-2  mb-5">
+                    <div key={itm.id} className="p-4 py-10 flex flex-col gap-2  mb-1">
                       <div className="flex justify-between items-center">
                         <span className="font-semibold text-gray-800">{itm.item}</span>
-                        <div className="flex gap-2">
+                        <div className="flex gap-5">
                           
                             <button
                               onClick={() => handleEdit(itm)}
                               className="p-1 text-blue-600 hover:bg-blue-50 rounded-lg"
                             >
-                              <Pencil className="w-6 h-6" />
+                              <Pencil className="w-10 h-10 border rounded-2xl p-2" />
                             </button>
                         
                           <button
@@ -357,23 +359,29 @@ export default function LineItems({ items: initialItems = [], invoiceID, reloadI
                           >
                             {
                               isRemoving ? 
+
                                 <> Removing ... </>
                               : 
-                                <Trash2 className="w-6 h-6" />
+                                <Trash2 className="w-10 h-10 border rounded-2xl p-2" />
                             }
                           </button>
                         </div>
                       </div>
-                
-                      <div className="text-sm text-gray-600">
-                          {itm.description}
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-x-4 text-sm mt-2">
-                            Quantity: {itm.quantity} <br/>
-                            Unit Price: {`$${Number(itm.unitPriceDefined).toFixed(2)}`} <br/>
-                            Line Total: {`$${currentAmount.toFixed(2)}`}
-                      </div>
+                      {
+                        isRemoving ?
+                          <> removing... </>  
+                        : 
+                          <> 
+                            <div className="text-sm text-gray-600">
+                                {itm.description}
+                            </div>
+                            <div className="grid grid-cols-2 gap-x-4 text-sm mt-2">
+                                  Quantity: {itm.quantity} <br/>
+                                  Unit Price: {`$${Number(itm.unitPriceDefined).toFixed(2)}`} <br/>
+                                  Line Total: {`$${currentAmount.toFixed(2)}`}
+                            </div>
+                          </>
+                      }
                     </div>
                   );
                 })}
@@ -383,10 +391,6 @@ export default function LineItems({ items: initialItems = [], invoiceID, reloadI
               No items to show
             </div>
         }
-
-
-
-        
       </div>
 
       <div className="flex justify-between md:justify-end items-center px-4 py-3 bg-gray-50 border-t rounded-b-2xl">
@@ -395,7 +399,7 @@ export default function LineItems({ items: initialItems = [], invoiceID, reloadI
           onClick={handleAddNewItem}
           className="flex items-center gap-1 text-blue-600 text-sm font-medium hover:underline disabled:bg-gray-200 disabled:cursor-not-allowed"
         >
-          <PlusCircle className="w-4 h-4" />
+          <PlusCircle className="w-6 h-6" />
           {
             creating ? 
               <> Loading... </> 

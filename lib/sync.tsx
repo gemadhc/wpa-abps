@@ -1,3 +1,4 @@
+
 import { getUnsyncedPopList, markAsSynced } from './db'
 import { getUnsyncedStops, markStopAsSynced } from "./stop_db.tsx" 
 import { getUnsyncedInvoices, markInvoiceAsSynced } from "./invoice_db.tsx" 
@@ -31,6 +32,9 @@ export async function syncItems() {
   }
 
   for (const item of unsyncedItems) {
+
+
+
     try {
       await markAsSynced(item.id)
     } catch (error) {
@@ -92,35 +96,32 @@ export async function syncLineItems(){
       try {
         //look at the list of items 
         let mylist = item.list; 
-        mylist.map( async (item) =>{
-          console.log("This is the action: ", item?.action, item)
-          if(item?.action){
-            if(item.action == "REMOVE"){
-              await removeLineItem(item.id); 
-              //remove item from indexedDB
-              await removeFromLocal(item.invoiceID, item.id)
+        await Promise.all(
+          mylist.map(async (lineItem) => {
+            if (!lineItem?.action) return;
+
+            if (lineItem.action === "REMOVE") {
+              await removeLineItem(lineItem.id);
+              await removeFromLocal(lineItem.invoiceID, lineItem.id);
             }
 
-            if(item.action == "NEW"){
-              console.log("new item",  item.invoiceID)
-              let data = await createLineItem(item.invoiceID); 
-              console.log("data: ", data)
-              let updates = { ...data.LineItem[0], oldID: item.id}
-              console.log("assignning id: ", updates)
-              updateLineItemID( item.invoiceID, updates); 
-
+            if (lineItem.action === "NEW") {
+              const data = await createLineItem(lineItem.invoiceID);
+              const updates = {
+                ...data.LineItem[0],
+                oldID: lineItem.id,
+              };
+              await updateLineItemID(lineItem.invoiceID, updates);
             }
 
-            if(item.action == "EDIT"){
-              console.log("Editing the item",  item.id)
-              updateLineItem(item.id, item); 
+            if (lineItem.action === "EDIT") {
+              await updateLineItem(lineItem.id, lineItem);
             }
-          }
-        })
+          })
+        );
 
-        await markLineItemAsSynced(item.invoiceID)
+        await markLineItemAsSynced(item.invoiceID);
         resolve()
-
       } catch (error) {
         console.error('Sync failed:', error)
         resolve(error)
