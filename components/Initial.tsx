@@ -45,20 +45,15 @@ export default function Initial() {
       <div className="col-span-10">
         <Approved />
       </div>
-
-      <div className="col-span-5">{renderDeviceForm()}</div>
-
       <div className="col-span-5">
-        {/* The NumberPad component uses NumberPadContext; it will be visible and always-connected */}
+        {renderDeviceForm()}
+      </div>
+      <div className="col-span-5 flex-col pt-10">
         <NumberPad />
       </div>
-
       <div className="col-span-10">
         <System  />
       </div>
-      
-      
-
       <div className="col-span-10">
         <Remarks />
       </div>

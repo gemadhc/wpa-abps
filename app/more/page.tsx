@@ -93,7 +93,7 @@ export default function Home() {
     a.target = "_blank";
     a.rel = "noopener noreferrer";
     a.click();
-    setOpening(false)
+    setTimeout(()=> setOpening(false), 2000)
   }
   return (
     <div className="min-h-screen px-5 py-30 bg-white text-black ">
@@ -122,10 +122,10 @@ export default function Home() {
         </p>
       </div>
       <div className = "p-6 bg-white rounded-lg shadow-sm border border-gray-200"> 
-        <h2 className="text-sm font-semibold text-gray-800 "> Links</h2>
+        <h2 className="text-sm font-semibold text-gray-800 mb-5"> Links</h2>
         {
           opening ? 
-            <WaterLoader />
+            <p className = "p-2 bg-amber-50 border border-amber-800 rounded"> Taking you there... </p>
           : 
             <> 
               {

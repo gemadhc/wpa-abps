@@ -98,6 +98,29 @@ export async function createItem(list, stopID) {
 	}
 }
 
+export async function markAll(stopID, isReady, reason){
+	return new Promise(async(resolve, reject) =>{
+		const db = await getDB();
+		const myitem = await db.get("services", Number(stopID) );
+		const updatedList = myitem.list.map( item => {
+				return {
+					...item,
+					reason: reason,
+					ready: isReady
+				};
+		});
+		const updated = {
+			...myitem,
+			list: updatedList,
+			synced: false,
+		};
+
+		await db.put("services", updated);
+		resolve(); 
+
+	})
+}
+
 
 export async function serviceNotReady( stopID, serviceID, reason, isReady){
 	return new Promise( async(resolve, reject) =>{

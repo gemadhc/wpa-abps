@@ -169,7 +169,6 @@ export default function PaymentApp({
 
   const handleChange = (e) =>{
     const { name, value, type, checked } = e.target;
-    console.log("handling this change: ", name, value, type, checked)
     setCardData( (prev) =>{
       let updated; 
       updated = {
@@ -277,56 +276,110 @@ export default function PaymentApp({
               />
               <label className = {labelClass}> Card Number</label> 
             </div>
-
-            
-            
-            {/*<div className="flex gap-2">
-              <FloatingSelect label="Month" value={cardData.expiryMonth}
-                onChange={(e) => setCardData({ ...cardData, expiryMonth: e.target.value })}>
-                {months.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
-              </FloatingSelect>
-
-              <FloatingSelect label="Year" value={cardData.expiryYear}
-                onChange={(e) => setCardData({ ...cardData, expiryYear: e.target.value })}>
-                {years.map(y => <option key={y} value={y}>{y}</option>)}
-              </FloatingSelect>
-            </div>*/}
-            {/*
-            <FloatingInput label="CVV" inputMode="numeric"
-              value={cardData.cvv}
-              onChange={(e) => setCardData({ ...cardData, cvv: e.target.value })} />
-
-            <FloatingInput label="ZIP" inputMode="numeric"
-              value={cardData.zip}
-              onChange={(e) => setCardData({ ...cardData, zip: e.target.value })} />
-
-            <FloatingInput label="Email" type="email"
-              value={cardData.email}
-              onChange={(e) => setCardData({ ...cardData, email: e.target.value })} />*/}
+            <div className = "flex gap-2">
+              <div className="w-full relative">
+                <select
+                  name = "expiryMonth"
+                  value={cardData.expiryMonth}
+                  onChange={handleChange} 
+                  className={ inputClass}
+                >
+                  {months.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
+                </select>
+                <label className = {labelClass}> Exp. Month</label> 
+              </div>
+              <div className="w-full relative">
+                <select
+                  name = "expiryYear"
+                  value={cardData.expiryYear}
+                  onChange={handleChange} 
+                  className={ inputClass}
+                >
+                  {years.map(y => <option key={y} value={y}>{y}</option>)}
+                </select>
+                <label className = {labelClass}> Exp. Year</label> 
+              </div>
+            </div>
+            <div className="relative">
+              <input
+                name = "cvv"
+                inputMode="numeric"
+                value={cardData.cvv}
+                onChange={handleChange} 
+                className={ inputClass}
+              />
+              <label className = {labelClass}> CVV</label> 
+            </div>
+            <div className="relative">
+              <input
+                name = "zip"
+                inputMode="numeric"
+                value={cardData.zip}
+                onChange={handleChange} 
+                className={ inputClass}
+              />
+              <label className = {labelClass}>Zipcode</label> 
+            </div>
+            <div className="relative">
+              <input
+                name = "email"
+                inputMode="email"
+                value={cardData.email}
+                onChange={handleChange} 
+                className={ inputClass}
+              />
+              <label className = {labelClass}>Email Address</label> 
+            </div>
           </form>
         )}
 
         {paymentType === 'CASH' && (
           <form onSubmit={handleCashPayment} className="space-y-3">
-            <FloatingInput label="Amount Received" type="number"
-              value={cashAmount}
-              onChange={(e) => setCashAmount(e.target.value)} />
-
-            <FloatingInput label="Email" type="email"
-              value={cardData.email}
-              onChange={(e) => setCardData({ ...cardData, email: e.target.value })} />
+            <div className="relative">
+              <input
+                name = "amount"
+                inputMode="numeric"
+                value={`$${cashAmount}`}
+                onChange={handleChange} 
+                className={ inputClass}
+              />
+              <label className = {labelClass}>Cash Amount </label> 
+            </div>
+            <div className="relative">
+              <input
+                name = "email"
+                inputMode="email"
+                value={cardData.email}
+                onChange={handleChange} 
+                className={ inputClass}
+              />
+              <label className = {labelClass}>Email Address</label> 
+            </div>
           </form>
         )}
 
         {paymentType === 'CHECK' && (
           <form onSubmit={handleCheckPayment} className="space-y-3">
-            <FloatingInput label="Check Number"
-              value={checkNumber}
-              onChange={(e) => setCheckNumber(e.target.value)} />
+            <div className="relative">
+              <input
+                name = "checkNumber"
+                value={checkNumber}
+                onChange={(e)=> setCheckNumber( e.target.value.toUpperCase() ) } 
+                className={ inputClass}
+              />
+              <label className = {labelClass}>Check Number</label> 
+            </div>
 
-            <FloatingInput label="Email" type="email"
-              value={cardData.email}
-              onChange={(e) => setCardData({ ...cardData, email: e.target.value })} />
+            <div className="relative">
+              <input
+                name = "email"
+                inputMode="email"
+                value={cardData.email}
+                onChange={handleChange} 
+                className={ inputClass}
+              />
+              <label className = {labelClass}>Email Address</label> 
+            </div>
           </form>
         )}
       </div>

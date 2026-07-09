@@ -51,7 +51,7 @@ export default function Final(){
 					<div className = "col-span-5">
 						{renderDeviceForm()}
 					</div>
-					<div className = "col-span-5">
+					<div className = "col-span-5 pt-10">
 						<NumberPad />
 					</div>
 					<div className = "col-span-10">

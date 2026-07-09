@@ -5,12 +5,9 @@ import { Pencil, Trash2, Save, PlusCircle, ArrowUp, ArrowDown } from 'lucide-rea
 import { createItem, removeItem, updateItem } from "../actions/invoice"
 import { getQuickbooksItems } from "../actions/quickbooks.js"
 import { X, CheckCircle2 } from 'lucide-react';
-
 import { removeLineItem, createLineItem, updateLineItem} from "@/lib/lineitem_db"
 import { syncLineItems } from "@/lib/sync"
-
 import { Dialog, Menu, Transition } from '@headlessui/react';
-
 
 function EditForm({
   lineItem,

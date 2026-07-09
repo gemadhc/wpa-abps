@@ -90,7 +90,7 @@ function ResultsBody({ closeMe, reloadServices, stopID, onSelectStop }) {
       </div>
 
       {/* Scrollable tab content */}
-      <div className="flex-1 overflow-y-auto px-10 no-scrollbar bg-slate-100 w-full pt-10">
+      <div className="flex-1 overflow-y-auto pl-5 pr-10 no-scrollbar bg-slate-100 w-full pt-10">
         {activeTab === 'Device' && <Assembly />}
         {activeTab === 'Initial' && <Initial />}
         {activeTab === 'Repairs' && <Final /> }

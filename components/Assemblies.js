@@ -12,7 +12,7 @@ import { ReportProvider } from "../contexts/ReportContext";
 
 import { addAssembly } from "../lib/assemblies_db";
 import { syncServices, syncAssemblies, syncReports } from "../lib/sync";
-import { serviceNotReady } from "../lib/services_db";
+import { serviceNotReady, markAll} from "../lib/services_db";
 
 export default function Assemblies({
   list = [],
@@ -176,20 +176,7 @@ export default function Assemblies({
           reason
         }))
       );
-
-      await Promise.all(
-        localList.map(  
-          async(item) => { 
-            console.log("updating this: ", item)
-            await serviceNotReady(
-              stopID,
-              item.serviceID,
-              reason,
-              false
-            )
-          }
-        )
-      );
+      await markAll(stopID, false, reason); 
 
     } else {
       setLocalList(prev =>
@@ -213,6 +200,7 @@ export default function Assemblies({
     }
 
     /* RESET FORM */
+    console.log("Resetting form")
     setUnableToLocate(false);
     setRanOutOfTime(false);
     setRemoved(false);
@@ -435,8 +423,8 @@ export default function Assemblies({
 
             </div>
 
-            {/* APPLY TO ALL 
-
+            {/* APPLY TO ALL  */}
+ 
             <div className="mt-3 border-t pt-2">
 
               <label className="text-sm">
@@ -453,7 +441,7 @@ export default function Assemblies({
 
               </label>
 
-            </div>*/}
+            </div>
 
             {/* SUBMIT */}
 
